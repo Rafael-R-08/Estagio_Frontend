@@ -4,6 +4,11 @@ import { ProtectedRoute } from './app/ProtectedRoute';
 import { AppLayout } from './layout/AppLayout';
 import { Toaster } from 'sonner';
 
+import { applyTheme } from "./utils/theme";
+
+const savedTheme = (localStorage.getItem("lh_theme") as never) || "system";
+applyTheme(savedTheme);
+
 // Pages — Auth
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterPage from './features/auth/pages/RegisterPage';

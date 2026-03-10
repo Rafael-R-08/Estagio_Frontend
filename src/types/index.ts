@@ -73,6 +73,8 @@ export interface UserSettings {
   // Privacidade
   adminCanSeeRecs: boolean;
   aiCanUseHistory: boolean;
+  // Idioma da interface
+  uiLanguage?: string;
 }
 
 export type UpdateUserSettingsDto = Partial<Omit<UserSettings, 'id' | 'userId'>>;
