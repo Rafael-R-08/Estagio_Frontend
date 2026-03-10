@@ -48,6 +48,35 @@ export interface UserPreferences {
   notificationRenewals: boolean;
 }
 
+// ─── Settings ─────────────────────────────────────────────────────────────────
+
+export interface UserSettings {
+  id?: string;
+  userId?: string;
+  // Preferências de aprendizagem
+  preferredPlatforms: string[];
+  contentTypes: string[];
+  preferredDuration: string | null;
+  courseLanguage: string | null;
+  freeContentOnly: boolean;
+  // Preferências da IA
+  aiResponseDetail: string | null;
+  aiResponseLanguage: string | null;
+  aiExplainReasoning: boolean;
+  aiRecommendationMode: string | null;
+  // Notificações
+  notifyWeeklyRecs: boolean;
+  notifyCertExpiry: boolean;
+  notifyProgress: boolean;
+  notifyByEmail: boolean;
+  notifyInApp: boolean;
+  // Privacidade
+  adminCanSeeRecs: boolean;
+  aiCanUseHistory: boolean;
+}
+
+export type UpdateUserSettingsDto = Partial<Omit<UserSettings, 'id' | 'userId'>>;
+
 // ─── Course / Search ──────────────────────────────────────────────────────────
 
 export interface Course {
@@ -179,6 +208,7 @@ export interface LearningPlatform {
   name: string;
   baseUrl?: string;
   logoUrl?: string;
+  apiKey?: string;
   isActive: boolean;
   isSearchEnabled: boolean;
   config?: Record<string, unknown>;
@@ -228,4 +258,29 @@ export interface ApiError {
   message: string | string[];
   statusCode: number;
   error?: string;
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminUser extends User {
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface UpdateUserRoleDto {
+  role: Role;
+}
+
+export interface AdminAnalytics {
+  completedByMonth: { month: string; count: number }[];
+  platformUsage: { name: string; count: number }[];
+  userGrowth: { month: string; count: number }[];
+  topSkills: { skill: string; count: number }[];
+  expiringCertificates: {
+    userId: string;
+    userName: string;
+    courseName: string;
+    expirationDate: string;
+    daysLeft: number;
+  }[];
 }

@@ -1,6 +1,17 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, Sparkles } from 'lucide-react';
 import { useAuth } from '../features/auth/hooks/useAuth';
+
+const AI_TIPS = [
+  'Completa um curso hoje e mantém o teu streak ativo.',
+  'Os teus certificados expiram? Verifica em Certificados.',
+  'Usa o Assistente IA para pedir recomendações personalizadas.',
+  'Adiciona skills ao teu perfil para melhores sugestões.',
+  'Cursos curtos de 1h são ideais para aprendizagem diária.',
+  'Pesquisa por tema e filtra por plataforma para melhores resultados.',
+  'Marca formações como Prioridade para as encontrar rapidamente.',
+];
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -9,6 +20,20 @@ interface HeaderProps {
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [tipIndex, setTipIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setTipIndex((i) => (i + 1) % AI_TIPS.length);
+        setVisible(true);
+      }, 400);
+    }, 8000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-6">
@@ -19,6 +44,25 @@ export function Header({ onMenuToggle }: HeaderProps) {
       >
         <Menu className="h-5 w-5" />
       </button>
+
+      {/* IA status + dica rotativa */}
+      <div className="hidden sm:flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+          </span>
+          <Sparkles className="h-3.5 w-3.5 text-softinsa-blue" />
+          <span className="text-xs font-medium text-softinsa-blue whitespace-nowrap">IA Ativa</span>
+        </div>
+        <span className="text-muted-foreground/40 text-xs">·</span>
+        <span
+          className="text-xs text-muted-foreground truncate max-w-xs transition-opacity duration-400"
+          style={{ opacity: visible ? 1 : 0 }}
+        >
+          {AI_TIPS[tipIndex]}
+        </span>
+      </div>
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Notificações */}

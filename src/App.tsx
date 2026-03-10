@@ -16,8 +16,8 @@ import MyLearningPage from './features/my-learning/pages/MyLearningPage';
 import CertificatesPage from './features/certificates/pages/CertificatesPage';
 import AiAssistantPage from './features/ai-assistant/pages/AiAssistantPage';
 import ProfilePage from './features/profile/pages/ProfilePage';
-import PlatformsPage from './pages/PlatformsPage';
-import AdminPage from './pages/AdminPage';
+import SettingsPage from './features/settings/pages/SettingsPage';
+import AdminPage from './features/admin/pages/AdminPage';
 
 function App() {
   return (
@@ -38,7 +38,7 @@ function App() {
               <Route path="/certificates" element={<CertificatesPage />} />
               <Route path="/ai" element={<AiAssistantPage />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/platforms" element={<PlatformsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>
 

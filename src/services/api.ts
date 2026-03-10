@@ -14,6 +14,11 @@ import type {
   UpdateCertificateDto,
   UpdateProfileDto,
   RagResponse,
+  UserSettings,
+  UpdateUserSettingsDto,
+  AdminUser,
+  UpdateUserRoleDto,
+  AdminAnalytics,
 } from '../types';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -149,6 +154,31 @@ export const aiApi = {
 export const profileApi = {
   getMe: () => api.get<User>('/auth/me'),
 
-  update: (dto: UpdateProfileDto) =>
-    api.patch<User>('/auth/me', dto),
+  update: (dto: UpdateProfileDto) => api.patch<User>('/auth/me', dto),
+};
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+
+export const settingsApi = {
+  get: () => api.get<UserSettings>('/auth/me/settings'),
+
+  update: (dto: UpdateUserSettingsDto) =>
+    api.patch<UserSettings>('/auth/me/settings', dto),
+};
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export const adminApi = {
+  getUsers: () => api.get<AdminUser[]>('/admin/users'),
+
+  updateUserRole: (id: string, dto: UpdateUserRoleDto) =>
+    api.patch<AdminUser>(`/admin/users/${id}/role`, dto),
+
+  deactivateUser: (id: string) =>
+    api.patch<AdminUser>(`/admin/users/${id}/deactivate`),
+
+  activateUser: (id: string) =>
+    api.patch<AdminUser>(`/admin/users/${id}/activate`),
+
+  getAnalytics: () => api.get<AdminAnalytics>('/admin/analytics'),
 };
