@@ -1,0 +1,53 @@
+image: node:20
+
+options:
+  max-time: 20
+
+pipelines:
+  default:
+    - step:
+        name: Build
+        caches:
+          - node
+        script:
+          - npm ci
+          - npm run build
+
+  pull-requests:
+    "**":
+      - step:
+          name: Lint + Build
+          caches:
+            - node
+          script:
+            - npm ci
+            - npm run lint
+            - npm run build
+
+  branches:
+    dev:
+      - step:
+          name: Dev Build
+          caches:
+            - node
+          script:
+            - npm ci
+            - npm run build
+
+    QA:
+      - step:
+          name: QA Build
+          caches:
+            - node
+          script:
+            - npm ci
+            - npm run build
+
+    main:
+      - step:
+          name: Production Build
+          caches:
+            - node
+          script:
+            - npm ci
+            - npm run build
