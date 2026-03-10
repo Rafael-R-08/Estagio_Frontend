@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .ts,.tsx",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.2",
     "react-router-dom": "^7.13.1",
+    "recharts": "^3.8.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
