@@ -1,0 +1,324 @@
+{
+  "nav": {
+    "mainMenu": "Main Menu",
+    "account": "Account",
+    "adminBackoffice": "Admin Backoffice",
+    "dashboard": "Dashboard",
+    "search": "Course Search",
+    "ai": "AI Assistant",
+    "certificates": "Certificates",
+    "myLearning": "Progress Panel",
+    "profile": "My Profile",
+    "settings": "Settings",
+    "users": "Users",
+    "platforms": "Platforms",
+    "analytics": "Analytics",
+    "logout": "Logout",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "common": {
+    "save": "Save changes",
+    "saving": "Saving...",
+    "export": "Export",
+    "featureInDev": "Feature under development."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Platform preferences and AI behavior",
+    "sections": {
+      "ai": "AI Assistant",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "appearance": "Appearance"
+    },
+    "ai": {
+      "title": "AI Preferences",
+      "responseDetail": "Response detail level",
+      "responseDetailDesc": "Controls how detailed each AI response is",
+      "concise": "Concise",
+      "detailed": "Detailed",
+      "responseLanguage": "AI response language",
+      "portuguese": "Portuguese",
+      "english": "English",
+      "explainReasoning": "Explain reasoning",
+      "explainReasoningDesc": "The AI justifies the reason for each recommendation",
+      "recommendationMode": "Recommendation mode",
+      "recommendationModeDesc": "Defines whether AI suggests within your current area or explores new fields",
+      "conservative": "Conservative",
+      "exploratory": "Exploratory"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "alerts": "Alerts",
+      "channel": "Channel",
+      "weeklyRecs": "Weekly recommendations",
+      "weeklyRecsDesc": "Course suggestions sent every week",
+      "certExpiry": "Expiring certifications",
+      "certExpiryDesc": "Warning 30 days before a certification expires",
+      "progress": "Course progress",
+      "progressDesc": "Reminder when you have a course in progress for more than 7 days",
+      "email": "Email notifications",
+      "inApp": "In-app notifications"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "adminCanSeeRecs": "Admin can see my recommendations",
+      "adminCanSeeRecsDesc": "The administrator can see the AI-recommended courses for you",
+      "aiCanUseHistory": "AI can use my history",
+      "aiCanUseHistoryDesc": "Allows personalization based on courses you've already completed",
+      "downloadData": "Download my data",
+      "downloadDataDesc": "Export all your personal data (GDPR)"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "themeDesc": "Interface color scheme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "language": "Interface language",
+      "note": "Appearance preferences are saved locally on this device and don't require saving."
+    }
+  },
+  "lang": {
+    "pt": "Portuguese",
+    "en": "English"
+  },
+  "dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "stats": {
+      "total": "Total trainings",
+      "ongoing": "In progress",
+      "completed": "Completed",
+      "hours": "Training hours"
+    },
+    "inProgress": "In Progress",
+    "saved": "Saved",
+    "viewAll": "View all",
+    "empty": {
+      "progress": "No training in progress. Start exploring courses!",
+      "saved": "No saved courses."
+    }
+  },
+  "myLearning": {
+    "title": "Progress Panel",
+    "subtitle": "Track your learning progress.",
+    "hello": "Hello",
+    "discover": "Discover training",
+    "tabs": {
+      "ongoing": "In Progress",
+      "completed": "Completed",
+      "later": "Saved",
+      "priority": "Plans"
+    },
+    "stats": {
+      "ongoing": "In Progress",
+      "completed": "Completed",
+      "later": "Saved",
+      "priority": "Plans"
+    },
+    "empty": {
+      "ongoingTitle": "No courses in progress",
+      "ongoingDesc": "Start a saved course or search for training on the platform.",
+      "completedTitle": "No completed courses",
+      "completedDesc": "Completed courses will appear here with their date and certificate.",
+      "laterTitle": "No saved courses",
+      "laterDesc": "Save courses from search to consult later.",
+      "priorityTitle": "Empty training plan",
+      "priorityDesc": "Mark courses as priority to structure your learning plan."
+    },
+    "statusMoved": {
+      "ongoing": "moved to In Progress.",
+      "completed": "marked as completed.",
+      "priority": "added to plan.",
+      "later": "saved for later."
+    },
+    "coursePrefix": "Course",
+    "errorUpdate": "Error updating record.",
+    "errorDelete": "Error deleting record.",
+    "deleted": "Course removed."
+  },
+  "certificates": {
+    "title": "Certificates",
+    "subtitle": "Manage your training certificates and credentials.",
+    "upload": "Upload certificate",
+    "search": "Search certificate...",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "expiring": "Expiring",
+      "expired": "Expired"
+    },
+    "count_one": "{{count}} certificate",
+    "count_other": "{{count}} certificates",
+    "filtered": "(filtered)",
+    "empty": {
+      "noResultsTitle": "No results for this search",
+      "noResultsDesc": "Try other terms.",
+      "noCertsTitle": "You have no certificates yet",
+      "noCertsDesc": "Upload your first certificate to get started."
+    }
+  },
+  "profile": {
+    "editActive": "Edit mode active",
+    "editProfile": "Edit Profile",
+    "memberSince": "Member since",
+    "experienceLevel": "Experience level",
+    "jobTitle": "Job title",
+    "jobTitlePlaceholder": "e.g. Software Engineer",
+    "department": "Department",
+    "departmentPlaceholder": "e.g. Engineering",
+    "location": "Location",
+    "locationNotSet": "Not set",
+    "locationOffice": "Office",
+    "locationRemote": "Remote",
+    "locationHybrid": "Hybrid",
+    "admin": "Administrator",
+    "collaborator": "Collaborator",
+    "noSkills": "No skills added.",
+    "saveSuccess": "Profile saved.",
+    "saveError": "Error saving profile.",
+    "tabs": {
+      "overview": "Overview",
+      "activity": "Activity",
+      "certifications": "Certifications"
+    },
+    "recentActivity": "Recent Activity",
+    "noActivity": "No recent activity.",
+    "certifications": "Certifications",
+    "noCertifications": "No certifications registered.",
+    "downloadCv": "Download CV",
+    "shareProfile": "Share Profile"
+  },
+  "search": {
+    "title": "Course Search",
+    "subtitle": "Find training across all platforms.",
+    "placeholder": "Search courses, technologies...",
+    "results": "result(s)",
+    "viewGrid": "Grid view",
+    "viewList": "List view",
+    "empty": {
+      "withQuery": "No results for \"{{query}}\"",
+      "withQueryDesc": "Try other terms or remove filters.",
+      "noQuery": "Start searching",
+      "noQueryDesc": "Type a topic, technology or course name."
+    },
+    "error": {
+      "title": "Search error",
+      "desc": "Check the backend connection.",
+      "retry": "Try again"
+    }
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "subtitle": "Your personalized learning assistant.",
+    "welcomeMessage": "I'm your learning assistant.\n\nYou can ask me about courses, certifications or request a personalized study plan. How can I help?",
+    "openPanel": "Open suggestions panel",
+    "closePanel": "Close suggestions panel",
+    "errorSend": "Error sending message."
+  },
+  "header": {
+    "aiActive": "AI Active",
+    "tips": [
+      "Complete a course today and keep your streak active.",
+      "Are your certificates expiring? Check in Certificates.",
+      "Use the AI Assistant to request personalized recommendations.",
+      "Add skills to your profile for better suggestions.",
+      "Short 1h courses are ideal for daily learning.",
+      "Search by topic and filter by platform for better results.",
+      "Mark trainings as Priority to find them quickly."
+    ]
+  },
+  "admin": {
+    "title": "Admin Backoffice",
+    "subtitle": "Manage users, platforms and platform analytics.",
+    "tabs": {
+      "users": "Users",
+      "platforms": "Platforms",
+      "analytics": "Analytics"
+    },
+    "users": {
+      "title": "Users",
+      "search": "Search user...",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "created": "Created at",
+        "actions": "Actions"
+      },
+      "promote": "Promote",
+      "demote": "Revoke",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No users found.",
+      "confirmPromote": "Promote {{name}} to Admin?",
+      "confirmDemote": "Revoke Admin role from {{name}}?",
+      "confirmDeactivate": "Deactivate {{name}}'s account?",
+      "confirmActivate": "Reactivate {{name}}'s account?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "platforms": {
+      "title": "Platforms",
+      "add": "New Platform",
+      "columns": {
+        "name": "Name",
+        "url": "URL",
+        "apiKey": "API Key",
+        "active": "Active",
+        "search": "Search",
+        "actions": "Actions"
+      },
+      "edit": "Edit",
+      "delete": "Delete",
+      "noResults": "No platforms found.",
+      "editTitle": "Edit platform",
+      "newTitle": "New platform",
+      "fields": {
+        "name": "Name",
+        "url": "Base URL",
+        "urlPlaceholder": "https://...",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "API key (optional)",
+        "active": "Platform active",
+        "search": "Search active"
+      },
+      "save": "Save changes",
+      "create": "Create platform",
+      "saving": "Saving...",
+      "confirmDelete": "Delete \"{{name}}\"?",
+      "confirmDeleteDesc": "This action cannot be undone.",
+      "masked": "Set",
+      "notSet": "—"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "kpi": {
+        "completed": "Completed courses",
+        "users": "Active users",
+        "expiring": "Expiring certs.",
+        "topSkill": "Most searched skill"
+      },
+      "charts": {
+        "completedByMonth": "Completed courses by month",
+        "platformUsage": "Most used platforms",
+        "userGrowth": "User growth",
+        "topSkills": "Most searched skills"
+      },
+      "expiring": {
+        "title": "Expiring certificates (next 90 days)",
+        "user": "User",
+        "course": "Course",
+        "date": "Date",
+        "daysLeft": "Days"
+      }
+    }
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "nav": {
+    "mainMenu": "Menu Principal",
+    "account": "Conta",
+    "adminBackoffice": "Backoffice Admin",
+    "dashboard": "Dashboard",
+    "search": "Pesquisa de Cursos",
+    "ai": "Assistente IA",
+    "certificates": "Certificados",
+    "myLearning": "Painel de Progresso",
+    "profile": "O Meu Perfil",
+    "settings": "Definições",
+    "users": "Utilizadores",
+    "platforms": "Plataformas",
+    "analytics": "Analytics",
+    "logout": "Terminar sessão",
+    "expandSidebar": "Expandir sidebar",
+    "collapseSidebar": "Colapsar sidebar"
+  },
+  "common": {
+    "save": "Guardar alterações",
+    "saving": "A guardar…",
+    "export": "Exportar",
+    "featureInDev": "Funcionalidade em desenvolvimento."
+  },
+  "settings": {
+    "title": "Definições",
+    "subtitle": "Preferências da plataforma e comportamento da IA",
+    "sections": {
+      "ai": "Assistente IA",
+      "notifications": "Notificações",
+      "privacy": "Privacidade",
+      "appearance": "Aparência"
+    },
+    "ai": {
+      "title": "Preferências da IA",
+      "responseDetail": "Nível de detalhe das respostas",
+      "responseDetailDesc": "Controla o quão extensa é cada resposta da IA",
+      "concise": "Conciso",
+      "detailed": "Detalhado",
+      "responseLanguage": "Idioma das respostas da IA",
+      "portuguese": "Português",
+      "english": "Inglês",
+      "explainReasoning": "Explicar raciocínio",
+      "explainReasoningDesc": "A IA justifica o porquê de cada recomendação",
+      "recommendationMode": "Modo de recomendações",
+      "recommendationModeDesc": "Define se a IA sugere dentro da tua área atual ou explora novas áreas",
+      "conservative": "Conservador",
+      "exploratory": "Exploratório"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "alerts": "Alertas",
+      "channel": "Canal",
+      "weeklyRecs": "Recomendações semanais",
+      "weeklyRecsDesc": "Sugestões de cursos enviadas todas as semanas",
+      "certExpiry": "Certificações a expirar",
+      "certExpiryDesc": "Aviso 30 dias antes de uma certificação expirar",
+      "progress": "Progresso de cursos",
+      "progressDesc": "Lembrete quando tens um curso a meio há mais de 7 dias",
+      "email": "Notificações por email",
+      "inApp": "Notificações in-app"
+    },
+    "privacy": {
+      "title": "Privacidade",
+      "adminCanSeeRecs": "Admin pode ver as minhas recomendações",
+      "adminCanSeeRecsDesc": "O administrador pode ver os cursos recomendados pela IA para ti",
+      "aiCanUseHistory": "IA pode usar o meu historial",
+      "aiCanUseHistoryDesc": "Permite personalização com base nos cursos que já concluíste",
+      "downloadData": "Download dos meus dados",
+      "downloadDataDesc": "Exporta todos os teus dados pessoais (RGPD)"
+    },
+    "appearance": {
+      "title": "Aparência",
+      "theme": "Tema",
+      "themeDesc": "Esquema de cores da interface",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "language": "Idioma da interface",
+      "note": "As preferências de aparência são guardadas localmente neste dispositivo e não requerem guardar."
+    }
+  },
+  "lang": {
+    "pt": "Português",
+    "en": "Inglês"
+  },
+  "dashboard": {
+    "greetingMorning": "Bom dia",
+    "greetingAfternoon": "Boa tarde",
+    "greetingEvening": "Boa noite",
+    "stats": {
+      "total": "Total de formações",
+      "ongoing": "Em progresso",
+      "completed": "Concluídas",
+      "hours": "Horas de formação"
+    },
+    "inProgress": "Em Progresso",
+    "saved": "Guardados",
+    "viewAll": "Ver todos",
+    "empty": {
+      "progress": "Nenhuma formação em progresso. Começa a explorar cursos!",
+      "saved": "Nenhum curso guardado."
+    }
+  },
+  "myLearning": {
+    "title": "Painel de Progresso",
+    "subtitle": "Acompanha o teu progresso de aprendizagem.",
+    "hello": "Olá",
+    "discover": "Descobrir formação",
+    "tabs": {
+      "ongoing": "Em Progresso",
+      "completed": "Concluídos",
+      "later": "Guardados",
+      "priority": "Planos"
+    },
+    "stats": {
+      "ongoing": "Em Progresso",
+      "completed": "Concluídos",
+      "later": "Guardados",
+      "priority": "Planos"
+    },
+    "empty": {
+      "ongoingTitle": "Sem cursos em progresso",
+      "ongoingDesc": "Inicia um curso guardado ou procura formação na plataforma.",
+      "completedTitle": "Nenhum curso concluído",
+      "completedDesc": "Os cursos concluídos aparecerão aqui com a respetiva data e certificado.",
+      "laterTitle": "Nenhum curso guardado",
+      "laterDesc": "Guarda cursos da pesquisa para consultar mais tarde.",
+      "priorityTitle": "Plano de formação vazio",
+      "priorityDesc": "Marca cursos como prioritários para estruturar o teu plano de aprendizagem."
+    },
+    "statusMoved": {
+      "ongoing": "movido para Em Progresso.",
+      "completed": "marcado como concluído.",
+      "priority": "adicionado ao plano.",
+      "later": "guardado para mais tarde."
+    },
+    "coursePrefix": "Curso",
+    "errorUpdate": "Erro ao actualizar registo.",
+    "errorDelete": "Erro ao remover registo.",
+    "deleted": "Curso removido."
+  },
+  "certificates": {
+    "title": "Certificados",
+    "subtitle": "Gere os teus certificados de formação e credenciais.",
+    "upload": "Carregar certificado",
+    "search": "Pesquisar certificado...",
+    "filters": {
+      "all": "Todos",
+      "active": "Ativos",
+      "expiring": "A expirar",
+      "expired": "Expirados"
+    },
+    "count_one": "{{count}} certificado",
+    "count_other": "{{count}} certificados",
+    "filtered": "(filtrado)",
+    "empty": {
+      "noResultsTitle": "Sem resultados para essa pesquisa",
+      "noResultsDesc": "Tenta outros termos.",
+      "noCertsTitle": "Ainda não tens certificados",
+      "noCertsDesc": "Carrega o teu primeiro certificado para começar."
+    }
+  },
+  "profile": {
+    "editActive": "Modo edição activo",
+    "editProfile": "Editar Perfil",
+    "memberSince": "Membro desde",
+    "experienceLevel": "Nível de experiência",
+    "jobTitle": "Cargo",
+    "jobTitlePlaceholder": "Ex: Software Engineer",
+    "department": "Departamento",
+    "departmentPlaceholder": "Ex: Engenharia",
+    "location": "Localização",
+    "locationNotSet": "Não definido",
+    "locationOffice": "Escritório",
+    "locationRemote": "Remoto",
+    "locationHybrid": "Híbrido",
+    "admin": "Administrador",
+    "collaborator": "Colaborador",
+    "noSkills": "Nenhuma skill adicionada.",
+    "saveSuccess": "Perfil guardado.",
+    "saveError": "Erro ao guardar o perfil.",
+    "tabs": {
+      "overview": "Visão Geral",
+      "activity": "Atividade",
+      "certifications": "Certificações"
+    },
+    "recentActivity": "Atividade Recente",
+    "noActivity": "Nenhuma atividade recente.",
+    "certifications": "Certificações",
+    "noCertifications": "Nenhuma certificação registada.",
+    "downloadCv": "Download CV",
+    "shareProfile": "Partilhar Perfil"
+  },
+  "search": {
+    "title": "Pesquisa de Cursos",
+    "subtitle": "Encontra formação em todas as plataformas.",
+    "placeholder": "Pesquisar cursos, tecnologias...",
+    "results": "resultado(s)",
+    "viewGrid": "Vista grelha",
+    "viewList": "Vista lista",
+    "empty": {
+      "withQuery": "Sem resultados para \"{{query}}\"",
+      "withQueryDesc": "Tenta outros termos ou remove os filtros.",
+      "noQuery": "Começa a pesquisar",
+      "noQueryDesc": "Escreve um tema, tecnologia ou nome de curso."
+    },
+    "error": {
+      "title": "Erro ao pesquisar",
+      "desc": "Verifica a ligação ao backend.",
+      "retry": "Tentar novamente"
+    }
+  },
+  "ai": {
+    "title": "Assistente IA",
+    "subtitle": "O teu assistente de aprendizagem personalizado.",
+    "welcomeMessage": "Sou o teu assistente de aprendizagem.\n\nPodes perguntar-me sobre cursos, certificações ou pedir um plano de estudo personalizado. Como posso ajudar?",
+    "openPanel": "Abrir painel de sugestões",
+    "closePanel": "Fechar painel de sugestões",
+    "errorSend": "Erro ao enviar mensagem."
+  },
+  "header": {
+    "aiActive": "IA Ativa",
+    "tips": [
+      "Completa um curso hoje e mantém o teu streak ativo.",
+      "Os teus certificados expiram? Verifica em Certificados.",
+      "Usa o Assistente IA para pedir recomendações personalizadas.",
+      "Adiciona skills ao teu perfil para melhores sugestões.",
+      "Cursos curtos de 1h são ideais para aprendizagem diária.",
+      "Pesquisa por tema e filtra por plataforma para melhores resultados.",
+      "Marca formações como Prioridade para as encontrar rapidamente."
+    ]
+  },
+  "admin": {
+    "title": "Backoffice Admin",
+    "subtitle": "Gestão de utilizadores, plataformas e analytics da plataforma.",
+    "tabs": {
+      "users": "Utilizadores",
+      "platforms": "Plataformas",
+      "analytics": "Analytics"
+    },
+    "users": {
+      "title": "Utilizadores",
+      "search": "Pesquisar utilizador...",
+      "columns": {
+        "name": "Nome",
+        "email": "Email",
+        "role": "Role",
+        "status": "Estado",
+        "created": "Criado em",
+        "actions": "Ações"
+      },
+      "promote": "Promover",
+      "demote": "Revogar",
+      "deactivate": "Desativar",
+      "activate": "Ativar",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "noResults": "Nenhum utilizador encontrado.",
+      "confirmPromote": "Promover {{name}} a Admin?",
+      "confirmDemote": "Revogar role Admin de {{name}}?",
+      "confirmDeactivate": "Desativar conta de {{name}}?",
+      "confirmActivate": "Reativar conta de {{name}}?",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "platforms": {
+      "title": "Plataformas",
+      "add": "Nova Plataforma",
+      "columns": {
+        "name": "Nome",
+        "url": "URL",
+        "apiKey": "API Key",
+        "active": "Ativa",
+        "search": "Pesquisa",
+        "actions": "Ações"
+      },
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "noResults": "Nenhuma plataforma encontrada.",
+      "editTitle": "Editar plataforma",
+      "newTitle": "Nova plataforma",
+      "fields": {
+        "name": "Nome",
+        "url": "URL Base",
+        "urlPlaceholder": "https://...",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "Chave de API (opcional)",
+        "active": "Plataforma ativa",
+        "search": "Pesquisa ativa"
+      },
+      "save": "Guardar alterações",
+      "create": "Criar plataforma",
+      "saving": "A guardar…",
+      "confirmDelete": "Eliminar \"{{name}}\"?",
+      "confirmDeleteDesc": "Esta ação não pode ser desfeita.",
+      "masked": "Definida",
+      "notSet": "—"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "kpi": {
+        "completed": "Cursos concluídos",
+        "users": "Utilizadores ativos",
+        "expiring": "Certs. a expirar",
+        "topSkill": "Skill mais pesquisada"
+      },
+      "charts": {
+        "completedByMonth": "Cursos concluídos por mês",
+        "platformUsage": "Plataformas mais usadas",
+        "userGrowth": "Crescimento de utilizadores",
+        "topSkills": "Skills mais procuradas"
+      },
+      "expiring": {
+        "title": "Certificados a expirar (próximos 90 dias)",
+        "user": "Utilizador",
+        "course": "Curso",
+        "date": "Data",
+        "daysLeft": "Dias"
+      }
+    }
+  }
+}
