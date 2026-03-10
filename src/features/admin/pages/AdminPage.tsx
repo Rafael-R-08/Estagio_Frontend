@@ -1,0 +1,59 @@
+import { Users, Globe, BarChart2, ShieldCheck } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { UsersTab } from '../components/UsersTab';
+import { PlatformsTab } from '../components/PlatformsTab';
+import { AnalyticsTab } from '../components/AnalyticsTab';
+
+// ─── Tabs config ──────────────────────────────────────────────────────────────
+
+const TABS = [
+  { id: 'users', label: 'Utilizadores', icon: Users },
+  { id: 'platforms', label: 'Plataformas', icon: Globe },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
+
+function isValidTab(t: string | null): t is TabId {
+  return t === 'users' || t === 'platforms' || t === 'analytics';
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+export default function AdminPage() {
+  const [searchParams] = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const active: TabId = isValidTab(rawTab) ? rawTab : 'users';
+
+  const current = TABS.find((t) => t.id === active)!;
+  const Icon = current.icon;
+
+  return (
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-softinsa-blue text-white shadow-sm">
+          <ShieldCheck className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground">Backoffice Admin</h1>
+            <span className="text-muted-foreground">/</span>
+            <span className="flex items-center gap-1.5 text-lg font-semibold text-softinsa-blue">
+              <Icon className="h-4 w-4" />
+              {current.label}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Gestão de utilizadores, plataformas e analytics da plataforma.
+          </p>
+        </div>
+      </div>
+
+      {/* Tab content */}
+      {active === 'users' && <UsersTab />}
+      {active === 'platforms' && <PlatformsTab />}
+      {active === 'analytics' && <AnalyticsTab />}
+    </div>
+  );
+}
