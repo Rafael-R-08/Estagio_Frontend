@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Menu, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/hooks/useAuth';
-
-const AI_TIPS = [
-  'Completa um curso hoje e mantém o teu streak ativo.',
-  'Os teus certificados expiram? Verifica em Certificados.',
-  'Usa o Assistente IA para pedir recomendações personalizadas.',
-  'Adiciona skills ao teu perfil para melhores sugestões.',
-  'Cursos curtos de 1h são ideais para aprendizagem diária.',
-  'Pesquisa por tema e filtra por plataforma para melhores resultados.',
-  'Marca formações como Prioridade para as encontrar rapidamente.',
-];
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -20,6 +11,10 @@ interface HeaderProps {
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const AI_TIPS: string[] = t('header.tips', { returnObjects: true }) as string[];
+  const tipsCount = AI_TIPS.length;
 
   const [tipIndex, setTipIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -28,12 +23,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
     const id = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
-        setTipIndex((i) => (i + 1) % AI_TIPS.length);
+        setTipIndex((i) => (i + 1) % tipsCount);
         setVisible(true);
       }, 400);
     }, 8000);
     return () => clearInterval(id);
-  }, []);
+  }, [tipsCount]);
 
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-6">
@@ -53,7 +48,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
           </span>
           <Sparkles className="h-3.5 w-3.5 text-softinsa-blue" />
-          <span className="text-xs font-medium text-softinsa-blue whitespace-nowrap">IA Ativa</span>
+          <span className="text-xs font-medium text-softinsa-blue whitespace-nowrap">{t('header.aiActive')}</span>
         </div>
         <span className="text-muted-foreground/40 text-xs">·</span>
         <span

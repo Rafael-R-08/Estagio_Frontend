@@ -15,6 +15,7 @@ import {
   Globe,
   BarChart2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { cn } from '../lib/utils';
 import logo from '../assets/Logo1.png';
@@ -22,22 +23,22 @@ import logo from '../assets/Logo1.png';
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
 const MAIN_NAV = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Pesquisa de Cursos', href: '/search', icon: Search },
-  { label: 'Assistente IA', href: '/ai', icon: Sparkles },
-  { label: 'Certificados', href: '/certificates', icon: Award },
-  { label: 'Painel de Progresso', href: '/my-learning', icon: BookOpen },
+  { labelKey: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { labelKey: 'nav.search', href: '/search', icon: Search },
+  { labelKey: 'nav.ai', href: '/ai', icon: Sparkles },
+  { labelKey: 'nav.certificates', href: '/certificates', icon: Award },
+  { labelKey: 'nav.myLearning', href: '/my-learning', icon: BookOpen },
 ] as const;
 
 const ACCOUNT_NAV = [
-  { label: 'O Meu Perfil', href: '/profile', icon: User },
-  { label: 'Definições', href: '/settings', icon: Settings },
+  { labelKey: 'nav.profile', href: '/profile', icon: User },
+  { labelKey: 'nav.settings', href: '/settings', icon: Settings },
 ] as const;
 
 const ADMIN_NAV = [
-  { label: 'Utilizadores', href: '/admin?tab=users', icon: Users },
-  { label: 'Plataformas', href: '/admin?tab=platforms', icon: Globe },
-  { label: 'Analytics', href: '/admin?tab=analytics', icon: BarChart2 },
+  { labelKey: 'nav.users', href: '/admin?tab=users', icon: Users },
+  { labelKey: 'nav.platforms', href: '/admin?tab=platforms', icon: Globe },
+  { labelKey: 'nav.analytics', href: '/admin?tab=analytics', icon: BarChart2 },
 ] as const;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { pathname, search } = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const currentAdminTab = new URLSearchParams(search).get('tab') ?? 'users';
 
   return (
@@ -78,17 +80,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className="px-3 mb-1">
           {!collapsed && (
             <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Main Menu
+              {t('nav.mainMenu')}
             </p>
           )}
           <ul className="space-y-1">
-            {MAIN_NAV.map(({ label, href, icon: Icon }) => {
+            {MAIN_NAV.map(({ labelKey, href, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(href + '/');
               return (
                 <li key={href}>
                   <Link
                     to={href}
-                    title={collapsed ? label : undefined}
+                    title={collapsed ? t(labelKey) : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActive
@@ -98,7 +100,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     )}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
-                    {!collapsed && <span className="truncate">{label}</span>}
+                    {!collapsed && <span className="truncate">{t(labelKey)}</span>}
                   </Link>
                 </li>
               );
@@ -119,7 +121,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <>
                   <Shield className="h-3 w-3 text-white/50" />
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                    Backoffice Admin
+                    {t('nav.adminBackoffice')}
                   </p>
                 </>
               )}
@@ -128,14 +130,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               )}
             </div>
             <ul className="space-y-1">
-              {ADMIN_NAV.map(({ label, href, icon: Icon }) => {
+              {ADMIN_NAV.map(({ labelKey, href, icon: Icon }) => {
                 const tabParam = href.split('tab=')[1];
                 const isThisActive = pathname.startsWith('/admin') && currentAdminTab === tabParam;
                 return (
                   <li key={href}>
                     <Link
                       to={href}
-                      title={collapsed ? label : undefined}
+                      title={collapsed ? t(labelKey) : undefined}
                       className={cn(
                         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                         isThisActive
@@ -145,7 +147,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="truncate">{label}</span>}
+                      {!collapsed && <span className="truncate">{t(labelKey)}</span>}
                     </Link>
                   </li>
                 );
@@ -158,17 +160,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className="px-3 mt-4">
           {!collapsed && (
             <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Account
+              {t('nav.account')}
             </p>
           )}
           <ul className="space-y-1">
-            {ACCOUNT_NAV.map(({ label, href, icon: Icon }) => {
+            {ACCOUNT_NAV.map(({ labelKey, href, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(href + '/');
               return (
                 <li key={href}>
                   <Link
                     to={href}
-                    title={collapsed ? label : undefined}
+                    title={collapsed ? t(labelKey) : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActive
@@ -178,7 +180,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     )}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
-                    {!collapsed && <span className="truncate">{label}</span>}
+                    {!collapsed && <span className="truncate">{t(labelKey)}</span>}
                   </Link>
                 </li>
               );
@@ -191,7 +193,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <button
         onClick={onToggle}
         className="mx-2 mb-2 flex items-center justify-center rounded-lg py-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-        title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+        title={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
       >
         {collapsed ? (
           <ChevronRight className="h-4 w-4" />
@@ -221,7 +223,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {!collapsed && (
             <button
               onClick={logout}
-              title="Terminar sessão"
+              title={t('nav.logout')}
               className="text-white/50 hover:text-white transition-colors"
             >
               <LogOut className="h-4 w-4" />
@@ -231,7 +233,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {collapsed && (
           <button
             onClick={logout}
-            title="Terminar sessão"
+            title={t('nav.logout')}
             className="mt-1 flex w-full items-center justify-center rounded-lg py-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
           >
             <LogOut className="h-4 w-4" />

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Award, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { certificatesApi, trainingApi } from '@/services/api';
 import type { Certificate } from '@/types';
@@ -23,6 +24,7 @@ function getCertStatus(cert: Certificate, now: number) {
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ hasSearch, onUpload }: { hasSearch: boolean; onUpload: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
@@ -32,12 +34,12 @@ function EmptyState({ hasSearch, onUpload }: { hasSearch: boolean; onUpload: () 
       </div>
       <div>
         <p className="text-sm font-medium text-foreground">
-          {hasSearch ? 'Sem resultados para essa pesquisa' : 'Ainda não tens certificados'}
+          {hasSearch ? t('certificates.empty.noResultsTitle') : t('certificates.empty.noCertsTitle')}
         </p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {hasSearch
-            ? 'Tenta outros termos.'
-            : 'Carrega o teu primeiro certificado para começar.'}
+            ? t('certificates.empty.noResultsDesc')
+            : t('certificates.empty.noCertsDesc')}
         </p>
       </div>
       {!hasSearch && (
@@ -45,7 +47,7 @@ function EmptyState({ hasSearch, onUpload }: { hasSearch: boolean; onUpload: () 
           onClick={onUpload}
           className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
         >
-          Carregar certificado
+          {t('certificates.upload')}
         </button>
       )}
     </div>
@@ -55,6 +57,7 @@ function EmptyState({ hasSearch, onUpload }: { hasSearch: boolean; onUpload: () 
 // ─── CertificatesPage ─────────────────────────────────────────────────────────
 
 export default function CertificatesPage() {
+  const { t } = useTranslation();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selected, setSelected] = useState<Certificate | null>(null);
   const [search, setSearch] = useState('');
@@ -97,10 +100,10 @@ export default function CertificatesPage() {
   };
 
   const FILTERS: { id: typeof statusFilter; label: string }[] = [
-    { id: 'all',      label: 'Todos' },
-    { id: 'active',   label: 'Ativos' },
-    { id: 'expiring', label: 'A expirar' },
-    { id: 'expired',  label: 'Expirados' },
+    { id: 'all',      label: t('certificates.filters.all') },
+    { id: 'active',   label: t('certificates.filters.active') },
+    { id: 'expiring', label: t('certificates.filters.expiring') },
+    { id: 'expired',  label: t('certificates.filters.expired') },
   ];
 
   return (
@@ -108,9 +111,9 @@ export default function CertificatesPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Certificados</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('certificates.title')}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Gere os teus certificados de formação e credenciais.
+            {t('certificates.subtitle')}
           </p>
         </div>
         <button
@@ -118,7 +121,7 @@ export default function CertificatesPage() {
           className="shrink-0 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Carregar certificado
+          {t('certificates.upload')}
         </button>
       </div>
 
@@ -131,7 +134,7 @@ export default function CertificatesPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Pesquisar certificado..."
+              placeholder={t('certificates.search')}
               className="h-9 w-56 rounded-lg border border-border bg-muted/40 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
@@ -168,8 +171,8 @@ export default function CertificatesPage() {
       {/* ── Result count ── */}
       {!isLoading && certs.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {filtered.length} certificado{filtered.length !== 1 ? 's' : ''}
-          {statusFilter !== 'all' || search ? ' (filtrado)' : ''}
+          {t('certificates.count', { count: filtered.length })}
+          {statusFilter !== 'all' || search ? ` ${t('certificates.filtered')}` : ''}
         </p>
       )}
 

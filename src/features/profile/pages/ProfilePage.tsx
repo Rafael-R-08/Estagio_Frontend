@@ -5,6 +5,7 @@ import {
   MapPin, Briefcase, Globe, Link2, Download, RefreshCw,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
+import { useTranslation } from 'react-i18next';
 import { profileApi, trainingApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -118,6 +119,7 @@ function ProfileSidebar({
   onNameChange, onLevelChange, onSkillsChange, onInterestsChange,
   onJobTitleChange, onDepartmentChange, onLocationChange, onLanguageChange,
 }: SidebarProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       {/* Identity card */}
@@ -136,7 +138,7 @@ function ProfileSidebar({
               <h2 className="text-lg font-bold text-foreground">{draftName || user.name}</h2>
             )}
             <p className="text-sm font-medium text-primary">
-              {draftLevel ? LEVEL_SUBTITLE[draftLevel] : user.role === 'ADMIN' ? 'Administrador' : 'Colaborador'}
+              {draftLevel ? LEVEL_SUBTITLE[draftLevel] : user.role === 'ADMIN' ? t('profile.admin') : t('profile.collaborator')}
             </p>
             {draftLevel && (
               <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -152,7 +154,7 @@ function ProfileSidebar({
             {!isEditing && draftLocation && (
               <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                 <MapPin className="h-3 w-3" />
-                {draftLocation === 'escritorio' ? 'Escritório' : draftLocation === 'remoto' ? 'Remoto' : 'Híbrido'}
+                {draftLocation === 'escritorio' ? t('profile.locationOffice') : draftLocation === 'remoto' ? t('profile.locationRemote') : t('profile.locationHybrid')}
               </p>
             )}
           </div>
@@ -168,13 +170,13 @@ function ProfileSidebar({
             )}
           >
             <Edit2 className="h-3.5 w-3.5" />
-            {isEditing ? 'Modo edição activo' : 'Editar Perfil'}
+            {isEditing ? t('profile.editActive') : t('profile.editProfile')}
           </button>
 
           {isEditing && (
             <div className="mt-3 w-full space-y-3">
               <div>
-                <p className="mb-1.5 text-xs font-medium text-muted-foreground">Nível de experiência</p>
+                <p className="mb-1.5 text-xs font-medium text-muted-foreground">{t('profile.experienceLevel')}</p>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {LEVELS.map((l) => (
                     <button
@@ -194,36 +196,36 @@ function ProfileSidebar({
                 </div>
               </div>
               <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Cargo</p>
+                <p className="text-xs font-medium text-muted-foreground">{t('profile.jobTitle')}</p>
                 <input
                   type="text"
                   value={draftJobTitle}
                   onChange={(e) => onJobTitleChange(e.target.value)}
-                  placeholder="Ex: Software Engineer"
+                  placeholder={t('profile.jobTitlePlaceholder')}
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Departamento</p>
+                <p className="text-xs font-medium text-muted-foreground">{t('profile.department')}</p>
                 <input
                   type="text"
                   value={draftDepartment}
                   onChange={(e) => onDepartmentChange(e.target.value)}
-                  placeholder="Ex: Engenharia"
+                  placeholder={t('profile.departmentPlaceholder')}
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Localização</p>
+                <p className="text-xs font-medium text-muted-foreground">{t('profile.location')}</p>
                 <select
                   value={draftLocation}
                   onChange={(e) => onLocationChange(e.target.value)}
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
-                  <option value="">Não definido</option>
-                  <option value="escritorio">Escritório</option>
-                  <option value="remoto">Remoto</option>
-                  <option value="hibrido">Híbrido</option>
+                  <option value="">{t('profile.locationNotSet')}</option>
+                  <option value="escritorio">{t('profile.locationOffice')}</option>
+                  <option value="remoto">{t('profile.locationRemote')}</option>
+                  <option value="hibrido">{t('profile.locationHybrid')}</option>
                 </select>
               </div>
             </div>
@@ -234,7 +236,7 @@ function ProfileSidebar({
           <p className="text-xs text-muted-foreground">{user.email}</p>
           {user.createdAt && (
             <p className="mt-0.5 text-[11px] text-muted-foreground/50">
-              Membro desde{' '}
+              {t('profile.memberSince')}{' '}
               {new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
             </p>
           )}
@@ -258,7 +260,7 @@ function ProfileSidebar({
               Professional Skills
             </p>
             {draftSkills.length === 0 ? (
-              <p className="text-xs text-muted-foreground/50">Nenhuma skill adicionada.</p>
+            <p className="text-xs text-muted-foreground/50">{t('profile.noSkills')}</p>
             ) : (
               <ul className="space-y-3">
                 {draftSkills.map((skill, i) => (
@@ -536,6 +538,7 @@ interface FormBodyProps {
 function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   const { setUser: setAuthUser } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -581,11 +584,11 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         location: draftLocation || undefined,
         language: draftLanguage || undefined,
       });
-      toast.success('Perfil guardado com sucesso!');
+      toast.success(t('profile.saveSuccess'));
       setIsEditing(false);
     },
     onError: () => {
-      toast.error('Erro ao guardar o perfil.');
+      toast.error(t('profile.saveError'));
     },
   });
 

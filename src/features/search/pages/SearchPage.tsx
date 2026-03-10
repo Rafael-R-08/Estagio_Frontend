@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, AlertCircle, LayoutGrid, List } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
+import { useTranslation } from 'react-i18next';
 
 import { searchApi, trainingApi } from '@/services/api';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { SearchResultCard, SearchResultCardSkeleton } from '../components/Search
 // ─── Empty / Error states ─────────────────────────────────────────────────────
 
 function EmptyState({ query }: { query: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
@@ -21,12 +23,12 @@ function EmptyState({ query }: { query: string }) {
       </div>
       <div>
         <p className="text-sm font-medium text-foreground">
-          {query ? `Sem resultados para "${query}"` : 'Começa a pesquisar'}
+          {query ? t('search.empty.withQuery', { query }) : t('search.empty.noQuery')}
         </p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {query
-            ? 'Tenta outros termos ou remove os filtros.'
-            : 'Escreve um tema, tecnologia ou nome de curso.'}
+            ? t('search.empty.withQueryDesc')
+            : t('search.empty.noQueryDesc')}
         </p>
       </div>
     </div>
@@ -34,20 +36,21 @@ function EmptyState({ query }: { query: string }) {
 }
 
 function ErrorState({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
         <AlertCircle className="h-8 w-8 text-destructive" />
       </div>
       <div>
-        <p className="text-sm font-medium text-foreground">Erro ao pesquisar</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">Verifica a ligação ao backend.</p>
+        <p className="text-sm font-medium text-foreground">{t('search.error.title')}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{t('search.error.desc')}</p>
       </div>
       <button
         onClick={onRetry}
         className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
       >
-        Tentar novamente
+        {t('search.error.retry')}
       </button>
     </div>
   );
@@ -56,6 +59,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 // ─── SearchPage ───────────────────────────────────────────────────────────────
 
 export default function SearchPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [inputValue, setInputValue] = useState('');
@@ -189,9 +193,9 @@ export default function SearchPage() {
     <div className="space-y-5">
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Pesquisa</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('search.title')}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Procura cursos em todas as plataformas ativas.
+          {t('search.subtitle')}
         </p>
       </div>
 

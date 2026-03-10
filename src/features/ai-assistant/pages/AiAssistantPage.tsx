@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Bot, PanelRight, PanelRightClose } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
+import { useTranslation } from 'react-i18next';
 import { recommendationsApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,7 @@ function makeId() {
 
 export default function AiAssistantPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<AiMessage[]>([]);
@@ -61,7 +63,7 @@ export default function AiAssistantPage() {
           {
             id: makeId(),
             role: 'assistant',
-            content: `Olá${user?.name ? `, ${user.name.split(' ')[0]}` : ''}! 👋 Sou o teu assistente de aprendizagem.\n\nPodes perguntar-me sobre cursos, certificações ou pedir um plano de estudo personalizado. Como posso ajudar?`,
+            content: `Olá${user?.name ? `, ${user.name.split(' ')[0]}` : ''}! 👋 ${t('ai.welcomeMessage')}`,
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -136,7 +138,7 @@ export default function AiAssistantPage() {
         );
       },
       onError: () => {
-        toast.error('Erro ao contactar o assistente. Tenta novamente.');
+        toast.error(t('ai.errorSend'));
         setMessages((prev) => prev.filter((m) => m.id !== loadingId));
       },
     });
@@ -162,13 +164,13 @@ export default function AiAssistantPage() {
             <Bot className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-foreground">Assistente IA</h1>
+            <h1 className="text-sm font-semibold text-foreground">{t('ai.title')}</h1>
             <p className="text-xs text-muted-foreground">Powered by Ollama · RAG</p>
           </div>
         </div>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
-          title={sidebarOpen ? 'Fechar painel' : 'Abrir painel'}
+          title={sidebarOpen ? t('ai.closePanel') : t('ai.openPanel')}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           {sidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRight className="h-4 w-4" />}

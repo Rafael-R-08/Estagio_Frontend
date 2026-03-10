@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/lib/toast-store';
+import { useTranslation } from 'react-i18next';
 
 import { trainingApi } from '@/services/api';
 import { cn } from '@/lib/utils';
@@ -23,12 +24,7 @@ import { LearningPlanCard } from '../components/LearningPlanCard';
 
 type Tab = 'ongoing' | 'completed' | 'later' | 'priority';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'ongoing',   label: 'Em Progresso' },
-  { id: 'completed', label: 'Concluídos'   },
-  { id: 'later',     label: 'Guardados'    },
-  { id: 'priority',  label: 'Planos'       },
-];
+const TAB_IDS: Tab[] = ['ongoing', 'completed', 'later', 'priority'];
 
 // ─── Stat tile ────────────────────────────────────────────────────────────────
 
@@ -65,41 +61,24 @@ function StatTile({
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
-const EMPTY_COPY: Record<Tab, { title: string; desc: string }> = {
-  ongoing: {
-    title: 'Sem cursos em progresso',
-    desc: 'Inicia um curso guardado ou procura formação na plataforma.',
-  },
-  completed: {
-    title: 'Nenhum curso concluído',
-    desc: 'Os cursos concluídos aparecerão aqui com a respetiva data e certificado.',
-  },
-  later: {
-    title: 'Nenhum curso guardado',
-    desc: 'Guarda cursos da pesquisa para consultar mais tarde.',
-  },
-  priority: {
-    title: 'Plano de formação vazio',
-    desc: 'Marca cursos como prioritários para estruturar o teu plano de aprendizagem.',
-  },
-};
-
 function EmptyState({ tab, onDiscover }: { tab: Tab; onDiscover: () => void }) {
-  const { title, desc } = EMPTY_COPY[tab];
+  const { t } = useTranslation();
+  const titleKey = `myLearning.empty.${tab}Title` as const;
+  const descKey = `myLearning.empty.${tab}Desc` as const;
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
         <Plus className="h-8 w-8 text-muted-foreground/40" />
       </div>
       <div>
-        <p className="text-sm font-medium text-foreground">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+        <p className="text-sm font-medium text-foreground">{t(titleKey)}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{t(descKey)}</p>
       </div>
       <button
         onClick={onDiscover}
         className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
       >
-        Descobrir formação
+        {t('myLearning.discover')}
       </button>
     </div>
   );
@@ -128,6 +107,7 @@ export default function MyLearningPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('ongoing');
 
   // ── Queries ──────────────────────────────────────────────────────────────
@@ -142,16 +122,16 @@ export default function MyLearningPage() {
     mutationFn: ({ id, ...dto }: { id: string; status?: TrainingStatus; rating?: number; completedAt?: string }) =>
       trainingApi.update(id, dto),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
-    onError: () => toast.error('Erro ao actualizar registo.'),
+    onError: () => toast.error(t('myLearning.errorUpdate')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: trainingApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
-      toast.success('Curso removido.');
+      toast.success(t('myLearning.deleted'));
     },
-    onError: () => toast.error('Erro ao remover registo.'),
+    onError: () => toast.error(t('myLearning.errorDelete')),
   });
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -159,13 +139,8 @@ export default function MyLearningPage() {
     const extra = status === 'completed' ? { completedAt: new Date().toISOString() } : {};
     updateMutation.mutate({ id, status, ...extra }, {
       onSuccess: () => {
-        const labels: Record<TrainingStatus, string> = {
-          ongoing:   'movido para Em Progresso.',
-          completed: 'marcado como concluído.',
-          priority:  'adicionado ao plano.',
-          later:     'guardado para mais tarde.',
-        };
-        toast.success(`Curso ${labels[status]}`);
+        const statusKey = `myLearning.statusMoved.${status}` as const;
+        toast.success(`${t('myLearning.coursePrefix')} ${t(statusKey)}`);
       },
     });
   };
@@ -189,10 +164,10 @@ export default function MyLearningPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Painel de Progresso</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('myLearning.title')}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Olá, <span className="font-medium text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
-            Acompanha o teu progresso de aprendizagem.
+            {t('myLearning.hello')}, <span className="font-medium text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
+            {' '}{t('myLearning.subtitle')}
           </p>
         </div>
         <button
@@ -200,35 +175,35 @@ export default function MyLearningPage() {
           className="shrink-0 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Adicionar curso
+          {t('myLearning.discover')}
         </button>
       </div>
 
       {/* ── Stat tiles ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile
-          label="Em Progresso"
+          label={t('myLearning.stats.ongoing')}
           value={counts.ongoing}
           iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
           icon={<PlayCircle className="h-5 w-5" />}
           active={activeTab === 'ongoing'}
         />
         <StatTile
-          label="Concluídos"
+          label={t('myLearning.stats.completed')}
           value={counts.completed}
           iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
           icon={<CheckCircle2 className="h-5 w-5" />}
           active={activeTab === 'completed'}
         />
         <StatTile
-          label="Guardados"
+          label={t('myLearning.stats.later')}
           value={counts.later}
           iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
           icon={<Clock className="h-5 w-5" />}
           active={activeTab === 'later'}
         />
         <StatTile
-          label="Planos"
+          label={t('myLearning.stats.priority')}
           value={counts.priority}
           iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
           icon={<Star className="h-5 w-5" />}
@@ -239,26 +214,26 @@ export default function MyLearningPage() {
       {/* ── Tab bar (underline style) ── */}
       <div className="border-b border-border">
         <nav className="-mb-px flex gap-0">
-          {TABS.map((tab) => (
+          {TAB_IDS.map((tabId) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              key={tabId}
+              onClick={() => setActiveTab(tabId)}
               className={cn(
                 'flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-                activeTab === tab.id
+                activeTab === tabId
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground',
               )}
             >
-              {tab.label}
-              {counts[tab.id] > 0 && (
+              {t(`myLearning.tabs.${tabId}`)}
+              {counts[tabId] > 0 && (
                 <span className={cn(
                   'rounded px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
-                  activeTab === tab.id
+                  activeTab === tabId
                     ? 'bg-primary/10 text-primary'
                     : 'bg-muted text-muted-foreground',
                 )}>
-                  {counts[tab.id]}
+                  {counts[tabId]}
                 </span>
               )}
             </button>

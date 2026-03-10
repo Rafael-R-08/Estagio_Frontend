@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { platformsApi } from '@/services/api';
 import type { LearningPlatform } from '@/types';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,7 @@ function PlatformModal({
   onSave: (data: PlatformFormData) => void;
   saving: boolean;
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<PlatformFormData>(() =>
     platform
       ? { name: platform.name, baseUrl: platform.baseUrl ?? '', logoUrl: platform.logoUrl ?? '', apiKey: platform.apiKey ?? '', isActive: platform.isActive, isSearchEnabled: platform.isSearchEnabled }
@@ -71,7 +73,7 @@ function PlatformModal({
       <div className="flex w-full max-w-md flex-col rounded-2xl border border-border bg-card shadow-xl max-h-[90vh]">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
           <h3 className="text-base font-semibold text-foreground">
-            {isEditing ? 'Editar plataforma' : 'Nova plataforma'}
+            {isEditing ? t('admin.platforms.editTitle') : t('admin.platforms.newTitle')}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
@@ -162,14 +164,14 @@ function PlatformModal({
               onClick={onClose}
               className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
             >
-              Cancelar
+              {t('admin.users.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 rounded-xl bg-softinsa-blue px-4 py-2.5 text-sm font-medium text-white hover:bg-softinsa-blue/90 disabled:opacity-60 transition-colors"
             >
-              {saving ? 'A guardar…' : isEditing ? 'Guardar alterações' : 'Criar plataforma'}
+              {saving ? t('admin.platforms.saving') : isEditing ? t('admin.platforms.save') : t('admin.platforms.create')}
             </button>
           </div>
         </form>
@@ -205,20 +207,21 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
 // ─── Delete confirm ───────────────────────────────────────────────────────────
 
 function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; name: string; onConfirm: () => void; onCancel: () => void }) {
+  const { t } = useTranslation();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl">
-        <h3 className="text-base font-semibold text-foreground">Eliminar plataforma</h3>
+        <h3 className="text-base font-semibold text-foreground">{t('admin.platforms.confirmDelete', { name })}</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Tens a certeza que queres eliminar <span className="font-medium text-foreground">{name}</span>? Esta ação é irreversível.
+          {t('admin.platforms.confirmDeleteDesc')}
         </p>
         <div className="mt-5 flex gap-3 justify-end">
           <button onClick={onCancel} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors">
-            Cancelar
+            {t('admin.users.cancel')}
           </button>
           <button onClick={onConfirm} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors">
-            Eliminar
+            {t('admin.platforms.delete')}
           </button>
         </div>
       </div>
@@ -230,6 +233,7 @@ function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; nam
 
 export function PlatformsTab() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LearningPlatform | null>(null);
@@ -295,7 +299,7 @@ export function PlatformsTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
-            placeholder="Pesquisar plataforma…"
+            placeholder={t('admin.users.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
@@ -306,7 +310,7 @@ export function PlatformsTab() {
           className="flex items-center gap-2 rounded-xl bg-softinsa-blue px-4 py-2 text-sm font-medium text-white hover:bg-softinsa-blue/90 transition-colors shadow-sm"
         >
           <Plus className="h-4 w-4" />
-          Nova plataforma
+          {t('admin.platforms.add')}
         </button>
       </div>
 
@@ -316,12 +320,12 @@ export function PlatformsTab() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">URL</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Key</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ativa</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pesquisa</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.name')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.url')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.apiKey')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.active')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.search')}</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -338,7 +342,7 @@ export function PlatformsTab() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                    Nenhuma plataforma encontrada.
+                    {t('admin.platforms.noResults')}
                   </td>
                 </tr>
               ) : (
@@ -390,14 +394,14 @@ export function PlatformsTab() {
                           className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                         >
                           <Pencil className="h-3.5 w-3.5" />
-                          Editar
+                          {t('admin.platforms.edit')}
                         </button>
                         <button
                           onClick={() => setDeleteTarget(p)}
                           className="flex items-center gap-1.5 rounded-lg border border-red-200 dark:border-red-900/40 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                          Eliminar
+                          {t('admin.platforms.delete')}
                         </button>
                       </div>
                     </td>

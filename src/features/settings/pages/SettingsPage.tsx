@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles,
@@ -12,6 +13,8 @@ import { toast } from 'sonner';
 import { settingsApi } from '../../../services/api';
 import type { UserSettings, UpdateUserSettingsDto } from '../../../types';
 import { cn } from '../../../lib/utils';
+import { applyTheme, type Theme } from '../../../utils/theme';
+import i18n from '../../../i18n';
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -36,25 +39,24 @@ const DEFAULT_SETTINGS: UserSettings = {
 
 // ─── Appearance stored in localStorage ────────────────────────────────────────
 
-type Theme = 'light' | 'dark' | 'system';
 type Density = 'comfortable' | 'compact';
 type UiLang = 'pt' | 'en';
 
 function loadAppearance() {
   return {
-    theme: (localStorage.getItem('app_theme') as Theme) ?? 'system',
+    theme: (localStorage.getItem('lh_theme') as Theme) ?? 'system',
     density: (localStorage.getItem('app_density') as Density) ?? 'comfortable',
-    uiLang: (localStorage.getItem('app_ui_lang') as UiLang) ?? 'pt',
+    uiLang: (localStorage.getItem('lh_lang') as UiLang) ?? 'pt',
   };
 }
 
 // ─── Nav sections ─────────────────────────────────────────────────────────────
 
 const SECTIONS = [
-  { id: 'ai', label: 'Assistente IA', icon: Sparkles },
-  { id: 'notifications', label: 'Notificações', icon: Bell },
-  { id: 'privacy', label: 'Privacidade', icon: Shield },
-  { id: 'appearance', label: 'Aparência', icon: Monitor },
+  { id: 'ai', labelKey: 'settings.sections.ai', icon: Sparkles },
+  { id: 'notifications', labelKey: 'settings.sections.notifications', icon: Bell },
+  { id: 'privacy', labelKey: 'settings.sections.privacy', icon: Shield },
+  { id: 'appearance', labelKey: 'settings.sections.appearance', icon: Monitor },
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
@@ -178,11 +180,29 @@ export default function SettingsPage() {
   const set = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) =>
     setDraft((prev) => ({ ...(prev ?? settings), [key]: value }));
 
+  const { t } = useTranslation();
+
   const [appearance, setAppearance] = useState(loadAppearance);
   const setApp = <K extends keyof ReturnType<typeof loadAppearance>>(key: K, value: string) => {
-    localStorage.setItem(`app_${key}`, value);
+    if (key === 'theme') {
+      applyTheme(value as Theme);
+    } else if (key === 'uiLang') {
+      localStorage.setItem('lh_lang', value);
+      i18n.changeLanguage(value);
+      set('uiLanguage', value);
+    } else {
+      localStorage.setItem(`app_${key}`, value);
+    }
     setAppearance((prev) => ({ ...prev, [key]: value }));
   };
+
+  // Sincronizar idioma do backend quando as definições carregam
+  useEffect(() => {
+    if (settings?.uiLanguage && settings.uiLanguage !== i18n.language) {
+      localStorage.setItem('lh_lang', settings.uiLanguage);
+      i18n.changeLanguage(settings.uiLanguage);
+    }
+  }, [settings?.uiLanguage]);
 
   const saveMutation = useMutation({
     mutationFn: (dto: UpdateUserSettingsDto) => settingsApi.update(dto),
@@ -217,9 +237,9 @@ export default function SettingsPage() {
         {/* Page header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Definições</h1>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('settings.title')}</h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Preferências da plataforma e comportamento da IA
+              {t('settings.subtitle')}
             </p>
           </div>
           <button
@@ -233,7 +253,7 @@ export default function SettingsPage() {
             )}
           >
             <Save className="h-4 w-4" />
-            {saveMutation.isPending ? 'A guardar…' : 'Guardar alterações'}
+            {saveMutation.isPending ? t('common.saving') : t('common.save')}
           </button>
         </div>
 
@@ -241,7 +261,7 @@ export default function SettingsPage() {
           {/* Sidebar nav */}
           <aside className="w-52 shrink-0">
             <nav className="sticky top-6 space-y-1">
-              {SECTIONS.map(({ id, label, icon: Icon }) => (
+              {SECTIONS.map(({ id, labelKey, icon: Icon }) => (
                 <button
                   key={id}
                   type="button"
@@ -254,7 +274,7 @@ export default function SettingsPage() {
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </nav>
@@ -264,26 +284,26 @@ export default function SettingsPage() {
           <main className="min-w-0 flex-1">
             {/* ── IA ── */}
             {activeSection === 'ai' && (
-              <SectionPanel title="Preferências da IA" icon={Sparkles}>
+              <SectionPanel title={t('settings.ai.title')} icon={Sparkles}>
                 <SectionItem>
-                  <SettingRow label="Nível de detalhe das respostas" description="Controla o quão extensa é cada resposta da IA">
+                  <SettingRow label={t('settings.ai.responseDetail')} description={t('settings.ai.responseDetailDesc')}>
                     <SelectField
                       value={current.aiResponseDetail}
                       options={[
-                        { value: 'concise', label: 'Conciso' },
-                        { value: 'detailed', label: 'Detalhado' },
+                        { value: 'concise', label: t('settings.ai.concise') },
+                        { value: 'detailed', label: t('settings.ai.detailed') },
                       ]}
                       onChange={(v) => set('aiResponseDetail', v)}
                     />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
-                  <SettingRow label="Idioma das respostas da IA">
+                  <SettingRow label={t('settings.ai.responseLanguage')}>
                     <SelectField
                       value={current.aiResponseLanguage}
                       options={[
-                        { value: 'pt', label: 'Português' },
-                        { value: 'en', label: 'Inglês' },
+                        { value: 'pt', label: t('settings.ai.portuguese') },
+                        { value: 'en', label: t('settings.ai.english') },
                       ]}
                       onChange={(v) => set('aiResponseLanguage', v)}
                     />
@@ -291,22 +311,22 @@ export default function SettingsPage() {
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Explicar raciocínio"
-                    description="A IA justifica o porquê de cada recomendação"
+                    label={t('settings.ai.explainReasoning')}
+                    description={t('settings.ai.explainReasoningDesc')}
                   >
                     <Toggle checked={current.aiExplainReasoning} onChange={(v) => set('aiExplainReasoning', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Modo de recomendações"
-                    description="Define se a IA sugere dentro da tua área atual ou explora novas áreas"
+                    label={t('settings.ai.recommendationMode')}
+                    description={t('settings.ai.recommendationModeDesc')}
                   >
                     <SelectField
                       value={current.aiRecommendationMode}
                       options={[
-                        { value: 'conservative', label: 'Conservador' },
-                        { value: 'exploratory', label: 'Exploratório' },
+                        { value: 'conservative', label: t('settings.ai.conservative') },
+                        { value: 'exploratory', label: t('settings.ai.exploratory') },
                       ]}
                       onChange={(v) => set('aiRecommendationMode', v)}
                     />
@@ -317,40 +337,40 @@ export default function SettingsPage() {
 
             {/* ── Notificações ── */}
             {activeSection === 'notifications' && (
-              <SectionPanel title="Notificações" icon={Bell}>
-                <SubLabel>Alertas</SubLabel>
+              <SectionPanel title={t('settings.notifications.title')} icon={Bell}>
+                <SubLabel>{t('settings.notifications.alerts')}</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label="Recomendações semanais"
-                    description="Sugestões de cursos enviadas todas as semanas"
+                    label={t('settings.notifications.weeklyRecs')}
+                    description={t('settings.notifications.weeklyRecsDesc')}
                   >
                     <Toggle checked={current.notifyWeeklyRecs} onChange={(v) => set('notifyWeeklyRecs', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Certificações a expirar"
-                    description="Aviso 30 dias antes de uma certificação expirar"
+                    label={t('settings.notifications.certExpiry')}
+                    description={t('settings.notifications.certExpiryDesc')}
                   >
                     <Toggle checked={current.notifyCertExpiry} onChange={(v) => set('notifyCertExpiry', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Progresso de cursos"
-                    description="Lembrete quando tens um curso a meio há mais de 7 dias"
+                    label={t('settings.notifications.progress')}
+                    description={t('settings.notifications.progressDesc')}
                   >
                     <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
                   </SettingRow>
                 </SectionItem>
-                <SubLabel>Canal</SubLabel>
+                <SubLabel>{t('settings.notifications.channel')}</SubLabel>
                 <SectionItem>
-                  <SettingRow label="Notificações por email">
+                  <SettingRow label={t('settings.notifications.email')}>
                     <Toggle checked={current.notifyByEmail} onChange={(v) => set('notifyByEmail', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
-                  <SettingRow label="Notificações in-app">
+                  <SettingRow label={t('settings.notifications.inApp')}>
                     <Toggle checked={current.notifyInApp} onChange={(v) => set('notifyInApp', v)} />
                   </SettingRow>
                 </SectionItem>
@@ -359,35 +379,35 @@ export default function SettingsPage() {
 
             {/* ── Privacidade ── */}
             {activeSection === 'privacy' && (
-              <SectionPanel title="Privacidade" icon={Shield}>
+              <SectionPanel title={t('settings.privacy.title')} icon={Shield}>
                 <SectionItem>
                   <SettingRow
-                    label="Admin pode ver as minhas recomendações"
-                    description="O administrador pode ver os cursos recomendados pela IA para ti"
+                    label={t('settings.privacy.adminCanSeeRecs')}
+                    description={t('settings.privacy.adminCanSeeRecsDesc')}
                   >
                     <Toggle checked={current.adminCanSeeRecs} onChange={(v) => set('adminCanSeeRecs', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="IA pode usar o meu historial"
-                    description="Permite personalização com base nos cursos que já concluíste"
+                    label={t('settings.privacy.aiCanUseHistory')}
+                    description={t('settings.privacy.aiCanUseHistoryDesc')}
                   >
                     <Toggle checked={current.aiCanUseHistory} onChange={(v) => set('aiCanUseHistory', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Download dos meus dados"
-                    description="Exporta todos os teus dados pessoais (RGPD)"
+                    label={t('settings.privacy.downloadData')}
+                    description={t('settings.privacy.downloadDataDesc')}
                   >
                     <button
                       type="button"
-                      onClick={() => toast.info('Funcionalidade em desenvolvimento.')}
+                      onClick={() => toast.info(t('common.featureInDev'))}
                       className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      Exportar
+                      {t('common.export')}
                     </button>
                   </SettingRow>
                 </SectionItem>
@@ -396,27 +416,26 @@ export default function SettingsPage() {
 
             {/* ── Aparência ── */}
             {activeSection === 'appearance' && (
-              <SectionPanel title="Aparência" icon={Monitor}>
+              <SectionPanel title={t('settings.appearance.title')} icon={Monitor}>
                 <SectionItem>
-                  <SettingRow label="Tema" description="Esquema de cores da interface">
+                  <SettingRow label={t('settings.appearance.theme')} description={t('settings.appearance.themeDesc')}>
                     <SelectField
                       value={appearance.theme}
                       options={[
-                        { value: 'light', label: 'Claro' },
-                        { value: 'dark', label: 'Escuro' },
-                        { value: 'system', label: 'Sistema' },
+                        { value: 'dark', label: t('settings.appearance.dark') },
+                        { value: 'system', label: t('settings.appearance.system') },
                       ]}
                       onChange={(v) => setApp('theme', v ?? 'system')}
                     />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
-                  <SettingRow label="Idioma da interface">
+                  <SettingRow label={t('settings.appearance.language')}>
                     <SelectField
                       value={appearance.uiLang}
                       options={[
-                        { value: 'pt', label: 'Português' },
-                        { value: 'en', label: 'English' },
+                        { value: 'pt', label: t('lang.pt') },
+                        { value: 'en', label: t('lang.en') },
                       ]}
                       onChange={(v) => setApp('uiLang', v ?? 'pt')}
                     />
@@ -424,7 +443,7 @@ export default function SettingsPage() {
                 </SectionItem>
                 <div className="px-5 pb-4">
                   <p className="text-xs text-slate-400 dark:text-slate-500">
-                    As preferências de aparência são guardadas localmente neste dispositivo e não requerem guardar.
+                    {t('settings.appearance.note')}
                   </p>
                 </div>
               </SectionPanel>

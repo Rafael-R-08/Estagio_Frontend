@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, ShieldOff, UserX, UserCheck, Search, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { adminApi } from '@/services/api';
 import type { AdminUser } from '@/types';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ function ConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -36,7 +38,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
           >
-            Cancelar
+            {t('admin.users.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -74,6 +76,7 @@ function RoleBadge({ role }: { role: string }) {
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ active }: { active: boolean }) {
+  const { t } = useTranslation();
   return (
     <span
       className={cn(
@@ -84,7 +87,7 @@ function StatusBadge({ active }: { active: boolean }) {
       )}
     >
       <span className={cn('h-1.5 w-1.5 rounded-full', active ? 'bg-green-500' : 'bg-red-400')} />
-      {active ? 'Ativo' : 'Inativo'}
+      {active ? t('admin.users.active') : t('admin.users.inactive')}
     </span>
   );
 }
@@ -133,6 +136,7 @@ function sortUsers(users: AdminUser[], key: SortKey, asc: boolean) {
 
 export function UsersTab() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortAsc, setSortAsc] = useState(true);
@@ -195,10 +199,10 @@ export function UsersTab() {
   }
 
   const confirmMeta = {
-    promote: { title: 'Promover a Admin', description: `${confirm?.user.name} terá acesso total ao backoffice.`, label: 'Promover', danger: false },
-    demote: { title: 'Remover role Admin', description: `${confirm?.user.name} passará a utilizador normal.`, label: 'Remover', danger: true },
-    deactivate: { title: 'Desativar utilizador', description: `${confirm?.user.name} não conseguirá iniciar sessão.`, label: 'Desativar', danger: true },
-    activate: { title: 'Reativar utilizador', description: `${confirm?.user.name} voltará a ter acesso à plataforma.`, label: 'Ativar', danger: false },
+    promote: { title: t('admin.users.confirmPromote', { name: confirm?.user.name }), description: `${confirm?.user.name} terá acesso total ao backoffice.`, label: t('admin.users.promote'), danger: false },
+    demote: { title: t('admin.users.confirmDemote', { name: confirm?.user.name }), description: `${confirm?.user.name} passará a utilizador normal.`, label: t('admin.users.demote'), danger: true },
+    deactivate: { title: t('admin.users.confirmDeactivate', { name: confirm?.user.name }), description: `${confirm?.user.name} não conseguirá iniciar sessão.`, label: t('admin.users.deactivate'), danger: true },
+    activate: { title: t('admin.users.confirmActivate', { name: confirm?.user.name }), description: `${confirm?.user.name} voltará a ter acesso à plataforma.`, label: t('admin.users.activate'), danger: false },
   };
 
   return (
@@ -208,7 +212,7 @@ export function UsersTab() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input
           type="text"
-          placeholder="Pesquisar utilizador…"
+          placeholder={t('admin.users.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
@@ -222,26 +226,26 @@ export function UsersTab() {
             <thead>
               <tr className="border-b border-border bg-muted/40">
                 {(
-                  [
-                    { key: 'name', label: 'Nome' },
-                    { key: 'email', label: 'Email' },
-                    { key: 'role', label: 'Role' },
-                    { key: 'isActive', label: 'Estado' },
-                  ] as { key: SortKey; label: string }[]
-                ).map(({ key, label }) => (
+                  [  
+                    { key: 'name', labelKey: 'admin.users.columns.name' },
+                    { key: 'email', labelKey: 'admin.users.columns.email' },
+                    { key: 'role', labelKey: 'admin.users.columns.role' },
+                    { key: 'isActive', labelKey: 'admin.users.columns.status' },
+                  ] as { key: SortKey; labelKey: string }[]
+                ).map(({ key, labelKey }) => (
                   <th
                     key={key}
                     onClick={() => handleSort(key)}
                     className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground select-none"
                   >
                     <div className="flex items-center gap-1">
-                      {label}
+                      {t(labelKey)}
                       <SortIcon k={key} />
                     </div>
                   </th>
                 ))}
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Ações
+                  {t('admin.users.columns.actions')}
                 </th>
               </tr>
             </thead>
@@ -251,7 +255,7 @@ export function UsersTab() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                    Nenhum utilizador encontrado.
+                    {t('admin.users.noResults')}
                   </td>
                 </tr>
               ) : (
@@ -280,39 +284,39 @@ export function UsersTab() {
                         {user.role === 'USER' ? (
                           <button
                             onClick={() => setConfirm({ type: 'promote', user })}
-                            title="Promover a Admin"
+                            title={t('admin.users.promote')}
                             className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                           >
                             <ShieldCheck className="h-3.5 w-3.5 text-softinsa-blue" />
-                            Promover
+                            {t('admin.users.promote')}
                           </button>
                         ) : (
                           <button
                             onClick={() => setConfirm({ type: 'demote', user })}
-                            title="Remover role Admin"
+                            title={t('admin.users.demote')}
                             className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                           >
                             <ShieldOff className="h-3.5 w-3.5 text-orange-500" />
-                            Revogar
+                            {t('admin.users.demote')}
                           </button>
                         )}
                         {user.isActive ? (
                           <button
                             onClick={() => setConfirm({ type: 'deactivate', user })}
-                            title="Desativar utilizador"
+                            title={t('admin.users.deactivate')}
                             className="flex items-center gap-1.5 rounded-lg border border-red-200 dark:border-red-900/40 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
                             <UserX className="h-3.5 w-3.5" />
-                            Desativar
+                            {t('admin.users.deactivate')}
                           </button>
                         ) : (
                           <button
                             onClick={() => setConfirm({ type: 'activate', user })}
-                            title="Reativar utilizador"
+                            title={t('admin.users.activate')}
                             className="flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-900/40 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                           >
                             <UserCheck className="h-3.5 w-3.5" />
-                            Ativar
+                            {t('admin.users.activate')}
                           </button>
                         )}
                       </div>

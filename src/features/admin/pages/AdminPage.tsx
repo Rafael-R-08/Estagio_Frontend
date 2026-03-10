@@ -1,5 +1,6 @@
 import { Users, Globe, BarChart2, ShieldCheck } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { UsersTab } from '../components/UsersTab';
 import { PlatformsTab } from '../components/PlatformsTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
@@ -7,9 +8,9 @@ import { AnalyticsTab } from '../components/AnalyticsTab';
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'users', label: 'Utilizadores', icon: Users },
-  { id: 'platforms', label: 'Plataformas', icon: Globe },
-  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+  { id: 'users', labelKey: 'admin.tabs.users', icon: Users },
+  { id: 'platforms', labelKey: 'admin.tabs.platforms', icon: Globe },
+  { id: 'analytics', labelKey: 'admin.tabs.analytics', icon: BarChart2 },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -22,6 +23,7 @@ function isValidTab(t: string | null): t is TabId {
 
 export default function AdminPage() {
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const rawTab = searchParams.get('tab');
   const active: TabId = isValidTab(rawTab) ? rawTab : 'users';
 
@@ -37,15 +39,15 @@ export default function AdminPage() {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">Backoffice Admin</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('admin.title')}</h1>
             <span className="text-muted-foreground">/</span>
             <span className="flex items-center gap-1.5 text-lg font-semibold text-softinsa-blue">
               <Icon className="h-4 w-4" />
-              {current.label}
+              {t(current.labelKey)}
             </span>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Gestão de utilizadores, plataformas e analytics da plataforma.
+            {t('admin.subtitle')}
           </p>
         </div>
       </div>

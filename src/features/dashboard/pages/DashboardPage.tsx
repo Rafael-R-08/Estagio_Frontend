@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { recommendationsApi, trainingApi, certificatesApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -82,7 +83,7 @@ function SectionHeader({
           onClick={() => navigate(linkTo)}
           className="flex items-center gap-1 text-xs font-medium text-primary transition hover:underline"
         >
-          {linkLabel ?? 'Ver todos'}
+          {linkLabel}
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
       )}
@@ -148,11 +149,13 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 10,
   });
 
+  const { t } = useTranslation();
+
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return 'Bom dia';
-    if (h < 18) return 'Boa tarde';
-    return 'Boa noite';
+    if (h < 12) return t('dashboard.greetingMorning');
+    if (h < 18) return t('dashboard.greetingAfternoon');
+    return t('dashboard.greetingEvening');
   })();
 
   const today = new Date().toLocaleDateString('pt-PT', {
@@ -181,28 +184,28 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           icon={BookOpen}
-          label="Total de formações"
+          label={t('dashboard.stats.total')}
           value={stats?.total ?? 0}
           color="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
           loading={statsLoading}
         />
         <StatCard
           icon={TrendingUp}
-          label="Em progresso"
+          label={t('dashboard.stats.ongoing')}
           value={stats?.ongoing ?? 0}
           color="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
           loading={statsLoading}
         />
         <StatCard
           icon={CheckCircle2}
-          label="Concluídas"
+          label={t('dashboard.stats.completed')}
           value={stats?.completed ?? 0}
           color="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
           loading={statsLoading}
         />
         <StatCard
           icon={Clock}
-          label="Horas de formação"
+          label={t('dashboard.stats.hours')}
           value={stats?.totalHours ?? 0}
           color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
           loading={statsLoading}
@@ -224,10 +227,10 @@ export default function DashboardPage() {
           {/* 2.2 Cursos em progresso */}
           <div className="space-y-3">
             <SectionHeader
-              title="Em Progresso"
+              title={t('dashboard.inProgress')}
               count={inProgress.length}
               linkTo="/my-learning"
-              linkLabel="Ver todos"
+              linkLabel={t('dashboard.viewAll')}
             />
             {progressLoading ? (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -238,7 +241,7 @@ export default function DashboardPage() {
             ) : inProgress.length === 0 ? (
               <EmptyState
                 icon={TrendingUp}
-                message="Nenhuma formação em progresso. Começa a explorar cursos!"
+                message={t('dashboard.empty.progress')}
               />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -258,7 +261,7 @@ export default function DashboardPage() {
           {/* 2.3 Cursos guardados */}
           <div className="space-y-3">
             <SectionHeader
-              title="Guardados"
+              title={t('dashboard.saved')}
               count={saved.length}
               linkTo="/my-learning"
             />
@@ -271,7 +274,7 @@ export default function DashboardPage() {
             ) : saved.length === 0 ? (
               <EmptyState
                 icon={Bookmark}
-                message="Nenhum curso guardado ainda."
+                message={t('dashboard.empty.saved')}
               />
             ) : (
               <div className="space-y-3">
