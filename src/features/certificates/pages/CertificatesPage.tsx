@@ -4,6 +4,7 @@ import { Plus, Award, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { certificatesApi, trainingApi } from '@/services/api';
+import { toList } from '@/lib/api';
 import type { Certificate } from '@/types';
 
 import { CertificateCard, CertificateCardSkeleton } from '../components/CertificateCard';
@@ -66,13 +67,13 @@ export default function CertificatesPage() {
   // ── Data ────────────────────────────────────────────────────────────────
   const { data: certs = [], isLoading } = useQuery({
     queryKey: ['certificates'],
-    queryFn: () => certificatesApi.getAll().then((r) => r.data),
+    queryFn: () => certificatesApi.getAll().then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
   const { data: trainings = [] } = useQuery({
     queryKey: ['trainings', 'all'],
-    queryFn: () => trainingApi.getAll().then((r) => r.data),
+    queryFn: () => trainingApi.getAll().then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 

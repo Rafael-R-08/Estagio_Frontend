@@ -1,10 +1,7 @@
 import axios from 'axios';
 import { storage } from './storage';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-// Se VITE_API_URL já incluir /api, não duplicar
-const BASE_URL = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
+const BASE_URL = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -29,6 +26,11 @@ export const api = axios.create({
   },
 });
 
+if (import.meta.env.DEV) {
+  // Confirma a URL base usada em runtime. Em dev esta deve ser '/api' (Vite proxy → localhost:3000).
+  console.info('[API] baseURL =', BASE_URL);
+}
+
 // Adiciona o token em cada pedido
 api.interceptors.request.use((config) => {
   const token = storage.getToken();
@@ -42,6 +44,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (import.meta.env.DEV) {
+      const cfg = error?.config as { baseURL?: string; url?: string; method?: string } | undefined;
+      const method = (cfg?.method || 'GET').toUpperCase();
+      const base = cfg?.baseURL || BASE_URL;
+      const path = cfg?.url || '';
+      console.error(`[API] ${method} ${base}${path} -> ${error.response?.status ?? 'ERR'}`);
+    }
+
     if (error.response?.status === 401) {
       storage.clearAll();
       window.location.href = '/login';

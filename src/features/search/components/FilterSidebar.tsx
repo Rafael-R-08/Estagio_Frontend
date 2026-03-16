@@ -74,6 +74,7 @@ export function FilterSidebar({
   filters,
   onChange,
 }: FilterSidebarProps) {
+  const safePlatforms = Array.isArray(platforms) ? platforms : [];
   const activeCount = filters.platforms.length + filters.levels.length;
   const hasActiveFilters = activeCount > 0;
 
@@ -122,10 +123,10 @@ export function FilterSidebar({
         <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Plataformas
         </p>
-        {platforms.length === 0 ? (
+        {safePlatforms.length === 0 ? (
           <p className="px-2 text-xs text-muted-foreground">Nenhuma disponível</p>
         ) : (
-          platforms.map((p) => (
+          safePlatforms.map((p) => (
             <FilterCheckbox
               key={p.id}
               label={p.name}

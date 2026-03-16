@@ -7,6 +7,7 @@ import {
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
 import { profileApi, trainingApi } from '@/services/api';
+import { toList } from '@/lib/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import type { ExperienceLevel, User, TrainingRecord, TrainingStats } from '@/types';
@@ -732,7 +733,7 @@ export default function ProfilePage() {
     queryKey: ['trainings', 'completed'],
     queryFn: async () => {
       const res = await trainingApi.getAll({ status: 'completed' });
-      return res.data;
+      return toList(res.data);
     },
   });
 

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { recommendationsApi, trainingApi, certificatesApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { toList } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 import { RecommendationCard } from '../components/RecommendationCard';
@@ -123,14 +124,14 @@ export default function DashboardPage() {
   // 2.2 — Cursos em progresso
   const { data: inProgress = [], isLoading: progressLoading } = useQuery({
     queryKey: ['trainings', 'ongoing'],
-    queryFn: () => trainingApi.getAll({ status: 'ongoing' }).then((r) => r.data),
+    queryFn: () => trainingApi.getAll({ status: 'ongoing' }).then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
   // 2.3 — Cursos guardados
   const { data: saved = [], isLoading: savedLoading } = useQuery({
     queryKey: ['trainings', 'later'],
-    queryFn: () => trainingApi.getAll({ status: 'later' }).then((r) => r.data),
+    queryFn: () => trainingApi.getAll({ status: 'later' }).then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
@@ -144,7 +145,7 @@ export default function DashboardPage() {
   // 2.5 — Alertas de certificados a expirar
   const { data: expiring = [] } = useQuery({
     queryKey: ['certificates', 'expiring'],
-    queryFn: () => certificatesApi.getExpiring().then((r) => r.data),
+    queryFn: () => certificatesApi.getExpiring().then((r) => toList(r.data)),
     retry: false,
     staleTime: 1000 * 60 * 10,
   });

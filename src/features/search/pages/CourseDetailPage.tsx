@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import { searchApi, trainingApi } from '@/services/api';
+import { toList } from '@/lib/api';
 import { toast } from '@/lib/toast-store';
 import { cn } from '@/lib/utils';
 import type { CourseSearchResult } from '@/types';
@@ -128,7 +129,7 @@ export default function CourseDetailPage() {
   // User's training records
   const { data: trainings = [] } = useQuery({
     queryKey: ['trainings', 'all'],
-    queryFn: () => trainingApi.getAll().then((r) => r.data),
+    queryFn: () => trainingApi.getAll().then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 

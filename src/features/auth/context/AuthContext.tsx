@@ -6,6 +6,10 @@ import { api } from '../../../lib/axios';
 import { storage } from '../../../lib/storage';
 import { queryClient } from '../../../lib/queryClient';
 
+const AUTH_LOGIN_PATH = (import.meta.env.VITE_AUTH_LOGIN_PATH || '/auth/login').trim();
+const AUTH_REGISTER_PATH = (import.meta.env.VITE_AUTH_REGISTER_PATH || '/auth/register').trim();
+const AUTH_ME_PATH = (import.meta.env.VITE_AUTH_ME_PATH || '/auth/me').trim();
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface AuthContextType {
@@ -37,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!savedToken) return;
 
     api
-      .get<User>('/auth/me')
+      .get<User>(AUTH_ME_PATH)
       .then(({ data }) => {
         setUser(data);
         storage.setUser(data);
@@ -53,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const { data } = await api.post<{ access_token: string; refresh_token: string; user: User }>(
-      '/auth/login',
+      AUTH_LOGIN_PATH,
       { email, password },
     );
     storage.setToken(data.access_token);
@@ -65,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     const { data } = await api.post<{ access_token: string; refresh_token: string; user: User }>(
-      '/auth/register',
+      AUTH_REGISTER_PATH,
       { name, email, password },
     );
     storage.setToken(data.access_token);

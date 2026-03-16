@@ -33,18 +33,18 @@ export const authApi = {
   me: () => api.get<User>('/auth/me'),
 
   refresh: (refreshToken: string) =>
-    api.post<{ access_token: string }>('/auth/refresh', { refreshToken }),
+    api.post<{ access_token: string }>('/auth/refresh-token', { refreshToken }),
 };
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 export const userApi = {
-  getAll: () => api.get<User[]>('/user'),
+  getAll: () => api.get<User[]>('/users'),
 
-  getById: (id: string) => api.get<User>(`/user/${id}`),
+  getById: (id: string) => api.get<User>(`/users/${id}`),
 
   updatePreferences: (platforms: string[]) =>
-    api.patch('/user/preferences', { enabledPlatforms: platforms }),
+    api.patch('/users/preferences', { enabledPlatforms: platforms }),
 };
 
 // ─── Search ──────────────────────────────────────────────────────────────────
@@ -116,19 +116,13 @@ export const certificatesApi = {
 };
 
 // ─── Platforms (Admin) ────────────────────────────────────────────────────────
+// Nota: o backend expõe plataformas apenas dentro do AdminController (/admin/platforms)
 
 export const platformsApi = {
-  getAll: () => api.get<LearningPlatform[]>('/platforms'),
-
-  getById: (id: string) => api.get<LearningPlatform>(`/platforms/${id}`),
-
-  create: (data: Partial<LearningPlatform>) =>
-    api.post<LearningPlatform>('/platforms', data),
+  getAll: () => api.get<LearningPlatform[]>('/admin/platforms'),
 
   update: (id: string, data: Partial<LearningPlatform>) =>
-    api.patch<LearningPlatform>(`/platforms/${id}`, data),
-
-  delete: (id: string) => api.delete(`/platforms/${id}`),
+    api.patch<LearningPlatform>(`/admin/platforms/${id}`, data),
 };
 
 // ─── Recommendations ─────────────────────────────────────────────────────────
@@ -182,3 +176,4 @@ export const adminApi = {
 
   getAnalytics: () => api.get<AdminAnalytics>('/admin/analytics'),
 };
+// Nota: as rotas /role, /activate, /deactivate são criadas explicitamente no backend (admin.controller.ts)

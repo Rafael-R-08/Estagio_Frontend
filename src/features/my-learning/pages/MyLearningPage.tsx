@@ -12,6 +12,7 @@ import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
 
 import { trainingApi } from '@/services/api';
+import { toList } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { TrainingStatus } from '@/types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -113,7 +114,7 @@ export default function MyLearningPage() {
   // ── Queries ──────────────────────────────────────────────────────────────
   const { data: allTrainings = [], isLoading } = useQuery({
     queryKey: ['trainings', 'all'],
-    queryFn: () => trainingApi.getAll().then((r) => r.data),
+    queryFn: () => trainingApi.getAll().then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
