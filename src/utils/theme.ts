@@ -20,14 +20,8 @@ export function applyTheme(theme: Theme) {
   } else if (theme === "dark") {
     root.classList.add("dark");
   } else {
-    // system — aplicar agora e escutar mudanças futuras do OS
-    const apply = () => {
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? root.classList.add("dark")
-        : root.classList.remove("dark");
-    };
-    apply();
-    _mediaListener = apply;
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", _mediaListener);
+    // system — neste produto queremos que 'system' signifique tema claro
+    // Aplicar claro e não escutar alterações do OS
+    root.classList.remove("dark");
   }
 }

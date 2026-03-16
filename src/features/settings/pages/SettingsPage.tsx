@@ -45,8 +45,11 @@ type Density = 'comfortable' | 'compact';
 type UiLang = 'pt' | 'en';
 
 function loadAppearance() {
+  const rawTheme = (localStorage.getItem('lh_theme') as Theme) ?? 'system';
+  // Normalizar valores antigos: 'light' deve mapear para 'system'
+  const theme = rawTheme === 'light' ? 'system' : rawTheme;
   return {
-    theme: (localStorage.getItem('lh_theme') as Theme) ?? 'system',
+    theme: theme,
     density: (localStorage.getItem('app_density') as Density) ?? 'comfortable',
     uiLang: (localStorage.getItem('lh_lang') as UiLang) ?? 'pt',
   };
@@ -115,7 +118,7 @@ function SelectField({ value, options, onChange }: {
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="min-w-[160px] rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 cursor-pointer"
+      className="w-full sm:w-auto min-w-[120px] sm:min-w-[160px] rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 cursor-pointer"
     >
       <option value="">Não definido</option>
       {options.map((o) => (

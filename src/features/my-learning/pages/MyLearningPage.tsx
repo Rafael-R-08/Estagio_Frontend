@@ -213,14 +213,14 @@ export default function MyLearningPage() {
       </div>
 
       {/* ── Tab bar (underline style) ── */}
-      <div className="border-b border-border">
-        <nav className="-mb-px flex gap-0">
+      <div className="border-b border-border overflow-x-auto scrollbar-hide">
+        <nav className="-mb-px flex gap-0 snap-x">
           {TAB_IDS.map((tabId) => (
             <button
               key={tabId}
               onClick={() => setActiveTab(tabId)}
               className={cn(
-                'flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                'flex-shrink-0 snap-start flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
                 activeTab === tabId
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground',

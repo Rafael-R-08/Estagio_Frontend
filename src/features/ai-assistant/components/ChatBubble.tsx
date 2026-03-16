@@ -80,8 +80,8 @@ export function ChatBubble({ message }: { message: AiMessage }) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%]">
-          <div className="rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground shadow-sm">
+        <div className="max-w-[85%] sm:max-w-[75%]">
+          <div className="rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground shadow-sm break-words">
             {displayContent}
             {isLong && (
               <button
@@ -110,9 +110,9 @@ export function ChatBubble({ message }: { message: AiMessage }) {
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
         <Bot className="h-4 w-4 text-primary" />
       </div>
-      <div className="max-w-[80%]">
+      <div className="max-w-[85%] sm:max-w-[80%]">
         <div className="rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
             {displayContent}
           </p>
           {isLong && (

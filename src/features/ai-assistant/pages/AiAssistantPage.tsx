@@ -182,7 +182,7 @@ export default function AiAssistantPage() {
         {/* ── Chat column ── */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Messages */}
-          <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            <div className="flex-1 space-y-4 overflow-y-auto px-6 pt-5 pb-28 md:pb-6">
             {messages.map((msg) =>
               msg.isLoading ? (
                 <LoadingBubble key={msg.id} />
@@ -208,7 +208,7 @@ export default function AiAssistantPage() {
           </div>
 
           {/* Input bar */}
-          <div className="shrink-0 border-t border-border bg-background px-6 py-3">
+          <div className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-background/95 px-6 py-3 backdrop-blur-sm">
             <ChatInput
               value={inputValue}
               onChange={setInputValue}
@@ -221,10 +221,10 @@ export default function AiAssistantPage() {
           </div>
         </div>
 
-        {/* ── Right sidebar ── */}
+        {/* ── Right sidebar (desktop) ── */}
         <div
           className={cn(
-            'flex w-72 shrink-0 flex-col border-l border-border bg-background transition-all duration-200',
+            'hidden md:flex w-72 shrink-0 flex-col border-l border-border bg-background transition-all duration-200',
             sidebarOpen ? 'translate-x-0' : 'hidden',
           )}
         >
@@ -261,6 +261,49 @@ export default function AiAssistantPage() {
             onClearRecent={handleClearRecent}
           />
         </div>
+
+        {/* ── Mobile sidebar overlay ── */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-20 md:hidden">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
+            <div className="absolute right-0 top-0 h-full w-4/5 max-w-xs border-l border-border bg-background">
+              <SuggestionsPanel
+                onSelect={(q) => {
+                  handleSelectSuggestion(q);
+                  const userId = makeId();
+                  const loadingId = makeId();
+                  setMessages((prev) => [
+                    ...prev,
+                    { id: userId, role: 'user', content: q, timestamp: new Date().toISOString() },
+                    { id: loadingId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isLoading: true },
+                  ]);
+                  setRecentQueries((prev) => saveRecent(q, prev));
+                  sendMutation.mutate(q, {
+                    onSuccess: (res) => {
+                      setMessages((prev) =>
+                        prev.map((m) =>
+                          m.id === loadingId
+                            ? { id: loadingId, role: 'assistant', content: res.data.answer, timestamp: new Date().toISOString(), sources: res.data.sources }
+                            : m,
+                        ),
+                      );
+                    },
+                    onError: () => {
+                      toast.error('Erro ao contactar o assistente.');
+                      setMessages((prev) => prev.filter((m) => m.id !== loadingId));
+                    },
+                  });
+                  setSidebarOpen(false);
+                }}
+                user={user ?? undefined}
+                recentQueries={recentQueries}
+                onClearRecent={() => {
+                  handleClearRecent();
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
