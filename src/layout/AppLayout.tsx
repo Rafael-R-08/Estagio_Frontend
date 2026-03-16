@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { BottomNav } from './BottomNav';
 import { cn } from '../lib/utils';
 
 export function AppLayout() {
@@ -34,12 +35,15 @@ export function AppLayout() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 pb-16 lg:pb-0">
         <Header onMenuToggle={() => setMobileOpen((o) => !o)} />
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <BottomNav />
     </div>
   );
 }

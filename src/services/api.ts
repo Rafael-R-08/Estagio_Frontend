@@ -121,8 +121,13 @@ export const certificatesApi = {
 export const platformsApi = {
   getAll: () => api.get<LearningPlatform[]>('/admin/platforms'),
 
+  create: (data: Partial<LearningPlatform>) =>
+    api.post<LearningPlatform>('/admin/platforms', data),
+
   update: (id: string, data: Partial<LearningPlatform>) =>
     api.patch<LearningPlatform>(`/admin/platforms/${id}`, data),
+
+  delete: (id: string) => api.delete(`/admin/platforms/${id}`),
 };
 
 // ─── Recommendations ─────────────────────────────────────────────────────────

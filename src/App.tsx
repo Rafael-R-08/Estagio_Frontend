@@ -24,6 +24,8 @@ import ProfilePage from './features/profile/pages/ProfilePage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import AdminPage from './features/admin/pages/AdminPage';
 
+import { InstallPrompt } from './components/ui/InstallPrompt';
+
 function App() {
   return (
     <BrowserRouter>
@@ -59,6 +61,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
+      <InstallPrompt />
       <Toaster position="bottom-right" richColors closeButton />
     </BrowserRouter>
   );

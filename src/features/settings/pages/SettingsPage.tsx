@@ -8,6 +8,7 @@ import {
   Monitor,
   Save,
   Download,
+  Smartphone,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { settingsApi } from '../../../services/api';
@@ -15,6 +16,7 @@ import type { UserSettings, UpdateUserSettingsDto } from '../../../types';
 import { cn } from '../../../lib/utils';
 import { applyTheme, type Theme } from '../../../utils/theme';
 import i18n from '../../../i18n';
+import { usePWAInstall } from '../../../hooks/usePWAInstall';
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -53,10 +55,11 @@ function loadAppearance() {
 // ─── Nav sections ─────────────────────────────────────────────────────────────
 
 const SECTIONS = [
-  { id: 'ai', labelKey: 'settings.sections.ai', icon: Sparkles },
-  { id: 'notifications', labelKey: 'settings.sections.notifications', icon: Bell },
-  { id: 'privacy', labelKey: 'settings.sections.privacy', icon: Shield },
-  { id: 'appearance', labelKey: 'settings.sections.appearance', icon: Monitor },
+  { id: 'ai', labelKey: 'settings.sections.ai', icon: Sparkles, customLabel: false },
+  { id: 'notifications', labelKey: 'settings.sections.notifications', icon: Bell, customLabel: false },
+  { id: 'privacy', labelKey: 'settings.sections.privacy', icon: Shield, customLabel: false },
+  { id: 'appearance', labelKey: 'settings.sections.appearance', icon: Monitor, customLabel: false },
+  { id: 'app', labelKey: 'Aplicação', icon: Smartphone, customLabel: true },
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
@@ -159,6 +162,7 @@ function SubLabel({ children }: { children: React.ReactNode }) {
 export default function SettingsPage() {
   const qc = useQueryClient();
   const [activeSection, setActiveSection] = useState<SectionId>('ai');
+  const { isInstallable, promptInstall } = usePWAInstall();
 
   const { data: serverSettings, isLoading } = useQuery({
     queryKey: ['settings'],
@@ -257,24 +261,24 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Sidebar nav */}
-          <aside className="w-52 shrink-0">
-            <nav className="sticky top-6 space-y-1">
-              {SECTIONS.map(({ id, labelKey, icon: Icon }) => (
+          <aside className="w-full md:w-52 shrink-0">
+            <nav className="flex md:block md:sticky md:top-6 overflow-x-auto pb-2 md:pb-0 gap-2 md:gap-0 md:space-y-1 snap-x scrollbar-hide">
+              {SECTIONS.map(({ id, labelKey, icon: Icon, customLabel }) => (
                 <button
                   key={id}
                   type="button"
                   onClick={() => setActiveSection(id)}
                   className={cn(
-                    'w-full flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-left transition-colors',
+                    'flex-shrink-0 snap-start flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-left transition-colors whitespace-nowrap md:w-full',
                     activeSection === id
                       ? 'bg-softinsa-blue text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200',
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  {t(labelKey)}
+                  {customLabel ? labelKey : t(labelKey)}
                 </button>
               ))}
             </nav>
@@ -446,6 +450,35 @@ export default function SettingsPage() {
                     {t('settings.appearance.note')}
                   </p>
                 </div>
+              </SectionPanel>
+            )}
+
+            {/* ── App ── */}
+            {activeSection === 'app' && (
+              <SectionPanel title="Aplicação" icon={Smartphone}>
+                <SectionItem>
+                  <SettingRow 
+                    label="Instalar Aplicação" 
+                    description={isInstallable 
+                      ? "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa."
+                      : "A aplicação já está instalada ou o teu browser não suporta esta funcionalidade."}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => promptInstall()}
+                      disabled={!isInstallable}
+                      className={cn(
+                        "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                        isInstallable 
+                          ? "border-softinsa-blue/20 bg-softinsa-blue/10 text-softinsa-blue hover:bg-softinsa-blue/20 dark:border-softinsa-blue/30 dark:bg-softinsa-blue/20 dark:text-blue-400 dark:hover:bg-softinsa-blue/30"
+                          : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
+                      )}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Instalar
+                    </button>
+                  </SettingRow>
+                </SectionItem>
               </SectionPanel>
             )}
           </main>
