@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff, Settings2, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { platformsApi } from '@/services/api';
@@ -18,6 +19,11 @@ const MOCK_PLATFORMS: LearningPlatform[] = [
 
 // ─── Platform form modal ──────────────────────────────────────────────────────
 
+interface ConfigEntry {
+  key: string;
+  value: string;
+}
+
 interface PlatformFormData {
   name: string;
   baseUrl: string;
@@ -25,6 +31,7 @@ interface PlatformFormData {
   apiKey: string;
   isActive: boolean;
   isSearchEnabled: boolean;
+  configEntries: ConfigEntry[];
 }
 
 const EMPTY_FORM: PlatformFormData = {
@@ -34,7 +41,19 @@ const EMPTY_FORM: PlatformFormData = {
   apiKey: '',
   isActive: true,
   isSearchEnabled: false,
+  configEntries: [],
 };
+
+function configToEntries(config?: Record<string, unknown>): ConfigEntry[] {
+  if (!config || typeof config !== 'object') return [];
+  return Object.entries(config).map(([key, value]) => ({ key, value: String(value) }));
+}
+
+function entriesToConfig(entries: ConfigEntry[]): Record<string, string> {
+  return Object.fromEntries(
+    entries.filter((e) => e.key.trim()).map((e) => [e.key.trim(), e.value]),
+  );
+}
 
 function PlatformModal({
   open,
@@ -52,9 +71,25 @@ function PlatformModal({
   const { t } = useTranslation();
   const [form, setForm] = useState<PlatformFormData>(() =>
     platform
-      ? { name: platform.name, baseUrl: platform.baseUrl ?? '', logoUrl: platform.logoUrl ?? '', apiKey: platform.apiKey ?? '', isActive: platform.isActive, isSearchEnabled: platform.isSearchEnabled }
+      ? {
+          name: platform.name,
+          baseUrl: platform.baseUrl ?? '',
+          logoUrl: platform.logoUrl ?? '',
+          apiKey: platform.apiKey ?? '',
+          isActive: platform.isActive,
+          isSearchEnabled: platform.isSearchEnabled,
+          configEntries: configToEntries(platform.config),
+        }
       : EMPTY_FORM,
   );
+
+  const addEntry = () => setForm((f) => ({ ...f, configEntries: [...f.configEntries, { key: '', value: '' }] }));
+  const removeEntry = (i: number) => setForm((f) => ({ ...f, configEntries: f.configEntries.filter((_, idx) => idx !== i) }));
+  const updateEntry = (i: number, field: 'key' | 'value', val: string) =>
+    setForm((f) => ({
+      ...f,
+      configEntries: f.configEntries.map((e, idx) => (idx === i ? { ...e, [field]: val } : e)),
+    }));
 
   const [showApiKey, setShowApiKey] = useState(false);
 
@@ -156,6 +191,57 @@ function PlatformModal({
             <ToggleSwitch checked={form.isSearchEnabled} onChange={(v) => setForm((f) => ({ ...f, isSearchEnabled: v }))} />
           </div>
 
+          {/* Config entries */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <Settings2 className="h-3 w-3" />
+                Config (credenciais)
+              </label>
+              <button
+                type="button"
+                onClick={addEntry}
+                className="flex items-center gap-1 rounded-lg border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Adicionar campo
+              </button>
+            </div>
+            {form.configEntries.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground px-1">
+                Nenhum campo configurado. Usa para credenciais OAuth (ex. <code className="font-mono">clientId</code>, <code className="font-mono">clientSecret</code>).
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {form.configEntries.map((entry, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="chave"
+                      value={entry.key}
+                      onChange={(e) => updateEntry(i, 'key', e.target.value)}
+                      className="w-2/5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+                    />
+                    <input
+                      type="text"
+                      placeholder="valor"
+                      value={entry.value}
+                      onChange={(e) => updateEntry(i, 'value', e.target.value)}
+                      className="flex-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeEntry(i)}
+                      className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           </div>{/* end scroll area */}
 
           <div className="shrink-0 flex gap-3 border-t border-border px-6 py-4">
@@ -233,6 +319,7 @@ function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; nam
 
 export function PlatformsTab() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -269,7 +356,8 @@ export function PlatformsTab() {
     onError: () => toast.error('Erro ao eliminar plataforma.'),
   });
 
-  function handleSave(data: { name: string; baseUrl: string; logoUrl: string; apiKey: string; isActive: boolean; isSearchEnabled: boolean }) {
+  function handleSave(data: PlatformFormData) {
+    const configObj = entriesToConfig(data.configEntries);
     const payload: Partial<LearningPlatform> = {
       name: data.name,
       baseUrl: data.baseUrl || undefined,
@@ -277,6 +365,7 @@ export function PlatformsTab() {
       apiKey: data.apiKey || undefined,
       isActive: data.isActive,
       isSearchEnabled: data.isSearchEnabled,
+      ...(Object.keys(configObj).length > 0 ? { config: configObj } : {}),
     };
     if (editing) {
       updateMutation.mutate({ id: editing.id, data: payload });
@@ -305,13 +394,22 @@ export function PlatformsTab() {
             className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
           />
         </div>
-        <button
-          onClick={() => { setEditing(null); setModalOpen(true); }}
-          className="flex items-center gap-2 rounded-xl bg-softinsa-blue px-4 py-2 text-sm font-medium text-white hover:bg-softinsa-blue/90 transition-colors shadow-sm"
-        >
-          <Plus className="h-4 w-4" />
-          {t('admin.platforms.add')}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('?tab=softinsa')}
+            className="flex items-center gap-2 rounded-xl bg-orange-100 dark:bg-orange-900/30 px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/40 transition-colors shadow-sm border border-orange-200 dark:border-orange-800/50"
+          >
+            <BookOpen className="h-4 w-4" />
+            Softinsa Learning
+          </button>
+          <button
+            onClick={() => { setEditing(null); setModalOpen(true); }}
+            className="flex items-center gap-2 rounded-xl bg-softinsa-blue px-4 py-2 text-sm font-medium text-white hover:bg-softinsa-blue/90 transition-colors shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            {t('admin.platforms.add')}
+          </button>
+        </div>
       </div>
 
       {/* Table */}

@@ -19,6 +19,9 @@ import type {
   AdminUser,
   UpdateUserRoleDto,
   AdminAnalytics,
+  SoftinsaLearningContent,
+  CreateSoftinsaLearningDto,
+  UpdateSoftinsaLearningDto,
 } from '../types';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -42,9 +45,6 @@ export const userApi = {
   getAll: () => api.get<User[]>('/users'),
 
   getById: (id: string) => api.get<User>(`/users/${id}`),
-
-  updatePreferences: (platforms: string[]) =>
-    api.patch('/users/preferences', { enabledPlatforms: platforms }),
 };
 
 // ─── Search ──────────────────────────────────────────────────────────────────
@@ -182,3 +182,22 @@ export const adminApi = {
   getAnalytics: () => api.get<AdminAnalytics>('/admin/analytics'),
 };
 // Nota: as rotas /role, /activate, /deactivate são criadas explicitamente no backend (admin.controller.ts)
+
+// ─── Softinsa Everyday Learning ───────────────────────────────────────────────
+
+export const softinsaLearningApi = {
+  getAll: (params?: { department?: string; mandatory?: boolean }) =>
+    api.get<SoftinsaLearningContent[]>('/softinsa-learning', { params }),
+
+  getById: (id: string) =>
+    api.get<SoftinsaLearningContent>(`/softinsa-learning/${id}`),
+
+  create: (data: CreateSoftinsaLearningDto) =>
+    api.post<SoftinsaLearningContent>('/softinsa-learning', data),
+
+  update: (id: string, data: UpdateSoftinsaLearningDto) =>
+    api.patch<SoftinsaLearningContent>(`/softinsa-learning/${id}`, data),
+
+  delete: (id: string) =>
+    api.delete(`/softinsa-learning/${id}`),
+};

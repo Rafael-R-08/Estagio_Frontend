@@ -286,3 +286,23 @@ export interface AdminAnalytics {
     daysLeft: number;
   }[];
 }
+
+// ─── Softinsa Learning ────────────────────────────────────────────────────────
+
+export interface SoftinsaLearningContent {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  department: string;
+  isMandatory: boolean;
+  skills: string[];
+  level?: CourseLevel;
+  durationHours?: number;
+  hasCertificate: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type CreateSoftinsaLearningDto = Omit<SoftinsaLearningContent, 'id' | 'createdAt' | 'updatedAt'>;
+export type UpdateSoftinsaLearningDto = Partial<CreateSoftinsaLearningDto>;
