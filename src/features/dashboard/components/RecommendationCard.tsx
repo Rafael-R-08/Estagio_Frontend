@@ -1,5 +1,6 @@
-import { Sparkles, RefreshCw, AlertCircle, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, RefreshCw, AlertCircle, ExternalLink, ChevronDown, ChevronUp, Target, TrendingUp, Lightbulb } from 'lucide-react';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import type { RagResponse } from '@/types';
 
@@ -42,6 +43,144 @@ function SourceChip({ content }: { content: string }) {
   );
 }
 
+// ─── AI Parser ────────────────────────────────────────────────────────────────
+
+interface ParsedSection {
+  title: string;
+  content: string;
+  icon: React.ElementType;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+}
+
+function parseBlocks(text?: string) {
+  if (!text) return { intro: '', sections: [], outro: '' };
+
+  let intro = '';
+  let outro = '';
+  const sections: ParsedSection[] = [];
+
+  let mainContent = text;
+  // Extract footer early
+  const footerRegex = /\n(---|___|_Histórico|\*Histórico|Histórico considerado)/i;
+  const footerMatch = mainContent.match(footerRegex);
+  if (footerMatch !== null && footerMatch.index !== undefined) {
+    outro = mainContent.substring(footerMatch.index).trim();
+    mainContent = mainContent.substring(0, footerMatch.index);
+  }
+
+  const categories = [
+    {
+      keywords: ['interest', 'interesse', 'exploração', 'explore'],
+      defaultTitle: 'Exploração e Interesses',
+      icon: Lightbulb,
+      iconColor: 'text-amber-500 dark:text-amber-400',
+      bgColor: 'bg-amber-50 dark:bg-amber-500/10',
+      borderColor: 'border-amber-100 dark:border-amber-500/20'
+    },
+    {
+      keywords: ['weak', 'missing', 'falta', 'gap', 'improve', 'melhorar'],
+      defaultTitle: 'Skills em Falta',
+      icon: Target,
+      iconColor: 'text-blue-500 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-500/10',
+      borderColor: 'border-blue-100 dark:border-blue-500/20'
+    },
+    {
+      keywords: ['progression', 'progress', 'progresso', 'natural', 'next', 'seguir'],
+      defaultTitle: 'Progresso Natural',
+      icon: TrendingUp,
+      iconColor: 'text-green-500 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-500/10',
+      borderColor: 'border-green-100 dark:border-green-500/20'
+    }
+  ];
+
+  const lines = mainContent.split('\n');
+  let currentSection: ParsedSection | null = null;
+  let currentContent: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Check if line is a category header
+    const isListItem = /^[-*+]\s/.test(trimmed) || /^\d+[.)]\s/.test(trimmed);
+    const noFormatting = trimmed.replace(/^[#\s]+|\*\*|__$/g, '').trim();
+    const endsWithSentencePunctuation = /[.;!?]$/.test(noFormatting);
+    
+    const isHeaderFormat = 
+      !isListItem && 
+      trimmed.length < 80 && 
+      !endsWithSentencePunctuation && 
+      (
+        /^#+\s/.test(trimmed) || 
+        /^\*\*.*?\*\*[:]*$/.test(trimmed) || 
+        trimmed.split(' ').length <= 6
+      );
+
+    if (trimmed && isHeaderFormat && !trimmed.toLowerCase().startsWith('reason:')) {
+      const matchedCategory = categories.find(c => 
+        c.keywords.some(k => trimmed.toLowerCase().includes(k))
+      );
+
+      if (matchedCategory) {
+        // Save the previous section
+        if (currentSection) {
+          currentSection.content = currentContent.join('\n').replace(/^(\d+)\)\s+/gm, '$1. ').trim();
+          sections.push(currentSection);
+        } else if (currentContent.length > 0) {
+          intro += currentContent.join('\n') + '\n\n';
+        }
+
+        currentSection = {
+          title: matchedCategory.defaultTitle,
+          content: '',
+          icon: matchedCategory.icon,
+          iconColor: matchedCategory.iconColor,
+          bgColor: matchedCategory.bgColor,
+          borderColor: matchedCategory.borderColor
+        };
+        currentContent = [];
+        continue;
+      }
+    }
+
+    if (trimmed) {
+      currentContent.push(line);
+    } else if (currentContent.length > 0 && currentContent[currentContent.length - 1] !== '') {
+      currentContent.push(''); // Preserve paragraph breaks
+    }
+  }
+
+  // Push the final section
+  if (currentSection) {
+    currentSection.content = currentContent.join('\n').replace(/^(\d+)\)\s+/gm, '$1. ').trim();
+    sections.push(currentSection);
+  } else if (currentContent.length > 0) {
+    intro += currentContent.join('\n').trim();
+  }
+
+  // Merge sections with the same title
+  const mergedSections = sections.reduce((acc: ParsedSection[], curr) => {
+    const existing = acc.find(s => s.title === curr.title);
+    if (existing) {
+      existing.content = (existing.content + '\n\n' + curr.content).trim();
+    } else {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+
+  // In case the parser failed to find any headers, fallback to dump everything in intro
+  if (mergedSections.length === 0 && !intro) {
+    intro = mainContent;
+  }
+
+  return { intro: intro.trim(), sections: mergedSections, outro: outro.trim() };
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface RecommendationCardProps {
@@ -58,6 +197,8 @@ export function RecommendationCard({
   onRetry,
 }: RecommendationCardProps) {
   const [showSources, setShowSources] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const parsedResponse = parseBlocks(data?.answer);
 
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
@@ -113,10 +254,106 @@ export function RecommendationCard({
         </div>
       ) : (
         <div className="p-5 space-y-4">
-          {/* AI answer — preserve whitespace / line breaks */}
-          <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">
-            {data.answer}
-          </p>
+          {/* AI answer parsed */}
+          <div className="flex flex-col gap-5">
+            {parsedResponse.intro && (
+              <div className="text-sm leading-relaxed text-foreground">
+                <ReactMarkdown>{parsedResponse.intro}</ReactMarkdown>
+              </div>
+            )}
+
+            {parsedResponse.sections.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {/* Section Tabs */}
+                {parsedResponse.sections.length > 1 && (
+                  <div className="flex flex-wrap gap-2">
+                    {parsedResponse.sections.map((section, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveIndex(idx)}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer",
+                          activeIndex === idx
+                            ? cn(section.bgColor, section.iconColor, "border", section.borderColor)
+                            : "bg-muted text-muted-foreground hover:bg-muted/80 border border-transparent"
+                        )}
+                      >
+                        <section.icon className="h-3.5 w-3.5" />
+                        <span>{section.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Active Section */}
+                {(() => {
+                  const section = parsedResponse.sections[activeIndex] || parsedResponse.sections[0];
+                  if (!section) return null;
+                  
+                  return (
+                    <div className={cn("rounded-xl border p-4 transition-all duration-300", section.borderColor, section.bgColor)}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <section.icon className={cn("h-5 w-5", section.iconColor)} />
+                        <h3 className={cn("text-sm font-semibold", section.iconColor)}>
+                          {section.title}
+                        </h3>
+                      </div>
+                      <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                            strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                            ul: ({ children }) => <ul className="mb-2 list-disc pl-5 last:mb-0 space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="mb-2 list-decimal pl-5 last:mb-0 space-y-1">{children}</ol>,
+                            li: ({ children }) => <li>{children}</li>,
+                            a: ({ href, children }) => (
+                              <a href={href} className="text-primary font-medium hover:underline" target="_blank" rel="noreferrer">
+                                {children}
+                              </a>
+                            ),
+                          }}
+                        >
+                          {section.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="text-sm leading-relaxed text-foreground">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                    ul: ({ children }) => <ul className="mb-3 list-disc pl-5 last:mb-0">{children}</ul>,
+                    ol: ({ children }) => <ol className="mb-3 list-decimal pl-5 last:mb-0">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    a: ({ href, children }) => (
+                      <a href={href} className="text-primary hover:underline" target="_blank" rel="noreferrer">
+                        {children}
+                      </a>
+                    ),
+                  }}
+                >
+                  {data.answer || ''}
+                </ReactMarkdown>
+              </div>
+            )}
+
+            {parsedResponse.outro && (
+              <div className="text-xs italic leading-relaxed text-muted-foreground pt-2 border-t border-border">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    em: ({ children }) => <em>{children}</em>,
+                  }}
+                >
+                  {parsedResponse.outro.replace(/^---/, '').trim()}
+                </ReactMarkdown>
+              </div>
+            )}
+          </div>
 
           {/* Sources toggle */}
           {data.sources && data.sources.length > 0 && (

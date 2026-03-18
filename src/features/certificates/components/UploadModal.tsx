@@ -1,6 +1,6 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Upload, FileText, ImageIcon, Sparkles, AlertCircle } from 'lucide-react';
+import { X, Upload, FileText, ImageIcon, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { certificatesApi } from '@/services/api';
 import { cn } from '@/lib/utils';
@@ -113,7 +113,6 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
     if (!file) return;
     if (!trainingId) { setErrorMsg('Seleciona a formação associada.'); return; }
     setErrorMsg('');
-    setState('uploading');
     uploadMutation.mutate();
   }
 
@@ -186,7 +185,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                   <select
                     value={trainingId}
                     onChange={(e) => setTrainingId(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   >
                     <option value="">Seleciona a formação...</option>
                     {linkable.map((t) => (
@@ -205,7 +205,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     value={meta.courseName ?? ''}
                     onChange={(e) => setMeta((m: UpdateCertificateDto) => ({ ...m, courseName: e.target.value }))}
                     placeholder="Ex: AZ-900: Microsoft Azure Fundamentals"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -215,7 +216,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     value={meta.provider ?? ''}
                     onChange={(e) => setMeta((m: UpdateCertificateDto) => ({ ...m, provider: e.target.value }))}
                     placeholder="Ex: Microsoft"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -226,7 +228,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     value={meta.durationHours ?? ''}
                     onChange={(e) => setMeta((m: UpdateCertificateDto) => ({ ...m, durationHours: e.target.value ? Number(e.target.value) : undefined }))}
                     placeholder="Ex: 8"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -235,7 +238,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     type="date"
                     value={meta.completionDate ? meta.completionDate.slice(0, 10) : ''}
                     onChange={(e) => setMeta((m: UpdateCertificateDto) => ({ ...m, completionDate: e.target.value ? new Date(e.target.value).toISOString() : undefined }))}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -244,7 +248,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     type="date"
                     value={meta.expirationDate ? meta.expirationDate.slice(0, 10) : ''}
                     onChange={(e) => setMeta((m: UpdateCertificateDto) => ({ ...m, expirationDate: e.target.value ? new Date(e.target.value).toISOString() : undefined }))}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    disabled={uploadMutation.isPending}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -257,21 +262,8 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
             </>
           )}
 
-          {/* ── Uploading ── */}
-          {state === 'uploading' && (
-            <div className="flex flex-col items-center justify-center gap-4 py-10">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-                <Sparkles className="h-7 w-7 animate-pulse text-primary" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-foreground">A extrair metadados com IA…</p>
-                <p className="mt-1 text-xs text-muted-foreground">Isto pode demorar alguns segundos.</p>
-              </div>
-            </div>
-          )}
-
           {/* ── Error banner ── */}
-          {errorMsg && state !== 'uploading' && (
+          {errorMsg && (
             <div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               {errorMsg}
@@ -280,34 +272,42 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
         </div>
 
         {/* Footer */}
-        {state !== 'uploading' && (
-          <div className="flex shrink-0 justify-end gap-2 border-t border-border px-5 py-3">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border px-5 py-3">
+          <button
+            onClick={() => { setFile(null); setMeta({}); setState('idle'); setErrorMsg(''); }}
+            disabled={uploadMutation.isPending}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
+          >
+            {state === 'preview' ? 'Trocar ficheiro' : 'Cancelar'}
+          </button>
+          {state === 'preview' && (
             <button
-              onClick={() => { setFile(null); setMeta({}); setState('idle'); setErrorMsg(''); }}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+              onClick={handleSubmit}
+              disabled={!trainingId || linkable.length === 0 || uploadMutation.isPending}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {state === 'preview' ? 'Trocar ficheiro' : 'Cancelar'}
+              {uploadMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  A processar...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Carregar
+                </>
+              )}
             </button>
-            {state === 'preview' && (
-              <button
-                onClick={handleSubmit}
-                disabled={!trainingId || linkable.length === 0}
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Upload className="h-4 w-4" />
-                Carregar
-              </button>
-            )}
-            {state === 'error' && (
-              <button
-                onClick={() => { setState(file ? 'preview' : 'idle'); setErrorMsg(''); }}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-              >
-                Tentar novamente
-              </button>
-            )}
-          </div>
-        )}
+          )}
+          {state === 'error' && (
+            <button
+              onClick={() => { setState(file ? 'preview' : 'idle'); setErrorMsg(''); }}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            >
+              Tentar novamente
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

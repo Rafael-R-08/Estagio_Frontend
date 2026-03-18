@@ -67,6 +67,7 @@ export interface UserSettings {
   // Notificações
   notifyWeeklyRecs: boolean;
   notifyCertExpiry: boolean;
+  renewalPeriodMonths: number;
   notifyProgress: boolean;
   notifyByEmail: boolean;
   notifyInApp: boolean;

@@ -41,15 +41,14 @@ export function ChatInput({ value, onChange, onSend, onAttach, loading }: Props)
 
   return (
     <div className="flex items-end gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm ring-0 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
-      {/* Attach button */}
+      {/* Attach button — disabled until backend supports file uploads */}
       <button
         type="button"
-        onClick={() => fileRef.current?.click()}
-        disabled={loading}
-        title="Anexar ficheiro"
+        disabled
+        title="Anexar ficheiro (brevemente disponível)"
         className={cn(
-          'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition',
-          'hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40',
+          'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/30 transition',
+          'cursor-not-allowed',
         )}
       >
         <Paperclip className="h-4 w-4" />

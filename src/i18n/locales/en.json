@@ -46,12 +46,15 @@
       "recommendationMode": "Recommendation mode",
       "recommendationModeDesc": "Defines whether AI suggests within your current area or explores new fields",
       "conservative": "Conservative",
-      "exploratory": "Exploratory"
+      "conservativeDesc": "AI suggests within your current stack and area",
+      "exploratory": "Exploratory",
+      "exploratoryDesc": "AI explores new areas and technologies outside your stack"
     },
     "notifications": {
       "title": "Notifications",
       "alerts": "Alerts",
       "channel": "Channel",
+      "channelDesc": "How you prefer to receive notifications",
       "weeklyRecs": "Weekly recommendations",
       "weeklyRecsDesc": "Course suggestions sent every week",
       "certExpiry": "Expiring certifications",
@@ -218,7 +221,10 @@
     "welcomeMessage": "I'm your learning assistant.\n\nYou can ask me about courses, certifications or request a personalized study plan. How can I help?",
     "openPanel": "Open suggestions panel",
     "closePanel": "Close suggestions panel",
-    "errorSend": "Error sending message."
+    "errorSend": "Error sending message.",
+    "preparingAssistant": "Preparing the assistant…",
+    "loadingModel": "Ollama is loading the model.",
+    "disclaimer": "The assistant can make mistakes. Verify important information."
   },
   "header": {
     "aiActive": "AI Active",

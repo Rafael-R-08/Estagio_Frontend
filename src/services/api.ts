@@ -50,8 +50,8 @@ export const userApi = {
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export const searchApi = {
-  search: (q: string, limit = 10, platforms?: string[]) =>
-    api.get<SearchResponse>('/search', { params: { q, limit, platforms } }),
+  search: (q: string, limit = 10, platforms?: string[], isFree?: boolean, minRating?: number) =>
+    api.get<SearchResponse>('/search', { params: { q, limit, platforms, isFree, minRating } }),
 
   getPlatforms: () =>
     api.get<{ id: string; name: string; type: string }[]>('/search/platforms'),
@@ -80,6 +80,12 @@ export const trainingApi = {
     api.patch<TrainingRecord>(`/trainings/${id}`, dto),
 
   delete: (id: string) => api.delete(`/trainings/${id}`),
+
+  trackAccess: (data: { externalId: string; title: string; url: string; platformId?: string }) =>
+    api.post('/trainings/track-access', data),
+
+  getPendingFeedback: () =>
+    api.get<TrainingRecord[]>('/trainings/pending-feedback'),
 };
 
 // ─── Certificates ─────────────────────────────────────────────────────────────
@@ -89,6 +95,12 @@ export const certificatesApi = {
 
   getExpiring: (days = 30) =>
     api.get<Certificate[]>('/certificates/expiring', { params: { days } }),
+
+  getRenewalAlerts: () =>
+    api.get<{
+      expiringAlerts: { courseName: string; daysRemaining: number; message: string }[];
+      staleKnowledgeSuggestions: { courseName: string; monthsSinceCompletion: number; message: string }[];
+    }>('/certificates/renewal-alerts'),
 
   getById: (id: string) => api.get<Certificate>(`/certificates/${id}`),
 
@@ -134,8 +146,11 @@ export const platformsApi = {
 
 export const recommendationsApi = {
   getForMe: () => api.get<RagResponse>('/recommendations/me'),
-  postForMe: (query: string) =>
-    api.post<RagResponse>('/recommendations/me', { query }),
+  postForMe: (
+    query: string,
+    history?: { role: 'user' | 'assistant'; content: string }[],
+  ) =>
+    api.post<RagResponse>('/recommendations/me', { query, history }),
 };
 
 // ─── AI ──────────────────────────────────────────────────────────────────

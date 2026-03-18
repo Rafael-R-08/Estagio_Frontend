@@ -1,4 +1,4 @@
-import { SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Level badge config ───────────────────────────────────────────────────────
@@ -21,6 +21,8 @@ interface Platform {
 export interface Filters {
   platforms: string[];   // platform names
   levels: LevelFilter[];
+  isFree?: boolean;
+  minRating?: number;
 }
 
 interface FilterSidebarProps {
@@ -92,7 +94,7 @@ export function FilterSidebar({
     onChange({ ...filters, levels: next });
   };
 
-  const reset = () => onChange({ platforms: [], levels: [] });
+  const reset = () => onChange({ platforms: [], levels: [], isFree: undefined, minRating: undefined });
 
   return (
     <div className="w-56 shrink-0 space-y-4">
@@ -155,6 +157,53 @@ export function FilterSidebar({
             }
           />
         ))}
+      </div>
+
+      {/* Price */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
+        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Preço
+        </p>
+        {[
+          { label: 'Todos os Preços', value: undefined },
+          { label: 'Grátis', value: true },
+          { label: 'Pago', value: false },
+        ].map((opt, i) => (
+          <label key={i} className="flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-muted/50 cursor-pointer text-sm text-foreground">
+            <input 
+              type="radio" 
+              className="h-4 w-4 border-muted text-primary focus:ring-primary/20 accent-primary"
+              name="price-filter"
+              checked={filters.isFree === opt.value}
+              onChange={() => onChange({ ...filters, isFree: opt.value })}
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+
+      {/* Minimum Rating */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
+        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Avaliação Mínima
+        </p>
+        <div className="flex gap-1 px-2 pt-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => onChange({ ...filters, minRating: filters.minRating === star ? undefined : star })}
+              className={cn(
+                "transition hover:scale-110",
+                (filters.minRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
+              )}
+            >
+              <Star className="h-5 w-5 fill-current" />
+            </button>
+          ))}
+        </div>
+        <p className="px-2 pt-1 text-[10px] text-muted-foreground">
+          {filters.minRating ? `${filters.minRating} ou mais estrelas` : 'Qualquer avaliação'}
+        </p>
       </div>
     </div>
   );

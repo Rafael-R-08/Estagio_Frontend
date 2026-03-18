@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bot, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import type { AiMessage, RagSource } from '@/types';
 
 // ─── Loading dots ─────────────────────────────────────────────────────────────
@@ -112,9 +113,29 @@ export function ChatBubble({ message }: { message: AiMessage }) {
       </div>
       <div className="max-w-[85%] sm:max-w-[80%]">
         <div className="rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm">
-          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
-            {displayContent}
-          </p>
+          <div className="text-sm leading-relaxed text-foreground break-words overflow-hidden">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="mb-3 last:mb-0 whitespace-pre-wrap">{children}</p>,
+                strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                ul: ({ children }) => <ul className="mb-3 list-disc pl-5 last:mb-0">{children}</ul>,
+                ol: ({ children }) => <ol className="mb-3 list-decimal pl-5 last:mb-0">{children}</ol>,
+                li: ({ children }) => <li className="mb-1">{children}</li>,
+                a: ({ href, children }) => (
+                  <a href={href} className="text-primary hover:underline font-medium break-all" target="_blank" rel="noreferrer">
+                    {children}
+                  </a>
+                ),
+                code: ({ children }) => (
+                  <code className="bg-muted px-1.5 py-0.5 rounded text-xs text-foreground font-mono">
+                    {children}
+                  </code>
+                ),
+              }}
+            >
+              {displayContent}
+            </ReactMarkdown>
+          </div>
           {isLong && (
             <button
               onClick={() => setExpanded((v) => !v)}

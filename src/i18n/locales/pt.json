@@ -46,12 +46,15 @@
       "recommendationMode": "Modo de recomendações",
       "recommendationModeDesc": "Define se a IA sugere dentro da tua área atual ou explora novas áreas",
       "conservative": "Conservador",
-      "exploratory": "Exploratório"
+      "conservativeDesc": "A IA sugere dentro da tua stack e área actual",
+      "exploratory": "Exploratório",
+      "exploratoryDesc": "A IA explora novas áreas e tecnologias fora da tua stack"
     },
     "notifications": {
       "title": "Notificações",
       "alerts": "Alertas",
       "channel": "Canal",
+      "channelDesc": "Como preferes receber as notificações",
       "weeklyRecs": "Recomendações semanais",
       "weeklyRecsDesc": "Sugestões de cursos enviadas todas as semanas",
       "certExpiry": "Certificações a expirar",
@@ -217,7 +220,10 @@
     "welcomeMessage": "Sou o teu assistente de aprendizagem.\n\nPodes perguntar-me sobre cursos, certificações ou pedir um plano de estudo personalizado. Como posso ajudar?",
     "openPanel": "Abrir painel de sugestões",
     "closePanel": "Fechar painel de sugestões",
-    "errorSend": "Erro ao enviar mensagem."
+    "errorSend": "Erro ao enviar mensagem.",
+    "preparingAssistant": "A preparar o assistente…",
+    "loadingModel": "Ollama está a carregar o modelo.",
+    "disclaimer": "O assistente pode cometer erros. Verifica informações importantes."
   },
   "header": {
     "aiActive": "IA Ativa",

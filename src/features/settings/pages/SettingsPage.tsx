@@ -37,6 +37,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   notifyInApp: true,
   adminCanSeeRecs: true,
   aiCanUseHistory: true,
+  renewalPeriodMonths: 6,
 };
 
 // ─── Appearance stored in localStorage ────────────────────────────────────────
@@ -125,6 +126,57 @@ function SelectField({ value, options, onChange }: {
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
     </select>
+  );
+}
+
+function RadioGroup({ value, options, onChange }: {
+  value: string | null;
+  options: { value: string; label: string; description?: string }[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {options.map((o) => (
+        <label
+          key={o.value}
+          className={cn(
+            'flex items-start gap-3 rounded-xl border-2 px-4 py-3 cursor-pointer transition-colors',
+            value === o.value
+              ? 'border-softinsa-blue bg-softinsa-blue/5 dark:bg-softinsa-blue/10'
+              : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500',
+          )}
+        >
+          <input
+            type="radio"
+            name={o.value}
+            value={o.value}
+            checked={value === o.value}
+            onChange={() => onChange(o.value)}
+            className="mt-0.5 accent-softinsa-blue shrink-0"
+          />
+          <div>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{o.label}</span>
+            {o.description && (
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{o.description}</p>
+            )}
+          </div>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 rounded border-slate-300 accent-softinsa-blue cursor-pointer"
+      />
+      <span className="text-sm text-slate-700 dark:text-slate-200">{label}</span>
+    </label>
   );
 }
 
@@ -325,19 +377,17 @@ export default function SettingsPage() {
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
-                  <SettingRow
-                    label={t('settings.ai.recommendationMode')}
-                    description={t('settings.ai.recommendationModeDesc')}
-                  >
-                    <SelectField
+                  <div className="py-4">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-3">{t('settings.ai.recommendationMode')}</p>
+                    <RadioGroup
                       value={current.aiRecommendationMode}
                       options={[
-                        { value: 'conservative', label: t('settings.ai.conservative') },
-                        { value: 'exploratory', label: t('settings.ai.exploratory') },
+                        { value: 'conservative', label: t('settings.ai.conservative'), description: t('settings.ai.conservativeDesc') },
+                        { value: 'exploratory', label: t('settings.ai.exploratory'), description: t('settings.ai.exploratoryDesc') },
                       ]}
                       onChange={(v) => set('aiRecommendationMode', v)}
                     />
-                  </SettingRow>
+                  </div>
                 </SectionItem>
               </SectionPanel>
             )}
@@ -370,15 +420,38 @@ export default function SettingsPage() {
                     <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
                   </SettingRow>
                 </SectionItem>
-                <SubLabel>{t('settings.notifications.channel')}</SubLabel>
                 <SectionItem>
-                  <SettingRow label={t('settings.notifications.email')}>
-                    <Toggle checked={current.notifyByEmail} onChange={(v) => set('notifyByEmail', v)} />
+                  <SettingRow label="Antecedência de alertas de expiração">
+                    <SelectField
+                      value={current.renewalPeriodMonths?.toString()}
+                      options={[
+                        { value: '1', label: '1 mês' },
+                        { value: '3', label: '3 meses' },
+                        { value: '6', label: '6 meses' },
+                        { value: '12', label: '12 meses' },
+                      ]}
+                      onChange={(v) => set('renewalPeriodMonths', v ? Number(v) : 6)}
+                    />
                   </SettingRow>
                 </SectionItem>
+                <SubLabel>{t('settings.notifications.channel')}</SubLabel>
                 <SectionItem>
-                  <SettingRow label={t('settings.notifications.inApp')}>
-                    <Toggle checked={current.notifyInApp} onChange={(v) => set('notifyInApp', v)} />
+                  <SettingRow
+                    label={t('settings.notifications.channel')}
+                    description={t('settings.notifications.channelDesc')}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Checkbox
+                        checked={current.notifyByEmail}
+                        onChange={(v) => set('notifyByEmail', v)}
+                        label={t('settings.notifications.email')}
+                      />
+                      <Checkbox
+                        checked={current.notifyInApp}
+                        onChange={(v) => set('notifyInApp', v)}
+                        label={t('settings.notifications.inApp')}
+                      />
+                    </div>
                   </SettingRow>
                 </SectionItem>
               </SectionPanel>

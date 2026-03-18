@@ -14,20 +14,21 @@ import { SuggestionsPanel } from '../components/SuggestionsPanel';
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
-const RECENT_KEY = 'ai-assistant:recent-queries';
+const RECENT_KEY_PREFIX = 'ai-assistant:recent-queries:';
 const MAX_RECENT = 8;
 
-function loadRecent(): string[] {
+function loadRecent(userId?: string): string[] {
+  if (!userId) return [];
   try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]');
+    return JSON.parse(localStorage.getItem(RECENT_KEY_PREFIX + userId) ?? '[]');
   } catch {
     return [];
   }
 }
 
-function saveRecent(q: string, current: string[]): string[] {
+function saveRecent(userId: string, q: string, current: string[]): string[] {
   const next = [q, ...current.filter((x) => x !== q)].slice(0, MAX_RECENT);
-  localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  localStorage.setItem(RECENT_KEY_PREFIX + userId, JSON.stringify(next));
   return next;
 }
 
@@ -46,16 +47,22 @@ export default function AiAssistantPage() {
 
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [recentQueries, setRecentQueries] = useState<string[]>(loadRecent);
+  const [recentQueries, setRecentQueries] = useState<string[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      setRecentQueries(loadRecent(user.id));
+    }
+  }, [user?.id]);
 
   // ── Initial recommendations (direct fetch to avoid type gymnastics) ──────
   useEffect(() => {
     if (initializedRef.current) return;
     let cancelled = false;
 
-    // Show welcome message after 3s if API is slow
+    // Show welcome message after 3.5s if API is slow
     const fallbackTimer = setTimeout(() => {
       if (!cancelled && !initializedRef.current) {
         initializedRef.current = true;
@@ -102,55 +109,79 @@ export default function AiAssistantPage() {
 
   // ── Send mutation ──────────────────────────────────────────────────────────
   const sendMutation = useMutation({
-    mutationFn: (query: string) => recommendationsApi.postForMe(query),
+    mutationFn: ({ query, history }: { query: string; history: { role: 'user' | 'assistant'; content: string }[] }) =>
+      recommendationsApi.postForMe(query, history),
   });
+
+  // ── Centralised send function (used in all 3 places) ──────────────────────
+  const sendQuery = useCallback(
+    (text: string) => {
+      if (!text.trim() || sendMutation.isPending) return;
+
+      const msgUserId = makeId();
+      const loadingId = makeId();
+
+      // Build history from current messages (exclude loading bubbles)
+      const history = messages
+        .filter((m) => !m.isLoading && m.content)
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      setMessages((prev) => [
+        ...prev,
+        { id: msgUserId, role: 'user', content: text, timestamp: new Date().toISOString() },
+        { id: loadingId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isLoading: true },
+      ]);
+
+      if (user?.id) {
+        setRecentQueries((prev) => saveRecent(user.id, text, prev));
+      }
+
+      sendMutation.mutate(
+        { query: text, history },
+        {
+          onSuccess: (res) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === loadingId
+                  ? {
+                      id: loadingId,
+                      role: 'assistant',
+                      content: res.data.answer,
+                      timestamp: new Date().toISOString(),
+                      sources: res.data.sources,
+                    }
+                  : m,
+              ),
+            );
+          },
+          onError: () => {
+            toast.error(t('ai.errorSend'));
+            setMessages((prev) => prev.filter((m) => m.id !== loadingId));
+          },
+        },
+      );
+    },
+    [messages, sendMutation, user?.id, t],
+  );
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
-    if (!text || sendMutation.isPending) return;
-
-    const userId = makeId();
-    const loadingId = makeId();
-
-    // Add user + loading messages immediately
-    setMessages((prev) => [
-      ...prev,
-      { id: userId, role: 'user', content: text, timestamp: new Date().toISOString() },
-      { id: loadingId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isLoading: true },
-    ]);
+    if (!text) return;
     setInputValue('');
-    setRecentQueries((prev) => saveRecent(text, prev));
+    sendQuery(text);
+  }, [inputValue, sendQuery]);
 
-    sendMutation.mutate(text, {
-      onSuccess: (res) => {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === loadingId
-              ? {
-                  id: loadingId,
-                  role: 'assistant',
-                  content: res.data.answer,
-                  timestamp: new Date().toISOString(),
-                  sources: res.data.sources,
-                }
-              : m,
-          ),
-        );
-      },
-      onError: () => {
-        toast.error(t('ai.errorSend'));
-        setMessages((prev) => prev.filter((m) => m.id !== loadingId));
-      },
-    });
-  }, [inputValue, sendMutation]);
-
-  const handleSelectSuggestion = useCallback((query: string) => {
-    setInputValue(query);
-    // Focus textarea handled by setting value; user can press Enter
-  }, []);
+  const handleSelectSuggestion = useCallback(
+    (query: string) => {
+      setSidebarOpen(false);
+      sendQuery(query);
+    },
+    [sendQuery],
+  );
 
   function handleClearRecent() {
-    localStorage.removeItem(RECENT_KEY);
+    if (!user?.id) return;
+    localStorage.removeItem(RECENT_KEY_PREFIX + user.id);
     setRecentQueries([]);
   }
 
@@ -182,7 +213,7 @@ export default function AiAssistantPage() {
         {/* ── Chat column ── */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Messages */}
-            <div className="flex-1 space-y-4 overflow-y-auto px-6 pt-5 pb-28 md:pb-6">
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 pt-5 pb-28 md:pb-6">
             {messages.map((msg) =>
               msg.isLoading ? (
                 <LoadingBubble key={msg.id} />
@@ -198,8 +229,8 @@ export default function AiAssistantPage() {
                   <Bot className="h-7 w-7 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">A preparar o assistente…</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Ollama está a carregar o modelo.</p>
+                  <p className="text-sm font-semibold text-foreground">{t('ai.preparingAssistant')}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t('ai.loadingModel')}</p>
                 </div>
               </div>
             )}
@@ -216,46 +247,20 @@ export default function AiAssistantPage() {
               loading={sendMutation.isPending}
             />
             <p className="mt-1.5 text-center text-[10px] text-muted-foreground/40">
-              O assistente pode cometer erros. Verifica informações importantes.
+              {t('ai.disclaimer')}
             </p>
           </div>
         </div>
 
-        {/* ── Right sidebar (desktop) ── */}
+        {/* ── Right sidebar (desktop) — fixed toggle logic ── */}
         <div
           className={cn(
-            'hidden md:flex w-72 shrink-0 flex-col border-l border-border bg-background transition-all duration-200',
-            sidebarOpen ? 'translate-x-0' : 'hidden',
+            'w-72 shrink-0 flex-col border-l border-border bg-background transition-all duration-200',
+            sidebarOpen ? 'flex' : 'hidden',
           )}
         >
           <SuggestionsPanel
-            onSelect={(q) => {
-              handleSelectSuggestion(q);
-              // Also send immediately
-              const userId = makeId();
-              const loadingId = makeId();
-              setMessages((prev) => [
-                ...prev,
-                { id: userId, role: 'user', content: q, timestamp: new Date().toISOString() },
-                { id: loadingId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isLoading: true },
-              ]);
-              setRecentQueries((prev) => saveRecent(q, prev));
-              sendMutation.mutate(q, {
-                onSuccess: (res) => {
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === loadingId
-                        ? { id: loadingId, role: 'assistant', content: res.data.answer, timestamp: new Date().toISOString(), sources: res.data.sources }
-                        : m,
-                    ),
-                  );
-                },
-                onError: () => {
-                  toast.error('Erro ao contactar o assistente.');
-                  setMessages((prev) => prev.filter((m) => m.id !== loadingId));
-                },
-              });
-            }}
+            onSelect={handleSelectSuggestion}
             user={user ?? undefined}
             recentQueries={recentQueries}
             onClearRecent={handleClearRecent}
@@ -270,36 +275,11 @@ export default function AiAssistantPage() {
               <SuggestionsPanel
                 onSelect={(q) => {
                   handleSelectSuggestion(q);
-                  const userId = makeId();
-                  const loadingId = makeId();
-                  setMessages((prev) => [
-                    ...prev,
-                    { id: userId, role: 'user', content: q, timestamp: new Date().toISOString() },
-                    { id: loadingId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isLoading: true },
-                  ]);
-                  setRecentQueries((prev) => saveRecent(q, prev));
-                  sendMutation.mutate(q, {
-                    onSuccess: (res) => {
-                      setMessages((prev) =>
-                        prev.map((m) =>
-                          m.id === loadingId
-                            ? { id: loadingId, role: 'assistant', content: res.data.answer, timestamp: new Date().toISOString(), sources: res.data.sources }
-                            : m,
-                        ),
-                      );
-                    },
-                    onError: () => {
-                      toast.error('Erro ao contactar o assistente.');
-                      setMessages((prev) => prev.filter((m) => m.id !== loadingId));
-                    },
-                  });
                   setSidebarOpen(false);
                 }}
                 user={user ?? undefined}
                 recentQueries={recentQueries}
-                onClearRecent={() => {
-                  handleClearRecent();
-                }}
+                onClearRecent={handleClearRecent}
               />
             </div>
           </div>

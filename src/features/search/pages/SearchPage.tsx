@@ -65,7 +65,7 @@ export default function SearchPage() {
 
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<Filters>({ platforms: [], levels: [] });
+  const [filters, setFilters] = useState<Filters>({ platforms: [], levels: [], isFree: undefined, minRating: undefined });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // ── Available platforms ──────────────────────────────────────────────────
@@ -82,10 +82,16 @@ export default function SearchPage() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['search', searchQuery, filters.platforms],
+    queryKey: ['search', searchQuery, filters.platforms, filters.isFree, filters.minRating],
     queryFn: () =>
       searchApi
-        .search(searchQuery, 20, filters.platforms.length ? filters.platforms : undefined)
+        .search(
+          searchQuery,
+          20,
+          filters.platforms.length ? filters.platforms : undefined,
+          filters.isFree,
+          filters.minRating
+        )
         .then((r) => r.data),
     enabled: searchQuery.trim().length >= 2,
     staleTime: 1000 * 60 * 5,

@@ -9,10 +9,10 @@ import {
   Save,
   Sparkles,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { certificatesApi } from '@/services/api';
-import { cn } from '@/lib/utils';
 import type { Certificate, UpdateCertificateDto } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -161,8 +161,17 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               disabled={isLoading}
               className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-60"
             >
-              <Sparkles className={cn('h-4 w-4 text-primary/70', reextractMutation.isPending && 'animate-pulse')} />
-              Re-extrair IA
+              {reextractMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-primary/70" />
+                  A re-extrair...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 text-primary/70" />
+                  Re-extrair IA
+                </>
+              )}
             </button>
             <button
               onClick={() => {

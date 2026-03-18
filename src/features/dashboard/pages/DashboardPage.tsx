@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import {
   BookOpen,
   CheckCircle2,
@@ -19,8 +20,9 @@ import { RecommendationCard } from '../components/RecommendationCard';
 import { ProgressCard, ProgressCardSkeleton } from '../components/ProgressCard';
 import { QuickActions } from '../components/QuickActions';
 import { AlertBanner } from '../components/AlertBanner';
+import { PendingFeedbackModal } from '../components/PendingFeedbackModal';
 
-import type { TrainingStats } from '@/types';
+import type { TrainingStats, TrainingRecord } from '@/types';
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -107,6 +109,21 @@ function EmptyState({ icon: Icon, message }: { icon: React.ElementType; message:
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [pendingFeedback, setPendingFeedback] = useState<TrainingRecord[]>([]);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    trainingApi.getPendingFeedback()
+      .then((res) => {
+        if (mounted && res.data && res.data.length > 0) {
+          setPendingFeedback(res.data);
+          setShowFeedbackModal(true);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch pending feedback', err));
+    return () => { mounted = false; };
+  }, []);
 
   // 2.1 — AI Recommendations
   const {
@@ -142,10 +159,10 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 2,
   });
 
-  // 2.5 — Alertas de certificados a expirar
-  const { data: expiring = [] } = useQuery({
-    queryKey: ['certificates', 'expiring'],
-    queryFn: () => certificatesApi.getExpiring().then((r) => toList(r.data)),
+  // 2.5 — Alertas de certificados a expirar e conhecimento obsoleto
+  const { data: renewalAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['certificates', 'renewal-alerts'],
+    queryFn: () => certificatesApi.getRenewalAlerts().then((r) => r.data),
     retry: false,
     staleTime: 1000 * 60 * 10,
   });
@@ -179,7 +196,11 @@ export default function DashboardPage() {
       </div>
 
       {/* ── 2.5 Alertas ─────────────────────────────────────────────────── */}
-      {expiring.length > 0 && <AlertBanner certs={expiring} />}
+      {alertsLoading ? (
+        <div className="flex animate-pulse items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 h-16" />
+      ) : renewalAlerts && (renewalAlerts.expiringAlerts?.length > 0 || renewalAlerts.staleKnowledgeSuggestions?.length > 0) && (
+        <AlertBanner data={renewalAlerts} />
+      )}
 
       {/* ── Stats row ───────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -295,6 +316,14 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Pending Feedback Modal */}
+      {showFeedbackModal && pendingFeedback.length > 0 && (
+        <PendingFeedbackModal
+          courses={pendingFeedback}
+          onClose={() => setShowFeedbackModal(false)}
+        />
+      )}
     </div>
   );
 }

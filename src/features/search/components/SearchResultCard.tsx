@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { trainingApi } from '@/services/api';
 import type { CourseSearchResult } from '@/types';
 
 // ─── Level badge ──────────────────────────────────────────────────────────────
@@ -124,6 +125,17 @@ export function SearchResultCard({
   const handlePlan = () => {
     setLocalOngoing((v) => !v);
     onAddToPlan?.(course);
+  };
+
+  const handleViewCourse = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+    // Fire-and-forget tracking
+    trainingApi.trackAccess({
+      externalId: course.externalId,
+      title: course.title,
+      url: course.url,
+      platformId: course.platformId,
+    }).catch(err => console.error('Failed to track course access', err));
   };
 
   return (
@@ -240,7 +252,7 @@ export function SearchResultCard({
           href={course.url}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleViewCourse}
           className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-primary/30 hover:text-foreground"
         >
           Ver curso
