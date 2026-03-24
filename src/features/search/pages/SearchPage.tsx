@@ -199,9 +199,9 @@ export default function SearchPage() {
   return (
     <div className="space-y-5">
       {/* ── Header ────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t('search.title')}</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
+      <div className="px-2">
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('search.title')}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           {t('search.subtitle')}
         </p>
       </div>

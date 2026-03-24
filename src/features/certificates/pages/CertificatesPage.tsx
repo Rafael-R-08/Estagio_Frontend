@@ -78,6 +78,7 @@ export default function CertificatesPage() {
   });
 
   // ── Client-side filter ──────────────────────────────────────────────────
+  // eslint-disable-next-line react-hooks/purity
   const now = useMemo(() => Date.now(), []);
 
   const filtered = certs.filter((c) => {
@@ -108,18 +109,18 @@ export default function CertificatesPage() {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* ── Page header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('certificates.title')}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('certificates.title')}</h1>
+          <p className="mt-1 text-base text-muted-foreground">
             {t('certificates.subtitle')}
           </p>
         </div>
         <button
           onClick={() => setUploadOpen(true)}
-          className="shrink-0 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition active:scale-95"
         >
           <Plus className="h-4 w-4" />
           {t('certificates.upload')}
@@ -128,20 +129,20 @@ export default function CertificatesPage() {
 
       {/* ── Search + filter bar ── */}
       {certs.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-4">
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('certificates.search')}
-              className="h-9 w-56 rounded-lg border border-border bg-muted/40 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-full border border-border/60 bg-muted/40 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-4 focus:ring-foreground/10"
             />
           </div>
 
           {/* Status filter pills */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {FILTERS.map((f) => {
               const isActive = statusFilter === f.id;
               const count = counts[f.id];
@@ -150,15 +151,15 @@ export default function CertificatesPage() {
                 <button
                   key={f.id}
                   onClick={() => setStatusFilter(f.id)}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 ${
                     isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      ? 'bg-foreground text-background shadow-xl'
+                      : 'bg-background/40 border border-border/60 text-muted-foreground hover:bg-background/80'
                   }`}
                 >
                   {f.label}
-                  <span className={`rounded-full px-1 text-[10px] font-semibold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-background text-muted-foreground'
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+                    isActive ? 'bg-background text-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
                   }`}>
                     {count}
                   </span>
@@ -171,7 +172,7 @@ export default function CertificatesPage() {
 
       {/* ── Result count ── */}
       {!isLoading && certs.length > 0 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           {t('certificates.count', { count: filtered.length })}
           {statusFilter !== 'all' || search ? ` ${t('certificates.filtered')}` : ''}
         </p>

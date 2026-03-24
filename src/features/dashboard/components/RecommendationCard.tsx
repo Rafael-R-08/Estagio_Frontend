@@ -201,22 +201,22 @@ export function RecommendationCard({
   const parsedResponse = parseBlocks(data?.answer);
 
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+    <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl overflow-hidden shadow-lg shadow-foreground/5 relative">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-5 py-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Sparkles className="h-4 w-4 text-primary" />
+      <div className="flex items-center justify-between border-b border-border/40 px-8 py-6 relative z-10">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background">
+            <Sparkles className="h-5 w-5" />
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Recomendações IA</h2>
-            <p className="text-xs text-muted-foreground">Personalizado com base no teu perfil</p>
+          <div className="space-y-0.5">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-70">Recomendações IA</h2>
+            <p className="text-lg font-bold text-foreground">Personalizado para o teu perfil</p>
           </div>
         </div>
         {!isLoading && onRetry && (
           <button
             onClick={onRetry}
-            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="flex items-center gap-2 rounded-full border border-border/60 bg-background px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition hover:bg-foreground hover:text-background"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Atualizar
@@ -291,10 +291,12 @@ export function RecommendationCard({
                   if (!section) return null;
                   
                   return (
-                    <div className={cn("rounded-xl border p-4 transition-all duration-300", section.borderColor, section.bgColor)}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <section.icon className={cn("h-5 w-5", section.iconColor)} />
-                        <h3 className={cn("text-sm font-semibold", section.iconColor)}>
+                    <div className={cn("rounded-[1.5rem] border p-6 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 shadow-sm", section.borderColor, section.bgColor)}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={cn("p-2 rounded-full bg-background/50 backdrop-blur-sm", section.iconColor)}>
+                          <section.icon className="h-5 w-5" />
+                        </div>
+                        <h3 className={cn("text-base font-bold", section.iconColor)}>
                           {section.title}
                         </h3>
                       </div>

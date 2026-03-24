@@ -165,6 +165,7 @@
     }
   },
   "profile": {
+    "title": "Perfil",
     "editActive": "Modo edição activo",
     "editProfile": "Editar Perfil",
     "memberSince": "Membro desde",

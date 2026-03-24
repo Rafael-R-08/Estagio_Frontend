@@ -52,7 +52,7 @@ export function ProgressCard({ record, variant = 'progress' }: ProgressCardProps
   })();
 
   return (
-    <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition hover:shadow-md hover:border-primary/30">
+    <div className="group flex flex-col gap-4 rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md p-6 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/5 hover:border-border hover:-translate-y-0.5">
       {/* Title + badge */}
       <div className="flex items-start justify-between gap-2">
         <h3
@@ -61,7 +61,7 @@ export function ProgressCard({ record, variant = 'progress' }: ProgressCardProps
         >
           {record.title}
         </h3>
-        <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold', status.className)}>
+        <span className={cn('shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.05em] border border-border/40', status.className)}>
           {status.label}
         </span>
       </div>

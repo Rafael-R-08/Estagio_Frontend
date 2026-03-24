@@ -48,7 +48,7 @@ function StatusBadge({ status }: { status: TrainingStatus }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold',
+        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.05em] border border-border/40',
         cfg.color,
       )}
     >
@@ -147,7 +147,7 @@ export function TrainingCard({
   return (
     <div
       className={cn(
-        'relative rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md',
+        'relative rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-border hover:-translate-y-0.5',
         isUpdating && 'opacity-60 pointer-events-none',
       )}
     >
@@ -155,9 +155,9 @@ export function TrainingCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {/* Platform + status */}
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             {training.platform && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              <span className="rounded-full bg-muted/60 border border-border/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-muted-foreground mr-1">
                 {training.platform.name}
               </span>
             )}
@@ -171,7 +171,7 @@ export function TrainingCard({
           </div>
 
           {/* Title */}
-          <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-2">
+          <h3 className="text-base font-bold leading-snug text-foreground line-clamp-2 mt-1">
             {training.title}
           </h3>
 

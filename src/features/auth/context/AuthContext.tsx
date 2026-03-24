@@ -7,7 +7,6 @@ import { storage } from '../../../lib/storage';
 import { queryClient } from '../../../lib/queryClient';
 
 const AUTH_LOGIN_PATH = (import.meta.env.VITE_AUTH_LOGIN_PATH || '/auth/login').trim();
-const AUTH_REGISTER_PATH = (import.meta.env.VITE_AUTH_REGISTER_PATH || '/auth/register').trim();
 const AUTH_ME_PATH = (import.meta.env.VITE_AUTH_ME_PATH || '/auth/me').trim();
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -18,7 +17,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -67,17 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }, []);
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
-    const { data } = await api.post<{ access_token: string; refresh_token: string; user: User }>(
-      AUTH_REGISTER_PATH,
-      { name, email, password },
-    );
-    storage.setToken(data.access_token);
-    storage.setRefreshToken(data.refresh_token);
-    storage.setUser(data.user);
-    setToken(data.access_token);
-    setUser(data.user);
-  }, []);
+
 
   const logout = useCallback(() => {
     storage.clearAll();
@@ -95,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!token && !!user,
         isLoading,
         login,
-        register,
         logout,
         setUser: (u: User) => {
           setUser(u);

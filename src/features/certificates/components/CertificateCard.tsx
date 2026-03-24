@@ -59,49 +59,49 @@ export function CertificateCard({ cert, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="group flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:shadow-sm"
+      className="group flex w-full flex-col gap-4 rounded-[2rem] border border-border/60 bg-background/60 p-6 text-left transition-all hover:bg-background/80 hover:shadow-2xl active:scale-[0.98] backdrop-blur-2xl"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Award className="h-4.5 w-4.5" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-foreground text-background shadow-xl group-hover:scale-110 transition-transform">
+            <Award className="h-6 w-6" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+            <p className="line-clamp-2 text-base font-black leading-tight text-foreground transition-colors">
               {title}
             </p>
             {cert.provider && (
-              <p className="mt-0.5 text-xs text-muted-foreground">{cert.provider}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{cert.provider}</p>
             )}
           </div>
         </div>
-        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium', className)}>
+        <span className={cn('shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm', className)}>
           {label}
         </span>
       </div>
 
       {/* Meta row */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground/80 pt-2 border-t border-border/20">
         {cert.completionDate && (
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+          <span className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
             {fmtDate(cert.completionDate)}
           </span>
         )}
         {cert.durationHours != null && (
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+          <span className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
             {cert.durationHours}h
           </span>
         )}
         {cert.expirationDate && status !== 'active' && (
           <span className={cn(
-            'flex items-center gap-1',
+            'flex items-center gap-2 font-bold',
             status === 'expired' ? 'text-red-500' : 'text-amber-500',
           )}>
-            <ExternalLink className="h-3 w-3" />
-            Expira {fmtDate(cert.expirationDate)}
+            <ExternalLink className="h-4 w-4" />
+            {fmtDate(cert.expirationDate)}
           </span>
         )}
       </div>

@@ -18,7 +18,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { cn } from '../lib/utils';
-import logo from '../assets/Logo1.png';
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -57,20 +56,20 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex flex-col bg-softinsa-blue text-white transition-all duration-300 ease-in-out',
-        'h-screen sticky top-0 shrink-0',
+        'flex flex-col bg-background/40 backdrop-blur-2xl border-r border-border/60 text-foreground transition-all duration-300 ease-in-out',
+        'h-screen sticky top-0 shrink-0 z-30',
         collapsed ? 'w-16' : 'w-60',
       )}
     >
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-          <img src={logo} alt="SL" className="h-full w-auto object-contain" />
-        </div>
+      {/* Logo Area */}
+      <div className="flex h-16 items-center px-6 border-b border-border/60">
         {!collapsed && (
-          <span className="truncate text-sm font-semibold leading-tight">
-            Learning Hub
+          <span className="text-sm font-bold tracking-tight text-foreground/90">
+            LearningHub
           </span>
+        )}
+        {collapsed && (
+          <div className="mx-auto h-1 w-4 rounded-full bg-foreground/20" />
         )}
       </div>
 
@@ -79,7 +78,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Main Menu */}
         <div className="px-3 mb-1">
           {!collapsed && (
-            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-70">
               {t('nav.mainMenu')}
             </p>
           )}
@@ -92,10 +91,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     to={href}
                     title={collapsed ? t(labelKey) : undefined}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                       isActive
-                        ? 'bg-white/20 text-white'
-                        : 'text-white/70 hover:bg-white/10 hover:text-white',
+                        ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                       collapsed && 'justify-center px-2',
                     )}
                   >
@@ -119,14 +118,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             >
               {!collapsed && (
                 <>
-                  <Shield className="h-3 w-3 text-white/50" />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                  <Shield className="h-3 w-3 text-muted-foreground/60" />
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
                     {t('nav.adminBackoffice')}
                   </p>
                 </>
               )}
               {collapsed && (
-                <div className="h-px w-8 bg-white/20" />
+                <div className="h-px w-8 bg-border/40" />
               )}
             </div>
             <ul className="space-y-1">
@@ -139,10 +138,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       to={href}
                       title={collapsed ? t(labelKey) : undefined}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                         isThisActive
-                          ? 'bg-white/15 text-white ring-1 ring-inset ring-white/20'
-                          : 'text-white/60 hover:bg-white/10 hover:text-white',
+                          ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                          : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                         collapsed && 'justify-center px-2',
                       )}
                     >
@@ -156,10 +155,52 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         )}
 
+        {/* SL Manager — My Team */}
+        {user?.role === 'SERVICE_LINE_MANAGER' && (
+          <div className="px-3 mt-4">
+            <div
+              className={cn(
+                'mb-2 flex items-center gap-2',
+                collapsed ? 'justify-center px-0' : 'px-2',
+              )}
+            >
+              {!collapsed && (
+                <>
+                  <Users className="h-3 w-3 text-muted-foreground/60" />
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                    {t('nav.myTeam')}
+                  </p>
+                </>
+              )}
+              {collapsed && (
+                <div className="h-px w-8 bg-border/40" />
+              )}
+            </div>
+            <ul className="space-y-1">
+              <li>
+                <Link
+                  to="/sl-manager"
+                  title={collapsed ? t('nav.myTeam') : undefined}
+                  className={cn(
+                    'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
+                    pathname.startsWith('/sl-manager')
+                      ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                    collapsed && 'justify-center px-2',
+                  )}
+                >
+                  <Users className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{t('nav.myTeam', 'My Team')}</span>}
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
+
         {/* Account */}
         <div className="px-3 mt-4">
           {!collapsed && (
-            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
               {t('nav.account')}
             </p>
           )}
@@ -172,10 +213,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     to={href}
                     title={collapsed ? t(labelKey) : undefined}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                       isActive
-                        ? 'bg-white/20 text-white'
-                        : 'text-white/70 hover:bg-white/10 hover:text-white',
+                        ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                       collapsed && 'justify-center px-2',
                     )}
                   >
@@ -192,7 +233,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Toggle collapse */}
       <button
         onClick={onToggle}
-        className="mx-2 mb-2 flex items-center justify-center rounded-lg py-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+        className="mx-2 mb-2 flex items-center justify-center rounded-full py-2 text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
         title={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
       >
         {collapsed ? (
@@ -203,28 +244,28 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </button>
 
       {/* User + Logout */}
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t border-border/60 p-3">
         <div
           className={cn(
-            'flex items-center gap-3 rounded-lg px-2 py-1.5',
+            'flex items-center gap-3 rounded-2xl px-2 py-1.5',
             collapsed && 'justify-center',
           )}
         >
           {/* Avatar */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-sm font-semibold">
             {user?.name?.charAt(0).toUpperCase() ?? 'U'}
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-white">{user?.name}</p>
-              <p className="truncate text-xs text-white/50 capitalize">{user?.role?.toLowerCase()}</p>
+              <p className="truncate text-xs font-bold text-foreground">{user?.name}</p>
+              <p className="truncate text-[10px] font-bold tracking-[0.05em] text-muted-foreground uppercase opacity-80">{user?.role}</p>
             </div>
           )}
           {!collapsed && (
             <button
               onClick={logout}
               title={t('nav.logout')}
-              className="text-white/50 hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -234,7 +275,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <button
             onClick={logout}
             title={t('nav.logout')}
-            className="mt-1 flex w-full items-center justify-center rounded-lg py-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+            className="mt-1 flex w-full items-center justify-center rounded-2xl py-1.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
           >
             <LogOut className="h-4 w-4" />
           </button>

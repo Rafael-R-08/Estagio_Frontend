@@ -70,7 +70,7 @@ const CHART_COLORS = ['#0057B7', '#45A5FF', '#22C55E', '#F59E0B', '#8B5CF6', '#E
 
 function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string | number; color: string }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+    <div className="flex items-center gap-4 rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md px-5 py-4 shadow-sm">
       <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', color)}>
         <Icon className="h-5 w-5" />
       </div>
@@ -86,7 +86,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <div className="rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md p-5 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
       {children}
     </div>
@@ -257,8 +257,8 @@ export function AnalyticsTab() {
       </div>
 
       {/* Expiring certificates table */}
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+      <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
           <h3 className="text-sm font-semibold text-foreground">Certificados a expirar em breve</h3>
           <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
             {analytics.expiringCertificates.length} certificado{analytics.expiringCertificates.length !== 1 ? 's' : ''}
@@ -267,7 +267,7 @@ export function AnalyticsTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
+              <tr className="border-b border-border/40 bg-muted/20">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Utilizador</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curso</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Expira em</th>

@@ -85,10 +85,10 @@ function ActionButton({ icon: Icon, label, onClick, active, color = '', loading 
       onClick={onClick}
       disabled={loading}
       className={cn(
-        'flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition active:scale-95',
+        'flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-bold transition active:scale-95',
         active
-          ? cn('border-transparent shadow-sm', color)
-          : 'border-border text-foreground hover:bg-muted',
+          ? cn('border-transparent shadow-xl', color)
+          : 'border-border/60 text-foreground hover:bg-background/80',
         loading && 'opacity-60 cursor-not-allowed',
       )}
     >
@@ -226,39 +226,41 @@ export default function CourseDetailPage() {
       </button>
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="space-y-6 rounded-[2.5rem] border border-border/60 bg-card/40 p-8 shadow-2xl backdrop-blur-2xl">
         {/* Title + level */}
-        <div className="flex items-start gap-3">
-          <h1 className="flex-1 text-2xl font-bold text-foreground leading-snug">
+        <div className="space-y-4">
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl leading-tight">
             {course.title}
           </h1>
           {levelStyle && (
-            <span className={cn('shrink-0 rounded-full px-3 py-1 text-xs font-bold', levelStyle)}>
+            <span className={cn('inline-block rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-sm', levelStyle)}>
               {levelLabel}
             </span>
           )}
         </div>
 
         {/* Meta */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-medium text-foreground/80">
-            <BookOpen className="h-4 w-4 text-primary/70" />
+        <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-muted-foreground">
+          <span className="flex items-center gap-2 text-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background">
+              <BookOpen className="h-4 w-4" />
+            </div>
             {course.platformName}
           </span>
           {course.durationHours && (
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               {course.durationHours} horas
             </span>
           )}
           {course.rating && (
-            <span className="flex items-center gap-1.5 text-amber-500 font-medium">
+            <span className="flex items-center gap-2 text-amber-500">
               <Star className="h-4 w-4 fill-current" />
               {course.rating.toFixed(1)} / 5
             </span>
           )}
           {existingRecord && (
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+            <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4" />
               {existingRecord.status === 'completed' ? 'Concluído' :
                existingRecord.status === 'ongoing' ? 'Em progresso' :
@@ -269,7 +271,7 @@ export default function CourseDetailPage() {
 
         {/* Description */}
         {course.description && (
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-lg leading-relaxed text-muted-foreground/80">
             {course.description}
           </p>
         )}
@@ -280,7 +282,7 @@ export default function CourseDetailPage() {
             {course.tags.map((tag) => (
               <span
                 key={tag}
-                className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+                className="flex items-center gap-1.5 rounded-full bg-background/40 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
               >
                 <Tag className="h-3 w-3" />
                 {tag}
@@ -290,44 +292,46 @@ export default function CourseDetailPage() {
         )}
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <ActionButton
-            icon={TrendingUp}
-            label="Adicionar ao plano"
-            onClick={() => handleAction('ongoing')}
-            active={existingRecord?.status === 'ongoing'}
-            color="bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400"
-            loading={isPending}
-          />
-          <ActionButton
-            icon={CheckCircle2}
-            label="Marcar concluído"
-            onClick={() => handleAction('completed')}
-            active={existingRecord?.status === 'completed'}
-            color="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400"
-            loading={isPending}
-          />
-          <ActionButton
-            icon={Bookmark}
-            label="Guardar"
-            onClick={() => handleAction('later')}
-            active={existingRecord?.status === 'later'}
-            color="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400"
-            loading={isPending}
-          />
-          <ActionButton
-            icon={Flame}
-            label="Prioritário"
-            onClick={() => handleAction('priority')}
-            active={existingRecord?.status === 'priority'}
-            color="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400"
-            loading={isPending}
-          />
+        <div className="flex flex-wrap items-center gap-3 pt-4">
+          <div className="flex flex-wrap gap-2">
+            <ActionButton
+              icon={TrendingUp}
+              label="Adicionar ao plano"
+              onClick={() => handleAction('ongoing')}
+              active={existingRecord?.status === 'ongoing'}
+              color="bg-foreground text-background"
+              loading={isPending}
+            />
+            <ActionButton
+              icon={CheckCircle2}
+              label="Marcar concluído"
+              onClick={() => handleAction('completed')}
+              active={existingRecord?.status === 'completed'}
+              color="bg-emerald-500 text-white"
+              loading={isPending}
+            />
+            <ActionButton
+              icon={Bookmark}
+              label="Guardar"
+              onClick={() => handleAction('later')}
+              active={existingRecord?.status === 'later'}
+              color="bg-blue-500 text-white"
+              loading={isPending}
+            />
+            <ActionButton
+              icon={Flame}
+              label="Prioritário"
+              onClick={() => handleAction('priority')}
+              active={existingRecord?.status === 'priority'}
+              color="bg-orange-500 text-white"
+              loading={isPending}
+            />
+          </div>
           <a
             href={course.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto flex items-center gap-2 rounded-xl border border-primary/30 bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            className="ml-auto flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition hover:opacity-90 min-w-max"
           >
             Abrir curso
             <ExternalLink className="h-4 w-4" />
@@ -337,18 +341,20 @@ export default function CourseDetailPage() {
 
       {/* ── Why recommended ──────────────────────────────────────────────── */}
       {course.similarityScore !== undefined && (
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Por que é recomendado?</h2>
+        <div className="rounded-[2.5rem] border border-border/60 bg-background/60 p-8 shadow-2xl backdrop-blur-2xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-foreground text-background">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Por que é recomendado?</h2>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-lg leading-relaxed text-muted-foreground/80">
             Este curso tem uma relevância semântica de{' '}
-            <span className="font-semibold text-primary">
+            <span className="font-black text-foreground">
               {Math.round(course.similarityScore * 100)}%
             </span>{' '}
             em relação à tua pesquisa, baseada em análise de conteúdo por IA. As tags{' '}
-            <span className="font-medium text-foreground">
+            <span className="font-bold text-foreground">
               {course.tags.slice(0, 3).join(', ')}
             </span>{' '}
             correspondem ao teu perfil e interesses.
@@ -358,8 +364,8 @@ export default function CourseDetailPage() {
 
       {/* ── Related courses ───────────────────────────────────────────────── */}
       {related.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Cursos relacionados</h2>
+        <div className="space-y-6">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Cursos relacionados</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {related.slice(0, 4).map((r: CourseSearchResult) =>
               isLoading ? (

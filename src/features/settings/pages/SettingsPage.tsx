@@ -96,13 +96,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-softinsa-blue/50',
-        checked ? 'bg-softinsa-blue' : 'bg-slate-200 dark:bg-slate-600',
+        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-foreground/10',
+        checked ? 'bg-foreground' : 'bg-muted',
       )}
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200',
+          'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-background shadow-xl ring-0 transition duration-200',
           checked ? 'translate-x-5' : 'translate-x-0',
         )}
       />
@@ -119,7 +119,7 @@ function SelectField({ value, options, onChange }: {
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="w-full sm:w-auto min-w-[120px] sm:min-w-[160px] rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 cursor-pointer"
+      className="w-full sm:w-auto min-w-[120px] sm:min-w-[160px] rounded-full border border-border/60 bg-background/50 px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-4 focus:ring-foreground/10 cursor-pointer"
     >
       <option value="">Não definido</option>
       {options.map((o) => (
@@ -140,10 +140,10 @@ function RadioGroup({ value, options, onChange }: {
         <label
           key={o.value}
           className={cn(
-            'flex items-start gap-3 rounded-xl border-2 px-4 py-3 cursor-pointer transition-colors',
+            'flex items-start gap-4 rounded-3xl border-2 px-6 py-4 cursor-pointer transition-all active:scale-[0.98]',
             value === o.value
-              ? 'border-softinsa-blue bg-softinsa-blue/5 dark:bg-softinsa-blue/10'
-              : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500',
+              ? 'border-foreground bg-foreground/5 dark:bg-foreground/10'
+              : 'border-border/60 hover:border-border',
           )}
         >
           <input
@@ -152,12 +152,12 @@ function RadioGroup({ value, options, onChange }: {
             value={o.value}
             checked={value === o.value}
             onChange={() => onChange(o.value)}
-            className="mt-0.5 accent-softinsa-blue shrink-0"
+            className="mt-1 accent-foreground shrink-0 h-4 w-4"
           />
           <div>
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{o.label}</span>
+            <span className="text-sm font-bold text-foreground">{o.label}</span>
             {o.description && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{o.description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{o.description}</p>
             )}
           </div>
         </label>
@@ -186,14 +186,14 @@ function SectionPanel({ title, icon: Icon, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-softinsa-blue/10 text-softinsa-blue">
+    <div className="animate-in fade-in duration-500">
+      <div className="mb-6 flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-xl">
           <Icon className="h-5 w-5" />
         </div>
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
+        <h2 className="text-xl font-black tracking-tight text-foreground">{title}</h2>
       </div>
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden shadow-sm">
+      <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-2xl backdrop-blur-2xl divide-y divide-border/20 overflow-hidden">
         {children}
       </div>
     </div>
@@ -206,7 +206,7 @@ function SectionItem({ children }: { children: React.ReactNode }) {
 
 function SubLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="px-5 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+    <p className="px-6 pt-5 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
       {children}
     </p>
   );
@@ -291,13 +291,13 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-5xl px-6 py-12">
         {/* Page header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-12 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('settings.title')}</h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('settings.title')}</h1>
+            <p className="mt-1 text-base text-muted-foreground">
               {t('settings.subtitle')}
             </p>
           </div>
@@ -305,10 +305,10 @@ export default function SettingsPage() {
             onClick={handleSave}
             disabled={!isDirty || saveMutation.isPending}
             className={cn(
-              'flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all',
+              'flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all active:scale-95',
               isDirty
-                ? 'bg-softinsa-blue text-white hover:bg-softinsa-blue/90 shadow-sm'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 cursor-not-allowed',
+                ? 'bg-foreground text-background shadow-2xl hover:bg-foreground/90'
+                : 'bg-muted/40 border border-border/60 text-muted-foreground/40 cursor-not-allowed',
             )}
           >
             <Save className="h-4 w-4" />
@@ -318,18 +318,18 @@ export default function SettingsPage() {
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Sidebar nav */}
-          <aside className="w-full md:w-52 shrink-0">
-            <nav className="flex md:block md:sticky md:top-6 overflow-x-auto pb-2 md:pb-0 gap-2 md:gap-0 md:space-y-1 snap-x scrollbar-hide">
+          <aside className="w-full md:w-60 shrink-0">
+            <nav className="flex md:block md:sticky md:top-12 overflow-x-auto pb-4 md:pb-0 gap-2 md:gap-1.5 md:space-y-1.5 snap-x scrollbar-hide">
               {SECTIONS.map(({ id, labelKey, icon: Icon, customLabel }) => (
                 <button
                   key={id}
                   type="button"
                   onClick={() => setActiveSection(id)}
                   className={cn(
-                    'flex-shrink-0 snap-start flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-left transition-colors whitespace-nowrap md:w-full',
+                    'flex-shrink-0 snap-start flex items-center gap-3 rounded-full px-5 py-3 text-sm font-bold text-left transition-all whitespace-nowrap md:w-full',
                     activeSection === id
-                      ? 'bg-softinsa-blue text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200',
+                      ? 'bg-foreground text-background shadow-xl'
+                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />

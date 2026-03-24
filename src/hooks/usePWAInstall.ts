@@ -23,7 +23,7 @@ export function usePWAInstall() {
       // Prevent the mini-infobar from appearing on mobile
       try {
         e.preventDefault();
-      } catch (err) {
+      } catch {
         // Some browsers may throw if event is not cancelable; still continue
       }
       // Stash the event so it can be triggered later.

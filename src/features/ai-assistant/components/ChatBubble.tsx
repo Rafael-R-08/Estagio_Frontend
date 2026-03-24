@@ -40,7 +40,7 @@ function SourceChips({ sources }: { sources: RagSource[] }) {
           >
             <FileText className="h-3 w-3 shrink-0" />
             <span className="max-w-[180px] truncate">{src.content.slice(0, 60)}…</span>
-            <span className="ml-1 shrink-0 font-medium text-primary/70">
+            <span className="ml-1 shrink-0 font-medium text-blue-600 dark:text-blue-400">
               {Math.round(src.similarity * 100)}%
             </span>
           </div>
@@ -48,7 +48,7 @@ function SourceChips({ sources }: { sources: RagSource[] }) {
         {sources.length > 2 && (
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="flex items-center gap-0.5 rounded-md px-2 py-1 text-xs text-primary/70 transition hover:text-primary"
+            className="flex items-center gap-0.5 rounded-md px-2 py-1 text-xs text-blue-600 dark:text-blue-400 transition hover:opacity-80"
           >
             {expanded ? (
               <>
@@ -80,14 +80,14 @@ export function ChatBubble({ message }: { message: AiMessage }) {
 
   if (isUser) {
     return (
-      <div className="flex justify-end">
+      <div className="flex justify-end pr-2">
         <div className="max-w-[85%] sm:max-w-[75%]">
-          <div className="rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground shadow-sm break-words">
+          <div className="rounded-[2rem] rounded-br-[0.5rem] bg-foreground px-6 py-4 text-sm font-medium leading-relaxed text-background shadow-2xl break-words">
             {displayContent}
             {isLong && (
               <button
                 onClick={() => setExpanded((v) => !v)}
-                className="ml-2 inline-flex items-center gap-0.5 text-xs font-medium text-primary-foreground/70 transition hover:text-primary-foreground"
+                className="ml-2 inline-flex items-center gap-0.5 text-xs font-black text-background/60 transition hover:text-background"
               >
                 {expanded ? (
                   <><ChevronUp className="h-3 w-3" />Menos</>
@@ -97,7 +97,7 @@ export function ChatBubble({ message }: { message: AiMessage }) {
               </button>
             )}
           </div>
-          <p className="mt-1 text-right text-[10px] text-muted-foreground/50">
+          <p className="mt-2 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
             {new Date(message.timestamp).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
@@ -107,27 +107,27 @@ export function ChatBubble({ message }: { message: AiMessage }) {
 
   // ── Assistant bubble ─────────────────────────────────────────────────────
   return (
-    <div className="flex items-end gap-2.5">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
-        <Bot className="h-4 w-4 text-primary" />
+    <div className="flex items-end gap-3 pl-2">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] bg-foreground text-background shadow-xl">
+        <Bot className="h-5 w-5" />
       </div>
       <div className="max-w-[85%] sm:max-w-[80%]">
-        <div className="rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm">
+        <div className="rounded-[2.5rem] rounded-bl-[0.5rem] border border-border/60 bg-background/60 px-6 py-5 shadow-2xl backdrop-blur-2xl">
           <div className="text-sm leading-relaxed text-foreground break-words overflow-hidden">
             <ReactMarkdown
               components={{
-                p: ({ children }) => <p className="mb-3 last:mb-0 whitespace-pre-wrap">{children}</p>,
-                strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                ul: ({ children }) => <ul className="mb-3 list-disc pl-5 last:mb-0">{children}</ul>,
-                ol: ({ children }) => <ol className="mb-3 list-decimal pl-5 last:mb-0">{children}</ol>,
+                p: ({ children }) => <p className="mb-4 last:mb-0 whitespace-pre-wrap">{children}</p>,
+                strong: ({ children }) => <strong className="font-black text-foreground">{children}</strong>,
+                ul: ({ children }) => <ul className="mb-4 list-disc pl-5 last:mb-0 space-y-1">{children}</ul>,
+                ol: ({ children }) => <ol className="mb-4 list-decimal pl-5 last:mb-0 space-y-1">{children}</ol>,
                 li: ({ children }) => <li className="mb-1">{children}</li>,
                 a: ({ href, children }) => (
-                  <a href={href} className="text-primary hover:underline font-medium break-all" target="_blank" rel="noreferrer">
+                  <a href={href} className="text-foreground font-black underline underline-offset-4 hover:opacity-70 transition-opacity break-all" target="_blank" rel="noreferrer">
                     {children}
                   </a>
                 ),
                 code: ({ children }) => (
-                  <code className="bg-muted px-1.5 py-0.5 rounded text-xs text-foreground font-mono">
+                  <code className="bg-background/40 px-2 py-0.5 rounded-md text-xs text-foreground font-mono font-bold">
                     {children}
                   </code>
                 ),
@@ -139,7 +139,7 @@ export function ChatBubble({ message }: { message: AiMessage }) {
           {isLong && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="mt-1.5 flex items-center gap-0.5 text-xs font-medium text-primary/70 transition hover:text-primary"
+              className="mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 transition hover:text-foreground"
             >
               {expanded ? (
                 <><ChevronUp className="h-3 w-3" />Ver menos</>
@@ -152,7 +152,7 @@ export function ChatBubble({ message }: { message: AiMessage }) {
             <SourceChips sources={message.sources} />
           )}
         </div>
-        <p className="mt-1 text-[10px] text-muted-foreground/50">
+        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
           {new Date(message.timestamp).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

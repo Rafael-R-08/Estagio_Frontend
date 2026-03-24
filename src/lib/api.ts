@@ -1,4 +1,4 @@
-export type ListResponse<T> = T[] | { data?: T[] } | null | undefined;
+type ListResponse<T> = T[] | { data?: T[] } | null | undefined;
 
 export function toList<T>(payload: ListResponse<T>): T[] {
 	if (Array.isArray(payload)) return payload;

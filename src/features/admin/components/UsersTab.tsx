@@ -29,9 +29,9 @@ function ConfirmModal({
   const { t } = useTranslation();
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-xl">
+      <div className="w-full max-w-sm rounded-[2rem] border border-border/60 bg-background/60 p-6 shadow-2xl backdrop-blur-2xl">
+        <h3 className="text-lg font-bold text-foreground">{title}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
         <div className="mt-5 flex gap-3 justify-end">
           <button
@@ -113,11 +113,11 @@ function TableSkeleton() {
 // ─── Mock fallback (sem backend admin) ───────────────────────────────────────
 
 const MOCK_USERS: AdminUser[] = [
-  { id: '1', name: 'Ana Ferreira', email: 'ana@softinsa.pt', role: 'ADMIN', isActive: true, createdAt: '2024-01-15T10:00:00Z' },
-  { id: '2', name: 'Bruno Costa', email: 'bruno@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-02-20T09:00:00Z' },
-  { id: '3', name: 'Carla Mendes', email: 'carla@softinsa.pt', role: 'USER', isActive: false, createdAt: '2024-03-05T08:30:00Z' },
-  { id: '4', name: 'David Sousa', email: 'david@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-04-10T11:00:00Z' },
-  { id: '5', name: 'Eva Lopes', email: 'eva@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-05-22T14:00:00Z' },
+  { id: '1', name: 'Ana Ferreira', email: 'ana@softinsa.pt', role: 'ADMIN', isActive: true, createdAt: '2024-01-15T10:00:00Z', serviceLine: null, onboardingDone: true, managedLineId: null },
+  { id: '2', name: 'Bruno Costa', email: 'bruno@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-02-20T09:00:00Z', serviceLine: null, onboardingDone: true, managedLineId: null },
+  { id: '3', name: 'Carla Mendes', email: 'carla@softinsa.pt', role: 'USER', isActive: false, createdAt: '2024-03-05T08:30:00Z', serviceLine: null, onboardingDone: true, managedLineId: null },
+  { id: '4', name: 'David Sousa', email: 'david@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-04-10T11:00:00Z', serviceLine: null, onboardingDone: true, managedLineId: null },
+  { id: '5', name: 'Eva Lopes', email: 'eva@softinsa.pt', role: 'USER', isActive: true, createdAt: '2024-05-22T14:00:00Z', serviceLine: null, onboardingDone: true, managedLineId: null },
 ];
 
 // ─── Sort helper ──────────────────────────────────────────────────────────────
@@ -209,22 +209,22 @@ export function UsersTab() {
     <div className="space-y-4">
       {/* Search */}
       <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input
           type="text"
           placeholder={t('admin.users.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+          className="w-full rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all"
         />
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
+              <tr className="border-b border-border/40 bg-muted/20">
                 {(
                   [  
                     { key: 'name', labelKey: 'admin.users.columns.name' },

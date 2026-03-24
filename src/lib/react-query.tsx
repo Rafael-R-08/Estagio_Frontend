@@ -10,4 +10,4 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export { queryClient };
+export {};

@@ -15,6 +15,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
   const [list, setList] = useState(courses);
 
   const updateMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: ({ id, payload }: { id: string; payload: any }) =>
       trainingApi.update(id, payload),
     onSuccess: (_, variables) => {
@@ -28,6 +29,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
 
   const handleAction = (id: string, action: 'ongoing' | 'past' | 'suggested') => {
     const now = new Date().toISOString();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let payload: any = {};
     if (action === 'ongoing') {
       payload = { status: 'ongoing', startedAt: now };

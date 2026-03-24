@@ -45,16 +45,16 @@ function StatTile({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-xl border bg-card px-4 py-3.5 shadow-sm transition-colors',
-        active ? 'border-primary' : 'border-border',
+        'flex items-center gap-4 rounded-[2rem] border border-border/60 bg-muted/40 backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5',
+        active ? 'border-foreground ring-1 ring-foreground/10' : 'hover:border-border',
       )}
     >
-      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', iconColor)}>
+      <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.2rem]', iconColor)}>
         {icon}
       </div>
       <div>
-        <p className="text-lg font-bold leading-none text-foreground">{value}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
+        <p className="text-2xl font-black leading-none text-foreground">{value}</p>
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground opacity-80">{label}</p>
       </div>
     </div>
   );
@@ -163,17 +163,17 @@ export default function MyLearningPage() {
     <div className="space-y-5">
 
       {/* ── Page header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 px-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('myLearning.title')}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {t('myLearning.hello')}, <span className="font-medium text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('myLearning.title')}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t('myLearning.hello')}, <span className="font-bold text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
             {' '}{t('myLearning.subtitle')}
           </p>
         </div>
         <button
           onClick={() => navigate('/search')}
-          className="shrink-0 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-foreground/5"
         >
           <Plus className="h-4 w-4" />
           {t('myLearning.discover')}

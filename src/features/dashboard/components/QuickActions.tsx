@@ -49,14 +49,14 @@ export function QuickActions() {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-          <Sparkles className="h-4 w-4 text-primary" />
+    <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl p-6 shadow-sm">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
+          <Sparkles className="h-4 w-4" />
         </div>
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Ações Rápidas</h2>
-          <p className="text-xs text-muted-foreground">Atalhos para funcionalidades principais</p>
+        <div className="space-y-0.5">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-70">Ações Rápidas</h2>
+          <p className="font-bold text-foreground">Atalhos principais</p>
         </div>
       </div>
 
@@ -68,8 +68,8 @@ export function QuickActions() {
               key={action.href}
               onClick={() => navigate(action.href)}
               className={cn(
-                'group flex flex-col gap-2 rounded-xl border border-border bg-background p-3.5',
-                'text-left transition hover:border-primary/30 hover:shadow-sm active:scale-[0.98]',
+                'group flex flex-col gap-3 rounded-[2rem] border border-border/60 bg-background/50 p-4',
+                'text-left transition-all duration-300 hover:border-border hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]',
               )}
             >
               <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg transition', action.color)}>

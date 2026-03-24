@@ -189,22 +189,22 @@ export default function AiAssistantPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* ── Top bar ── */}
-      <div className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-3.5">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Bot className="h-4.5 w-4.5 text-primary" />
+      <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-background/60 px-6 py-5 backdrop-blur-2xl">
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-foreground text-background shadow-xl">
+            <Bot className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-foreground">{t('ai.title')}</h1>
-            <p className="text-xs text-muted-foreground">Powered by Ollama · RAG</p>
+            <h1 className="text-xs font-black tracking-widest text-foreground uppercase opacity-70">{t('ai.title')}</h1>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ollama · RAG Engine</p>
           </div>
         </div>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
           title={sidebarOpen ? t('ai.closePanel') : t('ai.openPanel')}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-background/40 border border-border/60 text-muted-foreground transition hover:bg-foreground hover:text-background active:scale-90"
         >
-          {sidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRight className="h-4 w-4" />}
+          {sidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRight className="h-5 w-5" />}
         </button>
       </div>
 

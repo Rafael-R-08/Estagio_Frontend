@@ -121,12 +121,12 @@ export function FilterSidebar({
       </div>
 
       {/* Platforms */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
           Plataformas
         </p>
         {safePlatforms.length === 0 ? (
-          <p className="px-2 text-xs text-muted-foreground">Nenhuma disponível</p>
+          <p className="px-2 text-[11px] font-medium text-muted-foreground">Nenhuma disponível</p>
         ) : (
           safePlatforms.map((p) => (
             <FilterCheckbox
@@ -140,8 +140,8 @@ export function FilterSidebar({
       </div>
 
       {/* Difficulty level */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
           Nível
         </p>
         {LEVELS.map((l) => (
@@ -151,7 +151,7 @@ export function FilterSidebar({
             checked={filters.levels.includes(l.value)}
             onChange={() => toggleLevel(l.value)}
             badge={
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold', l.color)}>
+              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', l.color)}>
                 {l.label[0]}
               </span>
             }
@@ -160,8 +160,8 @@ export function FilterSidebar({
       </div>
 
       {/* Price */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
           Preço
         </p>
         {[
@@ -169,10 +169,10 @@ export function FilterSidebar({
           { label: 'Grátis', value: true },
           { label: 'Pago', value: false },
         ].map((opt, i) => (
-          <label key={i} className="flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-muted/50 cursor-pointer text-sm text-foreground">
+          <label key={i} className="flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-muted/50 cursor-pointer text-[13px] font-medium text-foreground">
             <input 
               type="radio" 
-              className="h-4 w-4 border-muted text-primary focus:ring-primary/20 accent-primary"
+              className="h-4 w-4 border-muted text-foreground focus:ring-foreground/20 accent-foreground"
               name="price-filter"
               checked={filters.isFree === opt.value}
               onChange={() => onChange({ ...filters, isFree: opt.value })}
@@ -183,11 +183,11 @@ export function FilterSidebar({
       </div>
 
       {/* Minimum Rating */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-0.5">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
           Avaliação Mínima
         </p>
-        <div className="flex gap-1 px-2 pt-1">
+        <div className="flex gap-2 px-2 pt-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -197,11 +197,11 @@ export function FilterSidebar({
                 (filters.minRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
               )}
             >
-              <Star className="h-5 w-5 fill-current" />
+              <Star className="h-6 w-6 fill-current" />
             </button>
           ))}
         </div>
-        <p className="px-2 pt-1 text-[10px] text-muted-foreground">
+        <p className="px-2 pt-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground opacity-70">
           {filters.minRating ? `${filters.minRating} ou mais estrelas` : 'Qualquer avaliação'}
         </p>
       </div>

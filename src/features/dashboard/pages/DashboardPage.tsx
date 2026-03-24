@@ -36,20 +36,20 @@ interface StatCardProps {
 
 function StatCard({ icon: Icon, label, value, color, loading }: StatCardProps) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 shadow-sm">
-      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', color)}>
+    <div className="flex items-center gap-4 rounded-[2rem] border border-border/60 bg-muted/40 backdrop-blur-md px-6 py-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.2rem]', color)}>
         <Icon className="h-5 w-5" />
       </div>
       <div>
         {loading ? (
           <div className="space-y-1">
-            <div className="h-5 w-10 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            <div className="h-6 w-12 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-24 animate-pulse rounded bg-muted" />
           </div>
         ) : (
           <>
-            <p className="text-lg font-bold text-foreground leading-none">{value}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+            <p className="text-2xl font-black text-foreground leading-none">{value}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-1.5 opacity-80">{label}</p>
           </>
         )}
       </div>
@@ -72,11 +72,11 @@ function SectionHeader({
 }) {
   const navigate = useNavigate();
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between px-2">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">{title}</h2>
         {count !== undefined && (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          <span className="rounded-full bg-muted/60 border border-border/40 px-2 py-0.5 text-[10px] font-bold text-foreground">
             {count}
           </span>
         )}
@@ -186,12 +186,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {greeting}{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 
+      <div className="flex items-start justify-between gap-4 px-2">
+        <div className="space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-60">{today}</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            {greeting}{user?.name ? `, ` : ''} <span className="text-blue-600 dark:text-blue-400">{user?.name ? user.name.split(' ')[0] : ''}</span>
           </h1>
-          <p className="mt-0.5 text-sm capitalize text-muted-foreground">{today}</p>
         </div>
       </div>
 

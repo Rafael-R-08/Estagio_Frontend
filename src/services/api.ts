@@ -1,7 +1,6 @@
 import { api } from '../lib/axios';
 import type {
   User,
-  AuthResponse,
   CourseSearchResult,
   CourseDetail,
   SearchResponse,
@@ -26,26 +25,11 @@ import type {
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
-export const authApi = {
-  login: (email: string, password: string) =>
-    api.post<AuthResponse>('/auth/login', { email, password }),
 
-  register: (name: string, email: string, password: string) =>
-    api.post<AuthResponse>('/auth/register', { name, email, password }),
-
-  me: () => api.get<User>('/auth/me'),
-
-  refresh: (refreshToken: string) =>
-    api.post<{ access_token: string }>('/auth/refresh-token', { refreshToken }),
-};
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
-export const userApi = {
-  getAll: () => api.get<User[]>('/users'),
 
-  getById: (id: string) => api.get<User>(`/users/${id}`),
-};
 
 // ─── Search ──────────────────────────────────────────────────────────────────
 
@@ -155,13 +139,7 @@ export const recommendationsApi = {
 
 // ─── AI ──────────────────────────────────────────────────────────────────
 
-export const aiApi = {
-  generateText: (prompt: string) =>
-    api.post<{ response: string }>('/ai/generate', { prompt }),
 
-  searchChunks: (query: string, limit = 5) =>
-    api.get<{ id: string; content: string; similarity: number }[]>('/ai/search-chunks', { params: { query, limit } }),
-};
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 

@@ -10,9 +10,14 @@ export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground font-sans antialiased relative selection:bg-blue-500 selection:text-white">
+      {/* Modern Background Elements */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
+      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed bottom-1/4 left-1/4 w-[300px] h-[300px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
+
       {/* Sidebar desktop */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block relative z-20">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       </div>
 

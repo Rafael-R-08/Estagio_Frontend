@@ -59,8 +59,8 @@ export function SearchBar({
   return (
     <div
       className={cn(
-        'group relative flex items-center rounded-2xl border border-border bg-card shadow-sm',
-        'transition-all focus-within:border-primary/60 focus-within:shadow-md focus-within:shadow-primary/10',
+        'group relative flex items-center rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm',
+        'transition-all focus-within:border-foreground focus-within:shadow-xl focus-within:shadow-foreground/5 focus-within:-translate-y-0.5',
         className,
       )}
     >
@@ -74,7 +74,7 @@ export function SearchBar({
       </div>
 
       {/* Input */}
-      <input
+        <input
         ref={inputRef}
         type="text"
         value={localValue}
@@ -82,7 +82,7 @@ export function SearchBar({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          'flex-1 bg-transparent py-3.5 text-sm text-foreground placeholder:text-muted-foreground/70',
+          'flex-1 bg-transparent py-4 text-base font-medium text-foreground placeholder:text-muted-foreground/50',
           'outline-none',
         )}
       />
@@ -102,9 +102,9 @@ export function SearchBar({
       <button
         onClick={() => localValue.trim() && onSearch(localValue.trim())}
         className={cn(
-          'mr-2 rounded-xl px-4 py-2 text-sm font-medium transition',
+          'mr-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all',
           localValue.trim()
-            ? 'bg-primary text-primary-foreground hover:opacity-90 active:scale-95'
+            ? 'bg-foreground text-background hover:opacity-90 active:scale-95 shadow-md shadow-foreground/10'
             : 'cursor-default bg-muted text-muted-foreground',
         )}
         disabled={!localValue.trim()}

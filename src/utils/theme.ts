@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 export type Theme = "light" | "dark" | "system";
 
 let _mediaListener: (() => void) | null = null;

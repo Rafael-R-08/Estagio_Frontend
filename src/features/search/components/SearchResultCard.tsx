@@ -30,26 +30,26 @@ const LEVEL_LABELS: Record<string, string> = {
 
 export function SearchResultCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-2xl border border-border bg-card p-5 space-y-3">
+    <div className="animate-pulse rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md p-6 space-y-4">
       <div className="flex justify-between">
-        <div className="h-4 w-2/3 rounded bg-muted" />
-        <div className="h-5 w-16 rounded-full bg-muted" />
+        <div className="h-5 w-2/3 rounded-lg bg-muted" />
+        <div className="h-6 w-16 rounded-full bg-muted" />
       </div>
       <div className="h-3 w-24 rounded bg-muted" />
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <div className="h-3 w-full rounded bg-muted" />
         <div className="h-3 w-5/6 rounded bg-muted" />
       </div>
       <div className="flex gap-2">
-        <div className="h-6 w-14 rounded-full bg-muted" />
-        <div className="h-6 w-16 rounded-full bg-muted" />
+        <div className="h-7 w-16 rounded-full bg-muted" />
+        <div className="h-7 w-20 rounded-full bg-muted" />
       </div>
-      <div className="flex justify-between pt-1">
+      <div className="flex justify-between pt-2">
         <div className="flex gap-2">
-          <div className="h-8 w-20 rounded-lg bg-muted" />
-          <div className="h-8 w-20 rounded-lg bg-muted" />
+          <div className="h-9 w-24 rounded-full bg-muted" />
+          <div className="h-9 w-24 rounded-full bg-muted" />
         </div>
-        <div className="h-8 w-24 rounded-lg bg-muted" />
+        <div className="h-9 w-28 rounded-full bg-muted" />
       </div>
     </div>
   );
@@ -71,10 +71,10 @@ function ActionBtn({ icon: Icon, label, onClick, active, activeClass }: ActionBt
       onClick={(e) => { e.stopPropagation(); onClick(); }}
       title={label}
       className={cn(
-        'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition active:scale-95',
+        'flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.05em] transition-all duration-300 active:scale-95',
         active
-          ? cn('border-transparent', activeClass ?? 'bg-primary/10 text-primary')
-          : 'border-border text-muted-foreground hover:border-primary/30 hover:text-foreground',
+          ? cn('border-transparent shadow-sm', activeClass ?? 'bg-foreground text-background')
+          : 'border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground hover:shadow-md hover:-translate-y-0.5',
       )}
     >
       <Icon className="h-3.5 w-3.5" />
@@ -142,29 +142,29 @@ export function SearchResultCard({
     <div
       onClick={() => navigate(`/course/${encodeURIComponent(course.externalId)}`)}
       className={cn(
-        'group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-card p-5',
-        'transition-all duration-200',
-        'hover:-translate-y-[3px] hover:shadow-lg hover:shadow-black/10 hover:border-primary/30',
+        'group relative flex cursor-pointer flex-col gap-4 rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-6',
+        'transition-all duration-300',
+        'hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/5 hover:border-foreground/20 hover:bg-background/50',
         alreadyAttended && 'border-emerald-300/50 dark:border-emerald-700/40',
       )}
     >
       {/* Already attended badge */}
       {alreadyAttended && (
-        <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          <CheckCircle2 className="h-3 w-3" />
+        <div className="absolute right-5 top-5 flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+          <CheckCircle2 className="h-4 w-4" />
           Frequentado
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-2 pr-4">
+      <div className="flex items-start gap-4 pr-5">
         <div className="flex-1 min-w-0">
-          <h3 className="line-clamp-2 text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-2 text-xl font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
             {course.title}
           </h3>
         </div>
         {levelStyle && (
-          <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold', levelStyle)}>
+          <span className={cn('shrink-0 rounded-full px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold', levelStyle)}>
             {levelLabel}
           </span>
         )}
@@ -253,10 +253,10 @@ export function SearchResultCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleViewCourse}
-          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-primary/30 hover:text-foreground"
+          className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-md shadow-foreground/5 ml-auto"
         >
           Ver curso
-          <ExternalLink className="h-3 w-3" />
+          <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>
     </div>

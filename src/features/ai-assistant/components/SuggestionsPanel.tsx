@@ -49,25 +49,25 @@ export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent 
   const skills = user?.techStack ?? [];
 
   return (
-    <div className="flex flex-col gap-6 overflow-y-auto p-5">
+    <div className="flex flex-col gap-8 overflow-y-auto p-6">
       {/* Shortcuts */}
       <section>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Atalhos rápidos
+        <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+          Sugestões IA
         </h3>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-3">
           {SHORTCUTS.map((s) => {
             const Icon = s.icon;
             return (
               <button
-                key={s.label}
+                key={s.query}
                 onClick={() => onSelect(s.query)}
-                className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5 text-left transition hover:border-primary/30 hover:bg-muted/40 active:scale-[0.98]"
+                className="group flex items-center gap-4 rounded-[1.5rem] border border-border/60 bg-background/40 p-3 text-left transition-all hover:bg-background/80 hover:shadow-xl active:scale-[0.98]"
               >
-                <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${s.bg}`}>
-                  <Icon className={`h-3.5 w-3.5 ${s.color}`} />
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-foreground text-background shadow-lg transition-transform group-hover:scale-110`}>
+                  <Icon className={`h-5 w-5`} />
                 </div>
-                <span className="text-xs font-medium text-foreground">{s.label}</span>
+                <span className="text-xs font-black tracking-tight text-foreground leading-tight">{s.label}</span>
               </button>
             );
           })}
@@ -77,15 +77,15 @@ export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent 
       {/* Skills */}
       {skills.length > 0 && (
         <section>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            As tuas skills
+          <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+            Focar nas tuas Skills
           </h3>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {skills.map((skill) => (
               <button
                 key={skill}
                 onClick={() => onSelect(`Recomenda cursos avançados de ${skill}`)}
-                className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition hover:bg-primary/20"
+                className="rounded-full bg-foreground px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-background shadow-sm transition hover:opacity-80 active:scale-95"
               >
                 {skill}
               </button>
@@ -97,26 +97,26 @@ export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent 
       {/* Recent queries */}
       {recentQueries.length > 0 && (
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
               Recentes
             </h3>
             <button
               onClick={onClearRecent}
-              className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 transition hover:text-muted-foreground"
+              className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 transition hover:text-foreground"
             >
               <X className="h-3 w-3" />
               Limpar
             </button>
           </div>
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {recentQueries.map((q, i) => (
               <li key={i}>
                 <button
                   onClick={() => onSelect(q)}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+                  className="flex w-full items-center gap-3 rounded-full px-4 py-2 text-left text-xs font-bold text-muted-foreground transition hover:bg-background/80 hover:text-foreground border border-transparent hover:border-border/60"
                 >
-                  <Clock className="h-3 w-3 shrink-0" />
+                  <Clock className="h-4 w-4 shrink-0" />
                   <span className="line-clamp-1">{q}</span>
                 </button>
               </li>
@@ -126,8 +126,8 @@ export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent 
       )}
 
       {skills.length === 0 && recentQueries.length === 0 && (
-        <p className="text-center text-xs text-muted-foreground/50">
-          Completa o teu perfil para ver sugestões personalizadas.
+        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 py-10">
+          Personaliza o teu perfil para obter sugestões IA.
         </p>
       )}
     </div>

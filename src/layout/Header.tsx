@@ -31,7 +31,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   }, [tipsCount]);
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-6">
+    <header className="flex h-16 items-center gap-4 border-b border-border/60 bg-background/40 backdrop-blur-2xl px-6 sticky top-0 z-30">
       {/* Mobile menu toggle */}
       <button
         onClick={onMenuToggle}
@@ -47,8 +47,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
           </span>
-          <Sparkles className="h-3.5 w-3.5 text-softinsa-blue" />
-          <span className="text-xs font-medium text-softinsa-blue whitespace-nowrap">{t('header.aiActive')}</span>
+          <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{t('header.aiActive')}</span>
         </div>
         <span className="text-muted-foreground/40 text-xs">·</span>
         <span
@@ -64,13 +64,13 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <button className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
           <Bell className="h-5 w-5" />
           {/* Badge exemplo */}
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-softinsa-error" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
         {/* Avatar */}
         <button
           onClick={() => navigate('/profile')}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-opacity"
           title={user?.name}
         >
           {user?.name?.charAt(0).toUpperCase() ?? 'U'}

@@ -35,20 +35,20 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-softinsa-blue text-white shadow-sm">
-          <ShieldCheck className="h-5 w-5" />
+      <div className="flex items-center gap-4 px-2">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-sm">
+          <ShieldCheck className="h-6 w-6" />
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">{t('admin.title')}</h1>
-            <span className="text-muted-foreground">/</span>
-            <span className="flex items-center gap-1.5 text-lg font-semibold text-softinsa-blue">
-              <Icon className="h-4 w-4" />
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('admin.title')}</h1>
+            <span className="text-muted-foreground opacity-50">/</span>
+            <span className="flex items-center gap-1.5 text-xl font-bold text-foreground opacity-90">
+              <Icon className="h-5 w-5" />
               {t(current.labelKey, current.labelFallback)}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-1">
             {t('admin.subtitle')}
           </p>
         </div>

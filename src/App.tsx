@@ -10,8 +10,8 @@ const savedTheme = (localStorage.getItem("lh_theme") as never) || "system";
 applyTheme(savedTheme);
 
 // Pages — Auth
+import LandingPage from './features/landing/pages/LandingPage';
 import LoginPage from './features/auth/pages/LoginPage';
-import RegisterPage from './features/auth/pages/RegisterPage';
 
 // Pages — App
 import DashboardPage from './features/dashboard/pages/DashboardPage';
@@ -23,6 +23,8 @@ import AiAssistantPage from './features/ai-assistant/pages/AiAssistantPage';
 import ProfilePage from './features/profile/pages/ProfilePage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import AdminPage from './features/admin/pages/AdminPage';
+import SlManagerPage from './features/sl-manager/pages/SlManagerPage';
+import SlManagerUserDetailPage from './features/sl-manager/pages/SlManagerUserDetailPage';
 
 import { InstallPrompt } from './components/ui/InstallPrompt';
 
@@ -32,8 +34,9 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Public */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+
 
           {/* Protected — layout comum */}
           <Route element={<ProtectedRoute />}>
@@ -56,8 +59,15 @@ function App() {
             </Route>
           </Route>
 
-          {/* Redirect raiz */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* SL Manager only */}
+          <Route element={<ProtectedRoute requiredRole="SERVICE_LINE_MANAGER" />}>
+            <Route element={<AppLayout />}>
+              <Route path="/sl-manager" element={<SlManagerPage />} />
+              <Route path="/sl-manager/users/:id" element={<SlManagerUserDetailPage />} />
+            </Route>
+          </Route>
+
+          {/* Redirect 404 */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>

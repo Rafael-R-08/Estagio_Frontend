@@ -10,7 +10,8 @@ import { profileApi, trainingApi } from '@/services/api';
 import { toList } from '@/lib/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import type { ExperienceLevel, User, TrainingRecord, TrainingStats } from '@/types';
+import { SERVICE_LINE_LABELS } from '@/types';
+import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine } from '@/types';
 
 import { TagInput } from '../components/TagInput';
 
@@ -65,7 +66,7 @@ function UserAvatar({ name }: { name: string }) {
     .map((w) => w[0].toUpperCase())
     .join('');
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground shadow-lg ring-4 ring-primary/20">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[2rem] bg-foreground text-3xl font-bold text-background shadow-2xl ring-4 ring-foreground/10">
       {initials || <UserIcon className="h-10 w-10" />}
     </div>
   );
@@ -103,6 +104,7 @@ interface SidebarProps {
   draftDepartment: string;
   draftLocation: string;
   draftLanguage: string;
+  draftServiceLine: ServiceLine | null;
   onNameChange: (v: string) => void;
   onLevelChange: (v: ExperienceLevel | undefined) => void;
   onSkillsChange: (v: string[]) => void;
@@ -111,21 +113,22 @@ interface SidebarProps {
   onDepartmentChange: (v: string) => void;
   onLocationChange: (v: string) => void;
   onLanguageChange: (v: string) => void;
+  onServiceLineChange: (v: ServiceLine | null) => void;
 }
 
 function ProfileSidebar({
   user, isEditing, onEditToggle,
   draftName, draftLevel, draftSkills, draftInterests,
-  draftJobTitle, draftDepartment, draftLocation, draftLanguage,
+  draftJobTitle, draftDepartment, draftLocation, draftLanguage, draftServiceLine,
   onNameChange, onLevelChange, onSkillsChange, onInterestsChange,
-  onJobTitleChange, onDepartmentChange, onLocationChange, onLanguageChange,
+  onJobTitleChange, onDepartmentChange, onLocationChange, onLanguageChange, onServiceLineChange,
 }: SidebarProps) {
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
       {/* Identity card */}
-      <div className="rounded-xl border border-primary/30 bg-card shadow-sm">
-        <div className="flex flex-col items-center p-6 pb-4 text-center">
+      <div className="rounded-[2.5rem] border border-border/60 bg-card/40 p-1 shadow-2xl backdrop-blur-2xl">
+        <div className="flex flex-col items-center p-8 pb-6 text-center">
           <UserAvatar name={draftName || user.name || 'U'} />
           <div className="mt-4 space-y-0.5">
             {isEditing ? (
@@ -152,6 +155,13 @@ function ProfileSidebar({
                 {draftJobTitle}{draftDepartment ? ` · ${draftDepartment}` : ''}
               </p>
             )}
+            {!isEditing && draftServiceLine && (
+              <div className="mt-1 flex justify-center">
+                <p className="text-[11px] font-medium text-primary bg-primary/10 rounded-full px-2 py-0.5 inline-block">
+                  {SERVICE_LINE_LABELS[draftServiceLine]}
+                </p>
+              </div>
+            )}
             {!isEditing && draftLocation && (
               <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                 <MapPin className="h-3 w-3" />
@@ -164,10 +174,10 @@ function ProfileSidebar({
             type="button"
             onClick={onEditToggle}
             className={cn(
-              'mt-4 flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition',
+              'mt-6 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-bold transition active:scale-95',
               isEditing
-                ? 'border-primary bg-primary text-primary-foreground hover:opacity-90'
-                : 'border-border bg-transparent text-foreground hover:bg-muted',
+                ? 'bg-foreground text-background shadow-xl'
+                : 'border border-border/60 bg-background/40 text-foreground hover:bg-background/80',
             )}
           >
             <Edit2 className="h-3.5 w-3.5" />
@@ -217,6 +227,19 @@ function ProfileSidebar({
                 />
               </div>
               <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">Service Line</p>
+                <select
+                  value={draftServiceLine || ''}
+                  onChange={(e) => onServiceLineChange((e.target.value as ServiceLine) || null)}
+                  className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <option value="">Não definido</option>
+                  {Object.entries(SERVICE_LINE_LABELS).map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
                 <p className="text-xs font-medium text-muted-foreground">{t('profile.location')}</p>
                 <select
                   value={draftLocation}
@@ -233,10 +256,10 @@ function ProfileSidebar({
           )}
         </div>
 
-        <div className="border-t border-border px-6 py-3 text-center">
-          <p className="text-xs text-muted-foreground">{user.email}</p>
+        <div className="border-t border-border/40 px-6 py-4 text-center bg-muted/20">
+          <p className="text-xs font-medium text-foreground">{user.email}</p>
           {user.createdAt && (
-            <p className="mt-0.5 text-[11px] text-muted-foreground/50">
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
               {t('profile.memberSince')}{' '}
               {new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
             </p>
@@ -245,7 +268,7 @@ function ProfileSidebar({
       </div>
 
       {/* Professional Skills */}
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
         {isEditing ? (
           <TagInput
             label="Stack tecnológica"
@@ -287,7 +310,7 @@ function ProfileSidebar({
       </div>
 
       {/* Learning Interests */}
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
         {isEditing ? (
           <TagInput
             label="Interesses"
@@ -321,7 +344,7 @@ function ProfileSidebar({
       </div>
 
       {/* Preferências */}
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
         <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <Globe className="h-3.5 w-3.5" />
           Preferências
@@ -402,11 +425,11 @@ function LearningImpactCard({ stats, timeline }: { stats?: TrainingStats; timeli
   const comparisonMax = Math.max(userHours, COMPANY_AVG_HOURS, 1);
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold text-foreground">Learning Impact</h2>
+    <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-2xl backdrop-blur-2xl">
+      <div className="border-b border-border/40 px-6 py-4">
+        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Learning Impact</h2>
       </div>
-      <div className="space-y-6 p-5">
+      <div className="space-y-8 p-6">
         {/* Top stats */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-muted/40 p-3">
@@ -554,6 +577,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   const [draftDepartment, setDraftDepartment] = useState(localExtra.department ?? '');
   const [draftLocation, setDraftLocation] = useState(localExtra.location ?? '');
   const [draftLanguage, setDraftLanguage] = useState(localExtra.language ?? '');
+  const [draftServiceLine, setDraftServiceLine] = useState<ServiceLine | null>(initialValues.serviceLine ?? null);
 
   const dirty = useMemo(
     () =>
@@ -564,8 +588,9 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       draftJobTitle !== (localExtra.jobTitle ?? '') ||
       draftDepartment !== (localExtra.department ?? '') ||
       draftLocation !== (localExtra.location ?? '') ||
-      draftLanguage !== (localExtra.language ?? ''),
-    [draftName, draftLevel, draftSkills, draftInterests, draftJobTitle, draftDepartment, draftLocation, draftLanguage, initialValues, localExtra],
+      draftLanguage !== (localExtra.language ?? '') ||
+      draftServiceLine !== (initialValues.serviceLine ?? null),
+    [draftName, draftLevel, draftSkills, draftInterests, draftJobTitle, draftDepartment, draftLocation, draftLanguage, draftServiceLine, initialValues, localExtra],
   );
 
   const saveMutation = useMutation({
@@ -575,6 +600,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         experienceLevel: draftLevel,
         techStack: draftSkills,
         interests: draftInterests,
+        serviceLine: draftServiceLine || undefined,
       }),
     onSuccess: (res) => {
       setAuthUser(res.data);
@@ -610,6 +636,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
             draftDepartment={draftDepartment}
             draftLocation={draftLocation}
             draftLanguage={draftLanguage}
+            draftServiceLine={draftServiceLine}
             onNameChange={setDraftName}
             onLevelChange={setDraftLevel}
             onSkillsChange={setDraftSkills}
@@ -618,6 +645,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
             onDepartmentChange={setDraftDepartment}
             onLocationChange={setDraftLocation}
             onLanguageChange={setDraftLanguage}
+            onServiceLineChange={setDraftServiceLine}
           />
         </div>
       </div>
@@ -626,12 +654,12 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       <div className="flex flex-col gap-5 lg:col-span-2">
         {/* Save bar */}
         {dirty && (
-          <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5">
-            <p className="text-sm text-foreground">Tens alterações por guardar.</p>
+          <div className="flex items-center justify-between rounded-full border border-foreground/10 bg-foreground px-6 py-3 text-background shadow-2xl animate-in fade-in slide-in-from-top-4">
+            <p className="text-sm font-bold">Tens alterações por guardar.</p>
             <button
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-bold text-foreground transition hover:opacity-90 disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
               {saveMutation.isPending ? 'A guardar…' : 'Guardar'}
@@ -643,16 +671,16 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         <LearningImpactCard stats={stats} timeline={timeline} />
 
         {/* Learning Timeline */}
-        <div className="rounded-xl border border-border bg-card shadow-sm">
-          <div className="flex items-center justify-between border-b border-border px-5 py-3">
-            <h2 className="text-sm font-semibold text-foreground">Learning Timeline</h2>
+        <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl">
+          <div className="flex items-center justify-between border-b border-border/40 px-6 py-4">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Learning Timeline</h2>
             {timeline.length > 0 && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-black text-background">
                 {timeline.length}
               </span>
             )}
           </div>
-          <div className="p-5">
+          <div className="p-6">
             {timeline.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground/60">
                 Ainda não concluíste nenhuma formação.
@@ -719,6 +747,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
 
 export default function ProfilePage() {
   const { user: authUser } = useAuth();
+  const { t } = useTranslation();
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -759,11 +788,13 @@ export default function ProfilePage() {
   const formKey = profile ? 'profile' : 'auth';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Gere o teu perfil.
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          {t('profile.title')}
+        </h1>
+        <p className="mt-1 text-base text-muted-foreground">
+          Gere a tua presença e visualiza o teu impacto.
         </p>
       </div>
       {formSource && (

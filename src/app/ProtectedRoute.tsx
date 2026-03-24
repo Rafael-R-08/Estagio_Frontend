@@ -1,9 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { OnboardingModal } from '../features/onboarding/components/OnboardingModal';
+import type { Role } from '../types';
 
 interface ProtectedRouteProps {
   /** Se definido, só utilizadores com este role acedem */
-  requiredRole?: 'ADMIN' | 'USER';
+  requiredRole?: Role | Role[];
 }
 
 export function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
@@ -22,8 +24,15 @@ export function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/dashboard" replace />;
+  if (user && !user.onboardingDone) {
+    return <OnboardingModal />;
+  }
+
+  if (requiredRole) {
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (user && !roles.includes(user.role)) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <Outlet />;

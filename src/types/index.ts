@@ -1,6 +1,21 @@
 // ─── Enums (mirror do backend) ───────────────────────────────────────────────
 
-export type Role = 'ADMIN' | 'USER';
+export type Role = 'ADMIN' | 'USER' | 'SERVICE_LINE_MANAGER';
+
+export type ServiceLine =
+  | 'HYBRID_CLOUD'
+  | 'DATA'
+  | 'BUSINESS_APPLICATIONS'
+  | 'APPLICATION_OPERATIONS'
+  | 'SOURCING_TALENT_MANAGEMENT';
+
+export const SERVICE_LINE_LABELS: Record<ServiceLine, string> = {
+  HYBRID_CLOUD: 'Hybrid Cloud',
+  DATA: 'Data',
+  BUSINESS_APPLICATIONS: 'Business Applications',
+  APPLICATION_OPERATIONS: 'Application Operations',
+  SOURCING_TALENT_MANAGEMENT: 'Sourcing & Talent Management',
+};
 
 export type ExperienceLevel = 'JUNIOR' | 'MID' | 'SENIOR';
 
@@ -25,6 +40,9 @@ export interface User {
   name: string;
   email: string;
   role: Role;
+  serviceLine: ServiceLine | null;
+  onboardingDone: boolean;
+  managedLineId: ServiceLine | null;
   experienceLevel?: ExperienceLevel;
   techStack?: string[];
   interests?: string[];
@@ -38,6 +56,7 @@ export interface UpdateProfileDto {
   experienceLevel?: ExperienceLevel;
   techStack?: string[];
   interests?: string[];
+  serviceLine?: ServiceLine;
 }
 
 export interface UserPreferences {

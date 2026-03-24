@@ -104,9 +104,9 @@ function PlatformModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="flex w-full max-w-md flex-col rounded-2xl border border-border bg-card shadow-xl max-h-[90vh]">
-        <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-xl p-4">
+      <div className="flex w-full max-w-md flex-col rounded-[2rem] border border-border/60 bg-background/60 shadow-2xl backdrop-blur-2xl max-h-[90vh]">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-4">
           <h3 className="text-base font-semibold text-foreground">
             {isEditing ? t('admin.platforms.editTitle') : t('admin.platforms.newTitle')}
           </h3>
@@ -296,9 +296,9 @@ function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; nam
   const { t } = useTranslation();
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl">
-        <h3 className="text-base font-semibold text-foreground">{t('admin.platforms.confirmDelete', { name })}</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-xl">
+      <div className="w-full max-w-sm rounded-[2rem] border border-border/60 bg-background/60 p-6 shadow-2xl backdrop-blur-2xl">
+        <h3 className="text-lg font-bold text-foreground">{t('admin.platforms.confirmDelete', { name })}</h3>
         <p className="mt-2 text-sm text-muted-foreground">
           {t('admin.platforms.confirmDeleteDesc')}
         </p>
@@ -385,26 +385,26 @@ export function PlatformsTab() {
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative max-w-xs flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             placeholder={t('admin.users.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+            className="w-full rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all"
           />
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('?tab=softinsa')}
-            className="flex items-center gap-2 rounded-xl bg-orange-100 dark:bg-orange-900/30 px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/40 transition-colors shadow-sm border border-orange-200 dark:border-orange-800/50"
+            className="flex items-center gap-2 rounded-full border border-border/60 bg-background px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-foreground hover:text-background transition-colors shadow-sm"
           >
             <BookOpen className="h-4 w-4" />
             Softinsa Learning
           </button>
           <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-xl bg-softinsa-blue px-4 py-2 text-sm font-medium text-white hover:bg-softinsa-blue/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-background hover:opacity-90 transition-all shadow-md shadow-foreground/5 active:scale-95"
           >
             <Plus className="h-4 w-4" />
             {t('admin.platforms.add')}
@@ -413,11 +413,11 @@ export function PlatformsTab() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
+              <tr className="border-b border-border/40 bg-muted/20">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.name')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.url')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.apiKey')}</th>

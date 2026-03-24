@@ -32,12 +32,12 @@ function AlertRow({
   const Icon = isExpiring ? ShieldAlert : Lightbulb;
   
   const urgencyClass = isExpiring
-    ? 'text-orange-700 border-orange-300/50 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/10 dark:border-orange-500/20'
-    : 'text-blue-700 border-blue-300/50 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/10 dark:border-blue-500/20';
+    ? 'text-orange-700 border-orange-500/20 bg-orange-50/50 backdrop-blur-md dark:text-orange-400 dark:bg-orange-900/10'
+    : 'text-blue-700 border-blue-500/20 bg-blue-50/50 backdrop-blur-md dark:text-blue-400 dark:bg-blue-900/10';
 
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border px-4 py-3 ${urgencyClass}`}>
-      <div className="flex items-start sm:items-center gap-3 min-w-0">
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-[2rem] border px-5 py-4 ${urgencyClass}`}>
+      <div className="flex items-start sm:items-center gap-4 min-w-0">
         <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-current/10 mt-1 sm:mt-0">
           <Icon className="h-4 w-4" />
         </div>
@@ -80,9 +80,9 @@ export function AlertBanner({ data }: AlertBannerProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-foreground">
+      <div className="flex items-center gap-2 text-foreground px-2">
         <AlertTriangle className="h-4 w-4 text-orange-500" />
-        <span className="text-sm font-semibold">
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
           Alertas e Renovações ({totalVisible})
         </span>
       </div>
