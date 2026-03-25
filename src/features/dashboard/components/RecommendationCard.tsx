@@ -54,8 +54,71 @@ interface ParsedSection {
   borderColor: string;
 }
 
-function parseBlocks(text?: string) {
-  if (!text) return { intro: '', sections: [], outro: '' };
+function parseBlocks(text?: any) {
+  const result = { intro: '', sections: [] as ParsedSection[], outro: '' };
+  if (!text) return result;
+
+  const categories = [
+    {
+      id: 'interests',
+      keywords: ['interest', 'interesse', 'exploração', 'explore', 'curiosidade'],
+      defaultTitle: 'Interesses e Exploração',
+      icon: Lightbulb,
+      iconColor: 'text-amber-500 dark:text-amber-400',
+      bgColor: 'bg-amber-50 dark:bg-amber-500/10',
+      borderColor: 'border-amber-100 dark:border-amber-500/20'
+    },
+    {
+      id: 'improvement',
+      keywords: ['improve', 'melhorar', 'aprofundar', 'deepen', 'expert', 'avançado', 'current', 'atuais'],
+      defaultTitle: 'Melhorar Skills Atuais',
+      icon: TrendingUp,
+      iconColor: 'text-green-500 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-500/10',
+      borderColor: 'border-green-100 dark:border-green-500/20'
+    },
+    {
+      id: 'missing_skills',
+      keywords: ['missing', 'falta', 'gap', 'perfil', 'profile', 'service line', 'necessário'],
+      defaultTitle: 'Skills em Falta (Perfil/SL)',
+      icon: Target,
+      iconColor: 'text-blue-500 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-500/10',
+      borderColor: 'border-blue-100 dark:border-blue-500/20'
+    }
+  ];
+
+  // Case A: Structured object from backend
+  if (typeof text === 'object' && !Array.isArray(text)) {
+    categories.forEach(cat => {
+      // Map potential field names: interests, improvement, missing_skills
+      const content = text[cat.id] || text[cat.id.replace('_', '')] || text[cat.defaultTitle.toLowerCase()];
+      if (content && typeof content === 'string') {
+        result.sections.push({
+          title: cat.defaultTitle,
+          content: content,
+          icon: cat.icon,
+          iconColor: cat.iconColor,
+          bgColor: cat.bgColor,
+          borderColor: cat.borderColor
+        });
+      }
+    });
+
+    if (text.intro) result.intro = text.intro;
+    if (text.outro) result.outro = text.outro;
+
+    // If we have sections, we are done
+    if (result.sections.length > 0) return result;
+    
+    // Otherwise fallback if it's just a generic object
+    if (text.answer || text.recommendations) {
+       return parseBlocks(text.recommendations || text.answer);
+    }
+  }
+
+  // Case B: Raw Markdown string
+  if (typeof text !== 'string') return result;
 
   let intro = '';
   let outro = '';
@@ -69,33 +132,6 @@ function parseBlocks(text?: string) {
     outro = mainContent.substring(footerMatch.index).trim();
     mainContent = mainContent.substring(0, footerMatch.index);
   }
-
-  const categories = [
-    {
-      keywords: ['interest', 'interesse', 'exploração', 'explore'],
-      defaultTitle: 'Exploração e Interesses',
-      icon: Lightbulb,
-      iconColor: 'text-amber-500 dark:text-amber-400',
-      bgColor: 'bg-amber-50 dark:bg-amber-500/10',
-      borderColor: 'border-amber-100 dark:border-amber-500/20'
-    },
-    {
-      keywords: ['weak', 'missing', 'falta', 'gap', 'improve', 'melhorar'],
-      defaultTitle: 'Skills em Falta',
-      icon: Target,
-      iconColor: 'text-blue-500 dark:text-blue-400',
-      bgColor: 'bg-blue-50 dark:bg-blue-500/10',
-      borderColor: 'border-blue-100 dark:border-blue-500/20'
-    },
-    {
-      keywords: ['progression', 'progress', 'progresso', 'natural', 'next', 'seguir'],
-      defaultTitle: 'Progresso Natural',
-      icon: TrendingUp,
-      iconColor: 'text-green-500 dark:text-green-400',
-      bgColor: 'bg-green-50 dark:bg-green-500/10',
-      borderColor: 'border-green-100 dark:border-green-500/20'
-    }
-  ];
 
   const lines = mainContent.split('\n');
   let currentSection: ParsedSection | null = null;
@@ -198,7 +234,7 @@ export function RecommendationCard({
 }: RecommendationCardProps) {
   const [showSources, setShowSources] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const parsedResponse = parseBlocks(data?.answer);
+  const parsedResponse = parseBlocks(data?.recommendations || data?.answer);
 
   return (
     <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl overflow-hidden shadow-lg shadow-foreground/5 relative">
@@ -235,7 +271,7 @@ export function RecommendationCard({
           <div>
             <p className="text-sm font-medium text-foreground">Não foi possível carregar recomendações</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Verifica se o Ollama está a correr localmente.
+              Ocorreu um erro ao contactar o serviço de recomendações.
             </p>
           </div>
           {onRetry && (
@@ -253,144 +289,127 @@ export function RecommendationCard({
           <p className="text-sm text-muted-foreground">Nenhuma recomendação disponível.</p>
         </div>
       ) : (
-        <div className="p-5 space-y-4">
-          {/* AI answer parsed */}
-          <div className="flex flex-col gap-5">
-            {parsedResponse.intro && (
-              <div className="text-sm leading-relaxed text-foreground">
-                <ReactMarkdown>{parsedResponse.intro}</ReactMarkdown>
-              </div>
-            )}
-
-            {parsedResponse.sections.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {/* Section Tabs */}
-                {parsedResponse.sections.length > 1 && (
-                  <div className="flex flex-wrap gap-2">
-                    {parsedResponse.sections.map((section, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setActiveIndex(idx)}
-                        className={cn(
-                          "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer",
-                          activeIndex === idx
-                            ? cn(section.bgColor, section.iconColor, "border", section.borderColor)
-                            : "bg-muted text-muted-foreground hover:bg-muted/80 border border-transparent"
-                        )}
-                      >
-                        <section.icon className="h-3.5 w-3.5" />
-                        <span>{section.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Active Section */}
-                {(() => {
-                  const section = parsedResponse.sections[activeIndex] || parsedResponse.sections[0];
-                  if (!section) return null;
-                  
-                  return (
-                    <div className={cn("rounded-[1.5rem] border p-6 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 shadow-sm", section.borderColor, section.bgColor)}>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={cn("p-2 rounded-full bg-background/50 backdrop-blur-sm", section.iconColor)}>
-                          <section.icon className="h-5 w-5" />
-                        </div>
-                        <h3 className={cn("text-base font-bold", section.iconColor)}>
-                          {section.title}
-                        </h3>
-                      </div>
-                      <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                        <ReactMarkdown
-                          components={{
-                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                            strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                            ul: ({ children }) => <ul className="mb-2 list-disc pl-5 last:mb-0 space-y-1">{children}</ul>,
-                            ol: ({ children }) => <ol className="mb-2 list-decimal pl-5 last:mb-0 space-y-1">{children}</ol>,
-                            li: ({ children }) => <li>{children}</li>,
-                            a: ({ href, children }) => (
-                              <a href={href} className="text-primary font-medium hover:underline" target="_blank" rel="noreferrer">
-                                {children}
-                              </a>
-                            ),
-                          }}
-                        >
-                          {section.content}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : (
-              <div className="text-sm leading-relaxed text-foreground">
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-                    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                    ul: ({ children }) => <ul className="mb-3 list-disc pl-5 last:mb-0">{children}</ul>,
-                    ol: ({ children }) => <ol className="mb-3 list-decimal pl-5 last:mb-0">{children}</ol>,
-                    li: ({ children }) => <li className="mb-1">{children}</li>,
-                    a: ({ href, children }) => (
-                      <a href={href} className="text-primary hover:underline" target="_blank" rel="noreferrer">
-                        {children}
-                      </a>
-                    ),
-                  }}
-                >
-                  {data.answer || ''}
-                </ReactMarkdown>
-              </div>
-            )}
-
-            {parsedResponse.outro && (
-              <div className="text-xs italic leading-relaxed text-muted-foreground pt-2 border-t border-border">
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    em: ({ children }) => <em>{children}</em>,
-                  }}
-                >
-                  {parsedResponse.outro.replace(/^---/, '').trim()}
-                </ReactMarkdown>
-              </div>
-            )}
-          </div>
-
-          {/* Sources toggle */}
-          {data.sources && data.sources.length > 0 && (
-            <div>
-              <button
-                onClick={() => setShowSources((v) => !v)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary transition hover:underline"
-              >
-                {showSources ? (
-                  <ChevronUp className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                )}
-                {showSources ? 'Ocultar' : 'Ver'} {data.sources.length} fonte
-                {data.sources.length !== 1 ? 's' : ''}
-              </button>
-
-              {showSources && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {data.sources.map((s) => (
-                    <SourceChip key={s.id} content={s.content} />
-                  ))}
-                </div>
-              )}
+        <div className="p-5 space-y-6">
+          {/* Intro text if any */}
+          {parsedResponse.intro && (
+            <div className="text-sm leading-relaxed text-foreground px-3">
+              <ReactMarkdown>{parsedResponse.intro}</ReactMarkdown>
             </div>
           )}
 
-          {/* Footer link */}
-          <a
-            href="/ai"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary transition hover:underline"
-          >
-            Abrir Assistente IA completo
-            <ExternalLink className="h-3 w-3" />
-          </a>
+          {/* Section Tabs */}
+          {parsedResponse.sections.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {/* Tabs switcher */}
+              {parsedResponse.sections.length > 1 && (
+                <div className="flex flex-wrap gap-2 px-1">
+                  {parsedResponse.sections.map((section, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveIndex(idx)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-all duration-300",
+                        activeIndex === idx
+                          ? cn(section.bgColor, section.iconColor, "border shadow-sm", section.borderColor)
+                          : "bg-muted/40 text-muted-foreground hover:bg-muted/80 border border-transparent"
+                      )}
+                    >
+                      <section.icon className="h-4 w-4" />
+                      <span>{section.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Active Tab Card */}
+              {(() => {
+                const section = parsedResponse.sections[activeIndex] || parsedResponse.sections[0];
+                if (!section) return null;
+                
+                return (
+                  <div 
+                    key={activeIndex}
+                    className={cn(
+                      "rounded-[2rem] border p-7 shadow-sm transition-all duration-500 animate-in fade-in slide-in-from-bottom-2", 
+                      section.borderColor, 
+                      section.bgColor
+                    )}
+                  >
+                    <div className="flex items-center gap-3.5 mb-5">
+                      <div className={cn("p-2.5 rounded-2xl bg-background/50 backdrop-blur-sm shadow-sm", section.iconColor)}>
+                        <section.icon className="h-5 w-5" />
+                      </div>
+                      <h3 className={cn("text-lg font-black tracking-tight", section.iconColor)}>
+                        {section.title}
+                      </h3>
+                    </div>
+                    <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                          strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                          ul: ({ children }) => <ul className="mb-3 list-disc pl-5 last:mb-0 space-y-1">{children}</ul>,
+                          ol: ({ children }) => <ol className="mb-3 list-decimal pl-5 last:mb-0 space-y-1">{children}</ol>,
+                          li: ({ children }) => <li>{children}</li>,
+                          a: ({ href, children }) => (
+                            <a href={href} className="text-primary font-bold hover:underline" target="_blank" rel="noreferrer">
+                              {children}
+                            </a>
+                          ),
+                        }}
+                      >
+                        {section.content}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="text-sm leading-relaxed text-foreground px-3">
+              <ReactMarkdown>{data.recommendations || data.answer || ''}</ReactMarkdown>
+            </div>
+          )}
+
+          {/* Outro / Footer AI text */}
+          {parsedResponse.outro && (
+            <div className="text-[11px] italic leading-relaxed text-muted-foreground/60 pt-2 px-3 border-t border-border/40">
+              <ReactMarkdown>{parsedResponse.outro.replace(/^---/, '').trim()}</ReactMarkdown>
+            </div>
+          )}
+
+          {/* Sources and Footer links */}
+          <div className="flex flex-col gap-4 pt-2">
+            {data.sources && data.sources.length > 0 && (
+              <div className="px-3">
+                <button
+                  onClick={() => setShowSources((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary transition hover:underline"
+                >
+                  {showSources ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  {showSources ? 'Ocultar' : 'Ver'} {data.sources?.length ?? 0} fonte{data.sources?.length !== 1 ? 's' : ''}
+                </button>
+
+                {showSources && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {data.sources?.map((s) => (
+                      <SourceChip key={s.id} content={s.content} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="px-3 pb-2">
+              <a
+                href="/ai"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary transition hover:underline"
+              >
+                Abrir Assistente IA completo
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -73,10 +73,17 @@ const COLLAPSE_THRESHOLD = 480;
 export function ChatBubble({ message }: { message: AiMessage }) {
   const [expanded, setExpanded] = useState(false);
 
+  const rawContent = message.content;
+  const contentStr = typeof rawContent === 'string'
+    ? rawContent
+    : (typeof rawContent === 'object' && rawContent !== null)
+      ? ((rawContent as any).answer || (rawContent as any).recommendations || JSON.stringify(rawContent))
+      : String(rawContent || '');
+
   const isUser = message.role === 'user';
-  const isLong = message.content.length > COLLAPSE_THRESHOLD;
+  const isLong = contentStr.length > COLLAPSE_THRESHOLD;
   const displayContent =
-    isLong && !expanded ? message.content.slice(0, COLLAPSE_THRESHOLD) + '…' : message.content;
+    isLong && !expanded ? contentStr.slice(0, COLLAPSE_THRESHOLD) + '…' : contentStr;
 
   if (isUser) {
     return (
@@ -113,21 +120,28 @@ export function ChatBubble({ message }: { message: AiMessage }) {
       </div>
       <div className="max-w-[85%] sm:max-w-[80%]">
         <div className="rounded-[2.5rem] rounded-bl-[0.5rem] border border-border/60 bg-background/60 px-6 py-5 shadow-2xl backdrop-blur-2xl">
-          <div className="text-sm leading-relaxed text-foreground break-words overflow-hidden">
+          <div className="text-sm leading-relaxed text-foreground break-words overflow-hidden prose prose-sm dark:prose-invert max-w-none transition-all duration-300">
             <ReactMarkdown
               components={{
-                p: ({ children }) => <p className="mb-4 last:mb-0 whitespace-pre-wrap">{children}</p>,
-                strong: ({ children }) => <strong className="font-black text-foreground">{children}</strong>,
-                ul: ({ children }) => <ul className="mb-4 list-disc pl-5 last:mb-0 space-y-1">{children}</ul>,
-                ol: ({ children }) => <ol className="mb-4 list-decimal pl-5 last:mb-0 space-y-1">{children}</ol>,
-                li: ({ children }) => <li className="mb-1">{children}</li>,
-                a: ({ href, children }) => (
-                  <a href={href} className="text-foreground font-black underline underline-offset-4 hover:opacity-70 transition-opacity break-all" target="_blank" rel="noreferrer">
+                p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+                strong: ({ children }) => (
+                  <strong className="font-bold text-blue-600 dark:text-blue-400">
                     {children}
-                  </a>
+                  </strong>
                 ),
+                ul: ({ children }) => (
+                  <ul className="mb-4 list-disc pl-6 space-y-2 last:mb-0">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="mb-4 list-decimal pl-6 space-y-2 last:mb-0">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => <li className="pl-1">{children}</li>,
                 code: ({ children }) => (
-                  <code className="bg-background/40 px-2 py-0.5 rounded-md text-xs text-foreground font-mono font-bold">
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono font-medium text-blue-600 dark:text-blue-400">
                     {children}
                   </code>
                 ),

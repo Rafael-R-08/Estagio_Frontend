@@ -77,19 +77,27 @@ export default function AiAssistantPage() {
       }
     }, 3500);
 
-    recommendationsApi.getForMe().then((res) => {
+    recommendationsApi.getWelcome().then((res) => {
       clearTimeout(fallbackTimer);
       if (cancelled || initializedRef.current) return;
       initializedRef.current = true;
-      setMessages([
-        {
-          id: makeId(),
-          role: 'assistant',
-          content: res.data.answer ?? '',
-          timestamp: new Date().toISOString(),
-          sources: res.data.sources,
-        },
-      ]);
+
+      const rawContent = res.data.welcome || res.data.answer || res.data.recommendations || '';
+      const contentStr = typeof rawContent === 'string'
+        ? rawContent
+        : (typeof rawContent === 'object' && rawContent !== null)
+          ? ((rawContent as any).welcome || (rawContent as any).answer || (rawContent as any).recommendations || JSON.stringify(rawContent))
+          : String(rawContent);
+
+      const assistantMessage: AiMessage = {
+        id: makeId(),
+        role: 'assistant',
+        content: contentStr,
+        timestamp: new Date().toISOString(),
+        sources: res.data.sources,
+      };
+
+      setMessages([assistantMessage]);
     }).catch(() => {
       // fallback timer handles this case
     });
@@ -140,13 +148,20 @@ export default function AiAssistantPage() {
         { query: text, history },
         {
           onSuccess: (res) => {
+            const rawContent = res.data.answer || res.data.recommendations || res.data.welcome || '';
+            const contentStr = typeof rawContent === 'string'
+              ? rawContent
+              : (typeof rawContent === 'object' && rawContent !== null)
+                ? ((rawContent as any).answer || (rawContent as any).recommendations || (rawContent as any).welcome || JSON.stringify(rawContent))
+                : String(rawContent);
+
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === loadingId
                   ? {
                       id: loadingId,
                       role: 'assistant',
-                      content: res.data.answer,
+                      content: contentStr,
                       timestamp: new Date().toISOString(),
                       sources: res.data.sources,
                     }
@@ -196,7 +211,7 @@ export default function AiAssistantPage() {
           </div>
           <div>
             <h1 className="text-xs font-black tracking-widest text-foreground uppercase opacity-70">{t('ai.title')}</h1>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ollama · RAG Engine</p>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">AI Assistant · RAG Engine</p>
           </div>
         </div>
         <button
