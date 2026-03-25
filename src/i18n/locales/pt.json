@@ -223,7 +223,7 @@
     "closePanel": "Fechar painel de sugestões",
     "errorSend": "Erro ao enviar mensagem.",
     "preparingAssistant": "A preparar o assistente…",
-    "loadingModel": "Ollama está a carregar o modelo.",
+    "loadingModel": "A carregar o assistente…",
     "disclaimer": "O assistente pode cometer erros. Verifica informações importantes."
   },
   "header": {

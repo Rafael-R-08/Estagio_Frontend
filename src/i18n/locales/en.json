@@ -223,7 +223,7 @@
     "closePanel": "Close suggestions panel",
     "errorSend": "Error sending message.",
     "preparingAssistant": "Preparing the assistant…",
-    "loadingModel": "Ollama is loading the model.",
+    "loadingModel": "Loading the assistant…",
     "disclaimer": "The assistant can make mistakes. Verify important information."
   },
   "header": {

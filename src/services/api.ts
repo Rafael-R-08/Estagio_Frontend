@@ -129,12 +129,18 @@ export const platformsApi = {
 // ─── Recommendations ─────────────────────────────────────────────────────────
 
 export const recommendationsApi = {
+  /** Initial personalised recommendations (dashboard & AI page welcome) */
   getForMe: () => api.get<RagResponse>('/recommendations/me'),
+
+  /** Initial welcome message */
+  getWelcome: () => api.get<RagResponse>('/rag/welcome'),
+
+  /** Chat query → POST /rag/query */
   postForMe: (
     query: string,
-    history?: { role: 'user' | 'assistant'; content: string }[],
+    _history?: { role: 'user' | 'assistant'; content: string }[],
   ) =>
-    api.post<RagResponse>('/recommendations/me', { query, history }),
+    api.post<RagResponse>('/rag/query', { query, topK: 5 }),
 };
 
 // ─── AI ──────────────────────────────────────────────────────────────────

@@ -246,9 +246,11 @@ export interface RagSource {
 }
 
 export interface RagResponse {
-  query: string;
-  answer: string;
-  sources: RagSource[];
+  query?: string;
+  answer?: string;
+  recommendations?: string | Record<string, any>;
+  welcome?: string;
+  sources?: RagSource[];
 }
 
 export interface AiMessage {
