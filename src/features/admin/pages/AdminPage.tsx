@@ -1,24 +1,22 @@
-import { Users, Globe, BarChart2, ShieldCheck, BookOpen } from 'lucide-react';
+import { Users, Globe, BarChart2, ShieldCheck } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { UsersTab } from '../components/UsersTab';
 import { PlatformsTab } from '../components/PlatformsTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
-import { SoftinsaLearningTab } from '../components/SoftinsaLearningTab';
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 
 const TABS = [
   { id: 'users', labelKey: 'admin.tabs.users', icon: Users, labelFallback: 'Utilizadores' },
   { id: 'platforms', labelKey: 'admin.tabs.platforms', icon: Globe, labelFallback: 'Plataformas' },
-  { id: 'softinsa', labelKey: 'admin.tabs.softinsa', icon: BookOpen, labelFallback: 'Softinsa Everyday Learning' },
   { id: 'analytics', labelKey: 'admin.tabs.analytics', icon: BarChart2, labelFallback: 'Analítica' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
 
 function isValidTab(t: string | null): t is TabId {
-  return t === 'users' || t === 'platforms' || t === 'softinsa' || t === 'analytics';
+  return t === 'users' || t === 'platforms' || t === 'analytics';
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -57,7 +55,6 @@ export default function AdminPage() {
       {/* Tab content */}
       {active === 'users' && <UsersTab />}
       {active === 'platforms' && <PlatformsTab />}
-      {active === 'softinsa' && <SoftinsaLearningTab />}
       {active === 'analytics' && <AnalyticsTab />}
     </div>
   );

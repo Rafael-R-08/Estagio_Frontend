@@ -21,21 +21,16 @@ import type {
   SoftinsaLearningContent,
   CreateSoftinsaLearningDto,
   UpdateSoftinsaLearningDto,
+  TrainingDocument,
+  CertificateJob,
 } from '../types';
-
-// ─── Auth ─────────────────────────────────────────────────────────────────────
-
-
-
-// ─── User ─────────────────────────────────────────────────────────────────────
-
-
 
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export const searchApi = {
+  /** Novos embeddings Xenova (384D) */
   search: (q: string, limit = 10, platforms?: string[], isFree?: boolean, minRating?: number) =>
-    api.get<SearchResponse>('/search', { params: { q, limit, platforms, isFree, minRating } }),
+    api.get<SearchResponse>('/search/semantic', { params: { q, limit, platforms, isFree, minRating } }),
 
   getPlatforms: () =>
     api.get<{ id: string; name: string; type: string }[]>('/search/platforms'),
@@ -70,6 +65,14 @@ export const trainingApi = {
 
   getPendingFeedback: () =>
     api.get<TrainingRecord[]>('/trainings/pending-feedback'),
+
+  uploadDocument: (id: string, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post<TrainingDocument>(`/trainings/${id}/documents`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // ─── Certificates ─────────────────────────────────────────────────────────────
@@ -88,6 +91,7 @@ export const certificatesApi = {
 
   getById: (id: string) => api.get<Certificate>(`/certificates/${id}`),
 
+  /** Retorna { jobId, status: 'PENDING' } */
   upload: (file: File, trainingId: string, meta?: Partial<UpdateCertificateDto>) => {
     const form = new FormData();
     form.append('file', file);
@@ -97,22 +101,25 @@ export const certificatesApi = {
     if (meta?.completionDate) form.append('completionDate', meta.completionDate);
     if (meta?.expirationDate) form.append('expirationDate', meta.expirationDate);
     if (meta?.durationHours !== undefined) form.append('durationHours', String(meta.durationHours));
-    return api.post<Certificate>('/certificates', form, {
+    return api.post<CertificateJob>('/certificates', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+
+  /** Consulta estado do BullMQ */
+  getJobStatus: (jobId: string) =>
+    api.get<CertificateJob>(`/certificates/job/${jobId}`),
 
   update: (id: string, dto: UpdateCertificateDto) =>
     api.patch<Certificate>(`/certificates/${id}`, dto),
 
   reextract: (id: string) =>
-    api.post<Certificate>(`/certificates/${id}/reextract`),
+    api.post<CertificateJob>(`/certificates/${id}/reextract`),
 
   delete: (id: string) => api.delete(`/certificates/${id}`),
 };
 
 // ─── Platforms (Admin) ────────────────────────────────────────────────────────
-// Nota: o backend expõe plataformas apenas dentro do AdminController (/admin/platforms)
 
 export const platformsApi = {
   getAll: () => api.get<LearningPlatform[]>('/admin/platforms'),
@@ -129,23 +136,14 @@ export const platformsApi = {
 // ─── Recommendations ─────────────────────────────────────────────────────────
 
 export const recommendationsApi = {
-  /** Initial personalised recommendations (dashboard & AI page welcome) */
+  /** RAG atualizado */
   getForMe: () => api.get<RagResponse>('/recommendations/me'),
 
-  /** Initial welcome message */
+  /** JSON Welcome rápido */
   getWelcome: () => api.get<RagResponse>('/rag/welcome'),
-
-  /** Chat query → POST /rag/query */
-  postForMe: (
-    query: string,
-    _history?: { role: 'user' | 'assistant'; content: string }[],
-  ) =>
-    api.post<RagResponse>('/rag/query', { query, topK: 5 }),
 };
 
-// ─── AI ──────────────────────────────────────────────────────────────────
-
-
+// ─── AI (SSE handled in component) ───────────────────────────────────────────
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
@@ -180,7 +178,6 @@ export const adminApi = {
 
   getAnalytics: () => api.get<AdminAnalytics>('/admin/analytics'),
 };
-// Nota: as rotas /role, /activate, /deactivate são criadas explicitamente no backend (admin.controller.ts)
 
 // ─── Softinsa Everyday Learning ───────────────────────────────────────────────
 

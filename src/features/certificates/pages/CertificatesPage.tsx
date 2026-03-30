@@ -48,7 +48,7 @@ function EmptyState({ hasSearch, onUpload }: { hasSearch: boolean; onUpload: () 
           onClick={onUpload}
           className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
         >
-          {t('certificates.upload')}
+          {t('certificates.uploadBtn')}
         </button>
       )}
     </div>
@@ -123,7 +123,7 @@ export default function CertificatesPage() {
           className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition active:scale-95"
         >
           <Plus className="h-4 w-4" />
-          {t('certificates.upload')}
+          {t('certificates.uploadBtn')}
         </button>
       </div>
 

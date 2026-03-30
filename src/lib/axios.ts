@@ -43,7 +43,7 @@ api.interceptors.request.use((config) => {
 // Trata erros globais: 401 → limpa sessão e redireciona
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (import.meta.env.DEV) {
       const cfg = error?.config as { baseURL?: string; url?: string; method?: string } | undefined;
       const method = (cfg?.method || 'GET').toUpperCase();
@@ -56,6 +56,10 @@ api.interceptors.response.use(
       storage.clearAll();
       window.location.href = '/login';
     }
+
+
+    return Promise.reject(error);
+
     return Promise.reject(error);
   },
 );

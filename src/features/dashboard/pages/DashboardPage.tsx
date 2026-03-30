@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import {
   BookOpen,
   CheckCircle2,
-  Clock,
   TrendingUp,
   Bookmark,
   ChevronRight,
@@ -16,7 +15,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { toList } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
-import { RecommendationCard } from '../components/RecommendationCard';
+import { UnifiedRecommendationCard } from '../components/UnifiedRecommendationCard';
 import { ProgressCard, ProgressCardSkeleton } from '../components/ProgressCard';
 import { QuickActions } from '../components/QuickActions';
 import { AlertBanner } from '../components/AlertBanner';
@@ -139,14 +138,21 @@ export default function DashboardPage() {
   });
 
   // 2.2 — Cursos em progresso
-  const { data: inProgress = [], isLoading: progressLoading } = useQuery({
+  const { data: inProgress = [], isLoading: progressLoading, refetch: refetchOngoing } = useQuery({
     queryKey: ['trainings', 'ongoing'],
     queryFn: () => trainingApi.getAll({ status: 'ongoing' }).then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
-  // 2.3 — Cursos guardados
-  const { data: saved = [], isLoading: savedLoading } = useQuery({
+  // 2.3 — Cursos concluídos
+  const { data: completed = [], isLoading: completedLoading, refetch: refetchCompleted } = useQuery({
+    queryKey: ['trainings', 'completed'],
+    queryFn: () => trainingApi.getAll({ status: 'completed' }).then((r) => toList(r.data)),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // 2.4 — Cursos guardados
+  const { data: saved = [], isLoading: savedLoading, refetch: refetchSaved } = useQuery({
     queryKey: ['trainings', 'later'],
     queryFn: () => trainingApi.getAll({ status: 'later' }).then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
@@ -202,7 +208,7 @@ export default function DashboardPage() {
         <AlertBanner data={renewalAlerts} />
       )}
 
-      {/* ── Stats row ───────────────────────────────────────────────────── */}
+      {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           icon={BookOpen}
@@ -226,9 +232,9 @@ export default function DashboardPage() {
           loading={statsLoading}
         />
         <StatCard
-          icon={Clock}
-          label={t('dashboard.stats.hours')}
-          value={stats?.totalHours ?? 0}
+          icon={Bookmark}
+          label={t('dashboard.stats.saved')}
+          value={stats?.later ?? 0}
           color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
           loading={statsLoading}
         />
@@ -238,13 +244,15 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left column — 2/3 width */}
         <div className="space-y-6 lg:col-span-2">
-          {/* 2.1 AI Recommendations */}
-          <RecommendationCard
-            data={recs}
-            isLoading={recsLoading}
-            isError={recsError}
-            onRetry={() => recsRefetch()}
-          />
+          {/* 2.1 AI Recommendations — Unified Tabbed Card */}
+          <div className="mb-6">
+            <UnifiedRecommendationCard
+              data={recs}
+              isLoading={recsLoading}
+              isError={recsError}
+              onRetry={() => recsRefetch()}
+            />
+          </div>
 
           {/* 2.2 Cursos em progresso */}
           <div className="space-y-3">
@@ -268,7 +276,35 @@ export default function DashboardPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {inProgress.slice(0, 4).map((r) => (
-                  <ProgressCard key={r.id} record={r} variant="progress" />
+                  <ProgressCard key={r.id} record={r} variant="progress" onUpdate={refetchOngoing} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 2.3 Cursos concluídos */}
+          <div className="space-y-3">
+            <SectionHeader
+              title={t('dashboard.completed')}
+              count={completed.length}
+              linkTo="/my-learning"
+              linkLabel={t('dashboard.viewAll')}
+            />
+            {completedLoading ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <ProgressCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : completed.length === 0 ? (
+              <EmptyState
+                icon={CheckCircle2}
+                message={t('dashboard.empty.completed')}
+              />
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {completed.slice(0, 4).map((r) => (
+                  <ProgressCard key={r.id} record={r} variant="completed" onUpdate={refetchCompleted} />
                 ))}
               </div>
             )}
@@ -301,7 +337,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {saved.slice(0, 3).map((r) => (
-                  <ProgressCard key={r.id} record={r} variant="saved" />
+                  <ProgressCard key={r.id} record={r} variant="saved" onUpdate={refetchSaved} />
                 ))}
                 {saved.length > 3 && (
                   <button

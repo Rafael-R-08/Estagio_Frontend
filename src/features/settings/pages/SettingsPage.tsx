@@ -30,14 +30,14 @@ const DEFAULT_SETTINGS: UserSettings = {
   aiResponseLanguage: null,
   aiExplainReasoning: false,
   aiRecommendationMode: null,
-  notifyWeeklyRecs: true,
-  notifyCertExpiry: true,
-  notifyProgress: true,
-  notifyByEmail: true,
-  notifyInApp: true,
+  emailNotifications: true,
+  weeklyDigest: true,
+  recommendations: true,
+  newCourses: true,
+  learningProgress: true,
+  certExpiring: true,
   adminCanSeeRecs: true,
   aiCanUseHistory: true,
-  renewalPeriodMonths: 6,
 };
 
 // ─── Appearance stored in localStorage ────────────────────────────────────────
@@ -166,19 +166,6 @@ function RadioGroup({ value, options, onChange }: {
   );
 }
 
-function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <label className="flex items-center gap-2.5 cursor-pointer select-none">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 rounded border-slate-300 accent-softinsa-blue cursor-pointer"
-      />
-      <span className="text-sm text-slate-700 dark:text-slate-200">{label}</span>
-    </label>
-  );
-}
 
 function SectionPanel({ title, icon: Icon, children }: {
   title: string;
@@ -395,63 +382,55 @@ export default function SettingsPage() {
             {/* ── Notificações ── */}
             {activeSection === 'notifications' && (
               <SectionPanel title={t('settings.notifications.title')} icon={Bell}>
-                <SubLabel>{t('settings.notifications.alerts')}</SubLabel>
+                <SubLabel>Preferências de Email</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.notifications.weeklyRecs')}
-                    description={t('settings.notifications.weeklyRecsDesc')}
+                    label="Notificações por Email"
+                    description="Receber alertas importantes e recomendações no teu email institucional."
                   >
-                    <Toggle checked={current.notifyWeeklyRecs} onChange={(v) => set('notifyWeeklyRecs', v)} />
+                    <Toggle checked={current.emailNotifications} onChange={(v) => set('emailNotifications', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.notifications.certExpiry')}
-                    description={t('settings.notifications.certExpiryDesc')}
+                    label="Digest Semanal"
+                    description="Resumo semanal das tuas atividades e progresso."
                   >
-                    <Toggle checked={current.notifyCertExpiry} onChange={(v) => set('notifyCertExpiry', v)} />
+                    <Toggle checked={current.weeklyDigest} onChange={(v) => set('weeklyDigest', v)} />
+                  </SettingRow>
+                </SectionItem>
+
+                <SubLabel>Conteúdo e Alertas</SubLabel>
+                <SectionItem>
+                  <SettingRow
+                    label="Novas Recomendações"
+                    description="Alertar quando a IA gerar novas sugestões personalizadas."
+                  >
+                    <Toggle checked={current.recommendations} onChange={(v) => set('recommendations', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.notifications.progress')}
-                    description={t('settings.notifications.progressDesc')}
+                    label="Novas Formações"
+                    description="Alertar sobre novos cursos adicionados ao catálogo que combinam com o teu perfil."
                   >
-                    <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
+                    <Toggle checked={current.newCourses} onChange={(v) => set('newCourses', v)} />
                   </SettingRow>
                 </SectionItem>
-                <SectionItem>
-                  <SettingRow label="Antecedência de alertas de expiração">
-                    <SelectField
-                      value={current.renewalPeriodMonths?.toString()}
-                      options={[
-                        { value: '1', label: '1 mês' },
-                        { value: '3', label: '3 meses' },
-                        { value: '6', label: '6 meses' },
-                        { value: '12', label: '12 meses' },
-                      ]}
-                      onChange={(v) => set('renewalPeriodMonths', v ? Number(v) : 6)}
-                    />
-                  </SettingRow>
-                </SectionItem>
-                <SubLabel>{t('settings.notifications.channel')}</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.notifications.channel')}
-                    description={t('settings.notifications.channelDesc')}
+                    label="Expiração de Certificados"
+                    description="Alertar 30 dias antes de um certificado expirar."
                   >
-                    <div className="flex flex-col gap-2">
-                      <Checkbox
-                        checked={current.notifyByEmail}
-                        onChange={(v) => set('notifyByEmail', v)}
-                        label={t('settings.notifications.email')}
-                      />
-                      <Checkbox
-                        checked={current.notifyInApp}
-                        onChange={(v) => set('notifyInApp', v)}
-                        label={t('settings.notifications.inApp')}
-                      />
-                    </div>
+                    <Toggle checked={current.certExpiring} onChange={(v) => set('certExpiring', v)} />
+                  </SettingRow>
+                </SectionItem>
+                <SectionItem>
+                  <SettingRow
+                    label="Progresso de Aprendizagem"
+                    description="Alertar sobre objetivos semanais e conquistas."
+                  >
+                    <Toggle checked={current.learningProgress} onChange={(v) => set('learningProgress', v)} />
                   </SettingRow>
                 </SectionItem>
               </SectionPanel>

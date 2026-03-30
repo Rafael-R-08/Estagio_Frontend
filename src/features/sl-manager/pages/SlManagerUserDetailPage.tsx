@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/button';
 import { ArrowLeft, BookOpen, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useTranslation } from 'react-i18next';
+import type { TrainingRecord } from '../../../types';
 
 export default function SlManagerUserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +30,8 @@ export default function SlManagerUserDetailPage() {
     );
   }
 
-  const completed = timeline?.filter((t: any) => t.status === 'completed') || [];
-  const ongoing = timeline?.filter((t: any) => t.status === 'ongoing') || [];
+  const completed = timeline?.filter((t: TrainingRecord) => t.status === 'completed') || [];
+  const ongoing = timeline?.filter((t: TrainingRecord) => t.status === 'ongoing') || [];
 
   return (
     <div className="space-y-8">
@@ -90,7 +91,7 @@ export default function SlManagerUserDetailPage() {
             </p>
           ) : (
             <div className="space-y-6">
-              {timeline.map((item: any) => (
+              {timeline.map((item: TrainingRecord) => (
                 <div key={item.id} className="group relative flex flex-col gap-4 rounded-[2rem] border border-border/40 bg-background/40 p-6 transition-all hover:bg-background/80 hover:shadow-xl active:scale-[0.99]">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">

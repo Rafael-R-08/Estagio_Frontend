@@ -170,4 +170,6 @@ export {
   FormControl,
   FormMessage,
   FormField,
+  FormLabel,
+  FormDescription,
 }

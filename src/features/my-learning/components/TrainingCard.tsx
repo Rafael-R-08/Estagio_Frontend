@@ -7,7 +7,6 @@ import {
   PlayCircle,
   Bookmark,
   Star,
-  Clock,
   ChevronDown,
   ChevronUp,
   Trophy,
@@ -177,12 +176,6 @@ export function TrainingCard({
 
           {/* Meta */}
           <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-            {training.durationHours && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {training.durationHours}h
-              </span>
-            )}
             {training.startedAt && (
               <span>
                 Iniciado {new Date(training.startedAt).toLocaleDateString('pt-PT')}

@@ -21,7 +21,11 @@
     "save": "Save changes",
     "saving": "Saving...",
     "export": "Export",
-    "featureInDev": "Feature under development."
+    "featureInDev": "Feature under development.",
+    "more": "See more",
+    "less": "See less",
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "settings": {
     "title": "Settings",
@@ -104,6 +108,20 @@
     "empty": {
       "progress": "No training in progress. Start exploring courses!",
       "saved": "No saved courses."
+    },
+    "recs": {
+      "career": {
+        "title": "Performance & Career Plan",
+        "sub": "Your current path at Softinsa"
+      },
+      "interests": {
+        "title": "New Horizons",
+        "sub": "Explore new technologies and sectors"
+      },
+      "skills": {
+        "title": "Profile / SL Gaps",
+        "sub": "Required skills for your current level"
+      }
     }
   },
   "myLearning": {
@@ -147,7 +165,7 @@
   "certificates": {
     "title": "Certificates",
     "subtitle": "Manage your training certificates and credentials.",
-    "upload": "Upload certificate",
+    "uploadBtn": "Upload certificate",
     "search": "Search certificate...",
     "filters": {
       "all": "All",
@@ -158,6 +176,24 @@
     "count_one": "{{count}} certificate",
     "count_other": "{{count}} certificates",
     "filtered": "(filtered)",
+    "uploadModal": {
+      "title": "Upload Certificate",
+      "states": {
+        "PENDING": "Please wait...",
+        "PROCESSING": "Extracting data with AI...",
+        "COMPLETED": "Processed!",
+        "FAILED": "Processing failed"
+      },
+      "fields": {
+        "courseName": "Course name",
+        "provider": "Platform / Provider",
+        "date": "Completion date",
+        "hours": "Total hours"
+      },
+      "errorProcessing": "Error processing the certificate. Please try again.",
+      "autoClose": "Closing in {{seconds}}s...",
+      "successDetail": "The metadata has been successfully extracted by our AI."
+    },
     "empty": {
       "noResultsTitle": "No results for this search",
       "noResultsDesc": "Try other terms.",
@@ -224,7 +260,8 @@
     "errorSend": "Error sending message.",
     "preparingAssistant": "Preparing the assistant…",
     "loadingModel": "Loading the assistant…",
-    "disclaimer": "The assistant can make mistakes. Verify important information."
+    "disclaimer": "The assistant can make mistakes. Verify important information.",
+    "generating": "Thinking..."
   },
   "header": {
     "aiActive": "AI Active",

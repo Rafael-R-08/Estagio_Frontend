@@ -33,7 +33,10 @@ export interface AuthResponse {
   user: User;
 }
 
-// ─── User ─────────────────────────────────────────────────────────────────────
+export interface UserSkill {
+  name: string;
+  level: number; // 1-5
+}
 
 export interface User {
   id: string;
@@ -41,11 +44,12 @@ export interface User {
   email: string;
   role: Role;
   serviceLine: ServiceLine | null;
+  userFunction?: string;
   onboardingDone: boolean;
   managedLineId: ServiceLine | null;
   experienceLevel?: ExperienceLevel;
-  techStack?: string[];
   interests?: string[];
+  skills?: UserSkill[];
   preferences?: UserPreferences;
   createdAt?: string;
   updatedAt?: string;
@@ -54,9 +58,10 @@ export interface User {
 export interface UpdateProfileDto {
   name?: string;
   experienceLevel?: ExperienceLevel;
-  techStack?: string[];
   interests?: string[];
+  skills?: UserSkill[];
   serviceLine?: ServiceLine;
+  userFunction?: string;
 }
 
 export interface UserPreferences {
@@ -84,12 +89,12 @@ export interface UserSettings {
   aiExplainReasoning: boolean;
   aiRecommendationMode: string | null;
   // Notificações
-  notifyWeeklyRecs: boolean;
-  notifyCertExpiry: boolean;
-  renewalPeriodMonths: number;
-  notifyProgress: boolean;
-  notifyByEmail: boolean;
-  notifyInApp: boolean;
+  emailNotifications: boolean;
+  weeklyDigest: boolean;
+  recommendations: boolean;
+  newCourses: boolean;
+  learningProgress: boolean;
+  certExpiring: boolean;
   // Privacidade
   adminCanSeeRecs: boolean;
   aiCanUseHistory: boolean;
@@ -114,6 +119,8 @@ export interface Course {
   tags: string[];
   platformId: string;
   platform?: LearningPlatform;
+  price?: string;
+  relevance?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -130,6 +137,8 @@ export interface CourseSearchResult {
   tags: string[];
   platformId: string;
   platformName: string;
+  price?: string;
+  relevance?: number;
   similarityScore?: number;
   relevanceScore?: number;
 }
@@ -164,11 +173,23 @@ export interface TrainingRecord {
   status: TrainingStatus;
   startedAt?: string;
   completedAt?: string;
-  durationHours?: number;
   notes?: string;
   rating?: number;
+  relevance?: number;
+  durationHours?: number;
+  progressLevel?: string;
+  priorityOrder?: number;
   certificate?: Certificate;
+  documents?: TrainingDocument[];
   createdAt?: string;
+}
+
+export interface TrainingDocument {
+  id: string;
+  trainingId: string;
+  fileUrl: string;
+  fileName: string;
+  createdAt: string;
 }
 
 export interface CreateTrainingRecordDto {
@@ -177,7 +198,6 @@ export interface CreateTrainingRecordDto {
   status?: TrainingStatus;
   platformId?: string;
   startedAt?: string;
-  durationHours?: number;
   notes?: string;
 }
 
@@ -185,7 +205,10 @@ export interface UpdateTrainingRecordDto {
   status?: TrainingStatus;
   notes?: string;
   rating?: number;
+  relevance?: number;
   completedAt?: string;
+  progressLevel?: string;
+  priorityOrder?: number;
 }
 
 export interface TrainingStats {
@@ -200,6 +223,15 @@ export interface TrainingStats {
 
 // ─── Certificates ─────────────────────────────────────────────────────────────
 
+export type CertificateStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface CertificateJob {
+  certificateId? : string;
+  jobId: string;
+  status: CertificateStatus;
+  errorMessage?: string;
+}
+
 export interface Certificate {
   id: string;
   userId: string;
@@ -212,6 +244,8 @@ export interface Certificate {
   expirationDate?: string;
   durationHours?: number;
   extractedMetadata?: Record<string, unknown>;
+  status? : CertificateStatus;
+  jobId? : string;
   createdAt?: string;
 }
 
@@ -248,19 +282,25 @@ export interface RagSource {
 export interface RagResponse {
   query?: string;
   answer?: string;
-  recommendations?: string | Record<string, any>;
+  interests?: string;
+  improvement?: string;
+  missing_skills?: string;
+  recommendations?: string;
   welcome?: string;
   sources?: RagSource[];
+  metadata?: Record<string, unknown>;
 }
 
 export interface AiMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  fullContent?: string;
   timestamp: string;
   courses?: CourseSearchResult[];
   sources?: RagSource[];
   isLoading?: boolean;
+  isStreaming?: boolean;
 }
 
 export interface AiRecommendation {

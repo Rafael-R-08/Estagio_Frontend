@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Save, CheckCircle2, Star, ExternalLink, User as UserIcon, Edit2,
-  MapPin, Briefcase, Globe, Link2, Download, RefreshCw,
+  Download, RefreshCw, Briefcase, Link2,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
@@ -14,29 +14,7 @@ import { SERVICE_LINE_LABELS } from '@/types';
 import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine } from '@/types';
 
 import { TagInput } from '../components/TagInput';
-
-// ─── localStorage helpers for extra profile fields ────────────────────────────
-// (campos não suportados pelo backend ainda — guardados localmente por utilizador)
-
-interface LocalProfileExtra {
-  jobTitle?: string;
-  department?: string;
-  location?: string;
-  language?: string;
-}
-
-function loadLocalExtra(userId: string): LocalProfileExtra {
-  try {
-    const raw = localStorage.getItem(`profile_extra_${userId}`);
-    return raw ? (JSON.parse(raw) as LocalProfileExtra) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveLocalExtra(userId: string, data: LocalProfileExtra) {
-  localStorage.setItem(`profile_extra_${userId}`, JSON.stringify(data));
-}
+import { LearningImpactCard } from '../components/LearningImpactCard';
 
 // ─── RatingStars ─────────────────────────────────────────────────────────────
 
@@ -86,9 +64,6 @@ const LEVEL_SUBTITLE: Record<ExperienceLevel, string> = {
   SENIOR: 'Senior Professional',
 };
 
-// Decorative skill display bars (no per-skill data in model)
-const SKILL_DISPLAY = ['Expert', 'Advanced', 'Intermediate', 'Expert', 'Advanced'];
-const SKILL_BAR_WIDTHS = [95, 75, 55, 90, 70];
 
 // ─── ProfileSidebar ───────────────────────────────────────────────────────────
 
@@ -98,30 +73,22 @@ interface SidebarProps {
   onEditToggle: () => void;
   draftName: string;
   draftLevel: ExperienceLevel | undefined;
-  draftSkills: string[];
   draftInterests: string[];
-  draftJobTitle: string;
-  draftDepartment: string;
-  draftLocation: string;
-  draftLanguage: string;
+  draftUserFunction: string;
   draftServiceLine: ServiceLine | null;
   onNameChange: (v: string) => void;
   onLevelChange: (v: ExperienceLevel | undefined) => void;
-  onSkillsChange: (v: string[]) => void;
   onInterestsChange: (v: string[]) => void;
-  onJobTitleChange: (v: string) => void;
-  onDepartmentChange: (v: string) => void;
-  onLocationChange: (v: string) => void;
-  onLanguageChange: (v: string) => void;
+  onUserFunctionChange: (v: string) => void;
   onServiceLineChange: (v: ServiceLine | null) => void;
 }
 
 function ProfileSidebar({
   user, isEditing, onEditToggle,
-  draftName, draftLevel, draftSkills, draftInterests,
-  draftJobTitle, draftDepartment, draftLocation, draftLanguage, draftServiceLine,
-  onNameChange, onLevelChange, onSkillsChange, onInterestsChange,
-  onJobTitleChange, onDepartmentChange, onLocationChange, onLanguageChange, onServiceLineChange,
+  draftName, draftLevel, draftInterests,
+  draftUserFunction, draftServiceLine,
+  onNameChange, onLevelChange, onInterestsChange,
+  onUserFunctionChange, onServiceLineChange,
 }: SidebarProps) {
   const { t } = useTranslation();
   return (
@@ -149,10 +116,10 @@ function ProfileSidebar({
                 {draftLevel}
               </span>
             )}
-            {!isEditing && draftJobTitle && (
+            {!isEditing && draftUserFunction && (
               <p className="flex items-center justify-center gap-1 pt-1 text-xs font-medium text-foreground">
                 <Briefcase className="h-3 w-3 text-muted-foreground" />
-                {draftJobTitle}{draftDepartment ? ` · ${draftDepartment}` : ''}
+                {draftUserFunction}
               </p>
             )}
             {!isEditing && draftServiceLine && (
@@ -161,12 +128,6 @@ function ProfileSidebar({
                   {SERVICE_LINE_LABELS[draftServiceLine]}
                 </p>
               </div>
-            )}
-            {!isEditing && draftLocation && (
-              <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                {draftLocation === 'escritorio' ? t('profile.locationOffice') : draftLocation === 'remoto' ? t('profile.locationRemote') : t('profile.locationHybrid')}
-              </p>
             )}
           </div>
 
@@ -210,19 +171,9 @@ function ProfileSidebar({
                 <p className="text-xs font-medium text-muted-foreground">{t('profile.jobTitle')}</p>
                 <input
                   type="text"
-                  value={draftJobTitle}
-                  onChange={(e) => onJobTitleChange(e.target.value)}
+                  value={draftUserFunction}
+                  onChange={(e) => onUserFunctionChange(e.target.value)}
                   placeholder={t('profile.jobTitlePlaceholder')}
-                  className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">{t('profile.department')}</p>
-                <input
-                  type="text"
-                  value={draftDepartment}
-                  onChange={(e) => onDepartmentChange(e.target.value)}
-                  placeholder={t('profile.departmentPlaceholder')}
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
@@ -239,19 +190,6 @@ function ProfileSidebar({
                   ))}
                 </select>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">{t('profile.location')}</p>
-                <select
-                  value={draftLocation}
-                  onChange={(e) => onLocationChange(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  <option value="">{t('profile.locationNotSet')}</option>
-                  <option value="escritorio">{t('profile.locationOffice')}</option>
-                  <option value="remoto">{t('profile.locationRemote')}</option>
-                  <option value="hibrido">{t('profile.locationHybrid')}</option>
-                </select>
-              </div>
             </div>
           )}
         </div>
@@ -260,54 +198,13 @@ function ProfileSidebar({
           <p className="text-xs font-medium text-foreground">{user.email}</p>
           {user.createdAt && (
             <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-              {t('profile.memberSince')}{' '}
+              Membro desde{' '}
               {new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
             </p>
           )}
         </div>
       </div>
 
-      {/* Professional Skills */}
-      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
-        {isEditing ? (
-          <TagInput
-            label="Stack tecnológica"
-            description="Tecnologias e linguagens que utilizas"
-            tags={draftSkills}
-            onChange={onSkillsChange}
-            placeholder="Ex: React, Azure, Python…"
-            colorClass="bg-primary/10 text-primary"
-          />
-        ) : (
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Professional Skills
-            </p>
-            {draftSkills.length === 0 ? (
-            <p className="text-xs text-muted-foreground/50">{t('profile.noSkills')}</p>
-            ) : (
-              <ul className="space-y-3">
-                {draftSkills.map((skill, i) => (
-                  <li key={skill}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-foreground">{skill}</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {SKILL_DISPLAY[i % SKILL_DISPLAY.length]}
-                      </span>
-                    </div>
-                    <div className="h-1 w-full rounded-full bg-muted">
-                      <div
-                        className="h-1 rounded-full bg-primary"
-                        style={{ width: `${SKILL_BAR_WIDTHS[i % SKILL_BAR_WIDTHS.length]}%` }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* Learning Interests */}
       <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
@@ -343,169 +240,13 @@ function ProfileSidebar({
         )}
       </div>
 
-      {/* Preferências */}
-      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
-        <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          <Globe className="h-3.5 w-3.5" />
-          Preferências
-        </p>
-        <div>
-          <p className="mb-1.5 text-xs font-medium text-muted-foreground">Idioma de formação</p>
-          {isEditing ? (
-            <select
-              value={draftLanguage}
-              onChange={(e) => onLanguageChange(e.target.value)}
-              className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="">Não definido</option>
-              <option value="PT">🇵🇹 Português</option>
-              <option value="EN">🇬🇧 English</option>
-              <option value="ES">🇪🇸 Español</option>
-              <option value="FR">🇫🇷 Français</option>
-            </select>
-          ) : (
-            <p className="text-sm text-foreground">
-              {draftLanguage === 'PT' ? '🇵🇹 Português'
-                : draftLanguage === 'EN' ? '🇬🇧 English'
-                : draftLanguage === 'ES' ? '🇪🇸 Español'
-                : draftLanguage === 'FR' ? '🇫🇷 Français'
-                : <span className="text-xs text-muted-foreground/60">Não definido</span>}
-            </p>
-          )}
-        </div>
-      </div>
 
       {/* Learning Impact */}
     </div>
   );
 }
 
-// ─── helpers: monthly hours & streak ─────────────────────────────────────────
 
-const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-
-function computeMonthlyHours(timeline: TrainingRecord[]): { label: string; hours: number }[] {
-  const now = new Date();
-  return Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-    const hours = timeline
-      .filter((t) => {
-        if (!t.completedAt) return false;
-        const c = new Date(t.completedAt);
-        return c.getFullYear() === d.getFullYear() && c.getMonth() === d.getMonth();
-      })
-      .reduce((sum, t) => sum + (t.durationHours ?? 0), 0);
-    return { label: MONTH_LABELS[d.getMonth()], hours };
-  });
-}
-
-function computeStreak(timeline: TrainingRecord[]): number {
-  const dates = new Set(
-    timeline.filter((t) => t.completedAt).map((t) => new Date(t.completedAt!).toDateString()),
-  );
-  let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-    if (dates.has(d.toDateString())) streak++;
-    else break;
-  }
-  return streak;
-}
-
-// ─── LearningImpactCard ───────────────────────────────────────────────────────
-
-const COMPANY_AVG_HOURS = 42; // mock — sem API de média da empresa ainda
-
-function LearningImpactCard({ stats, timeline }: { stats?: TrainingStats; timeline: TrainingRecord[] }) {
-  const monthlyHours = useMemo(() => computeMonthlyHours(timeline), [timeline]);
-  const streak = useMemo(() => computeStreak(timeline), [timeline]);
-  const maxBarHours = Math.max(...monthlyHours.map((m) => m.hours), 1);
-  const userHours = stats?.totalHours ?? 0;
-  const comparisonMax = Math.max(userHours, COMPANY_AVG_HOURS, 1);
-
-  return (
-    <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-2xl backdrop-blur-2xl">
-      <div className="border-b border-border/40 px-6 py-4">
-        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Learning Impact</h2>
-      </div>
-      <div className="space-y-8 p-6">
-        {/* Top stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xl font-bold text-foreground">{userHours}h</p>
-            <p className="text-[11px] text-muted-foreground">Horas totais</p>
-          </div>
-          <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xl font-bold text-foreground">{stats?.completed ?? 0}</p>
-            <p className="text-[11px] text-muted-foreground">Formações</p>
-          </div>
-          <div className={cn('rounded-lg p-3', streak > 0 ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-muted/40')}>
-            <p className={cn('text-xl font-bold', streak > 0 ? 'text-amber-500' : 'text-foreground')}>
-              {streak} {streak > 0 && '🔥'}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Streak (dias)</p>
-          </div>
-        </div>
-
-        {/* Bar chart — horas por mês */}
-        <div>
-          <p className="mb-3 text-xs font-medium text-muted-foreground">Horas por mês (6 meses)</p>
-          <div className="flex h-24 items-end gap-1.5">
-            {monthlyHours.map((m) => (
-              <div key={m.label} className="flex flex-1 flex-col items-center gap-1">
-                {m.hours > 0 && (
-                  <span className="text-[9px] font-medium text-muted-foreground">{m.hours}h</span>
-                )}
-                <div className="flex w-full flex-1 items-end rounded-sm bg-muted/50">
-                  <div
-                    className="w-full rounded-sm bg-primary transition-all duration-500"
-                    style={{ height: `${Math.max((m.hours / maxBarHours) * 100, m.hours > 0 ? 6 : 0)}%` }}
-                  />
-                </div>
-                <span className="text-[10px] text-muted-foreground">{m.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Comparação com empresa */}
-        <div>
-          <p className="mb-3 text-xs font-medium text-muted-foreground">Comparação com a empresa</p>
-          <div className="space-y-2.5">
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-foreground">Tu</span>
-                <span className="text-xs text-muted-foreground">{userHours}h</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-2 rounded-full bg-primary transition-all duration-500"
-                  style={{ width: `${(userHours / comparisonMax) * 100}%` }}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Média empresa</span>
-                <span className="text-xs text-muted-foreground">{COMPANY_AVG_HOURS}h</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-2 rounded-full bg-muted-foreground/40 transition-all duration-500"
-                  style={{ width: `${(COMPANY_AVG_HOURS / comparisonMax) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground/50">
-            * Média baseada em dados agregados e anónimos.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── TimelineItem ─────────────────────────────────────────────────────────────
 
@@ -522,9 +263,17 @@ function TimelineItem({ training, isLast }: { training: TrainingRecord; isLast: 
             {training.platform?.name && (
               <span className="text-xs text-muted-foreground">{training.platform.name}</span>
             )}
-            {training.rating != null && <RatingStars rating={training.rating} />}
-            {training.durationHours && (
-              <span className="text-xs text-muted-foreground">{training.durationHours}h</span>
+            {training.rating != null && (
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground">Rating:</span>
+                <RatingStars rating={training.rating} />
+              </div>
+            )}
+            {training.relevance != null && (
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground">Relevância:</span>
+                <RatingStars rating={training.relevance} />
+              </div>
             )}
           </div>
           <p className="mt-0.5 text-[11px] text-muted-foreground/50">
@@ -568,29 +317,18 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
 
   const [draftName, setDraftName] = useState(initialValues.name ?? '');
   const [draftLevel, setDraftLevel] = useState<ExperienceLevel | undefined>(initialValues.experienceLevel);
-  const [draftSkills, setDraftSkills] = useState<string[]>(initialValues.techStack ?? []);
   const [draftInterests, setDraftInterests] = useState<string[]>(initialValues.interests ?? []);
-
-  // Extra fields stored in localStorage (not yet supported by the backend)
-  const localExtra = useMemo(() => loadLocalExtra(initialValues.id), [initialValues.id]);
-  const [draftJobTitle, setDraftJobTitle] = useState(localExtra.jobTitle ?? '');
-  const [draftDepartment, setDraftDepartment] = useState(localExtra.department ?? '');
-  const [draftLocation, setDraftLocation] = useState(localExtra.location ?? '');
-  const [draftLanguage, setDraftLanguage] = useState(localExtra.language ?? '');
+  const [draftUserFunction, setDraftUserFunction] = useState(initialValues.userFunction ?? '');
   const [draftServiceLine, setDraftServiceLine] = useState<ServiceLine | null>(initialValues.serviceLine ?? null);
 
   const dirty = useMemo(
     () =>
       draftName !== (initialValues.name ?? '') ||
       draftLevel !== initialValues.experienceLevel ||
-      JSON.stringify(draftSkills) !== JSON.stringify(initialValues.techStack ?? []) ||
       JSON.stringify(draftInterests) !== JSON.stringify(initialValues.interests ?? []) ||
-      draftJobTitle !== (localExtra.jobTitle ?? '') ||
-      draftDepartment !== (localExtra.department ?? '') ||
-      draftLocation !== (localExtra.location ?? '') ||
-      draftLanguage !== (localExtra.language ?? '') ||
+      draftUserFunction !== (initialValues.userFunction ?? '') ||
       draftServiceLine !== (initialValues.serviceLine ?? null),
-    [draftName, draftLevel, draftSkills, draftInterests, draftJobTitle, draftDepartment, draftLocation, draftLanguage, draftServiceLine, initialValues, localExtra],
+    [draftName, draftLevel, draftInterests, draftUserFunction, draftServiceLine, initialValues],
   );
 
   const saveMutation = useMutation({
@@ -598,19 +336,13 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       profileApi.update({
         name: draftName || undefined,
         experienceLevel: draftLevel,
-        techStack: draftSkills,
         interests: draftInterests,
+        userFunction: draftUserFunction,
         serviceLine: draftServiceLine || undefined,
       }),
     onSuccess: (res) => {
       setAuthUser(res.data);
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      saveLocalExtra(initialValues.id, {
-        jobTitle: draftJobTitle || undefined,
-        department: draftDepartment || undefined,
-        location: draftLocation || undefined,
-        language: draftLanguage || undefined,
-      });
       toast.success(t('profile.saveSuccess'));
       setIsEditing(false);
     },
@@ -630,21 +362,13 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
             onEditToggle={() => setIsEditing((v) => !v)}
             draftName={draftName}
             draftLevel={draftLevel}
-            draftSkills={draftSkills}
             draftInterests={draftInterests}
-            draftJobTitle={draftJobTitle}
-            draftDepartment={draftDepartment}
-            draftLocation={draftLocation}
-            draftLanguage={draftLanguage}
+            draftUserFunction={draftUserFunction}
             draftServiceLine={draftServiceLine}
             onNameChange={setDraftName}
             onLevelChange={setDraftLevel}
-            onSkillsChange={setDraftSkills}
             onInterestsChange={setDraftInterests}
-            onJobTitleChange={setDraftJobTitle}
-            onDepartmentChange={setDraftDepartment}
-            onLocationChange={setDraftLocation}
-            onLanguageChange={setDraftLanguage}
+            onUserFunctionChange={setDraftUserFunction}
             onServiceLineChange={setDraftServiceLine}
           />
         </div>

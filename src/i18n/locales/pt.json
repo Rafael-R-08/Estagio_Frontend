@@ -21,7 +21,11 @@
     "save": "Guardar alterações",
     "saving": "A guardar…",
     "export": "Exportar",
-    "featureInDev": "Funcionalidade em desenvolvimento."
+    "featureInDev": "Funcionalidade em desenvolvimento.",
+    "more": "Ver mais",
+    "less": "Ver menos",
+    "close": "Fechar",
+    "cancel": "Cancelar"
   },
   "settings": {
     "title": "Definições",
@@ -103,6 +107,20 @@
     "empty": {
       "progress": "Nenhuma formação em progresso. Começa a explorar cursos!",
       "saved": "Nenhum curso guardado."
+    },
+    "recs": {
+      "career": {
+        "title": "Performance & Plano de Carreira",
+        "sub": "O teu percurso atual na Softinsa"
+      },
+      "interests": {
+        "title": "Novos Horizontes",
+        "sub": "Explora novas tecnologias e áreas"
+      },
+      "skills": {
+        "title": "Gaps de Perfil / SL",
+        "sub": "Skills necessárias para o teu nível"
+      }
     }
   },
   "myLearning": {
@@ -146,7 +164,7 @@
   "certificates": {
     "title": "Certificados",
     "subtitle": "Gere os teus certificados de formação e credenciais.",
-    "upload": "Carregar certificado",
+    "uploadBtn": "Carregar certificado",
     "search": "Pesquisar certificado...",
     "filters": {
       "all": "Todos",
@@ -157,6 +175,24 @@
     "count_one": "{{count}} certificado",
     "count_other": "{{count}} certificados",
     "filtered": "(filtrado)",
+    "uploadModal": {
+      "title": "Carregar Certificado",
+      "states": {
+        "PENDING": "Aguarde...",
+        "PROCESSING": "IA a extrair dados...",
+        "COMPLETED": "Processado!",
+        "FAILED": "Falha no processamento"
+      },
+      "fields": {
+        "courseName": "Nome do curso",
+        "provider": "Plataforma / Emissor",
+        "date": "Data de conclusão",
+        "hours": "Horas totais"
+      },
+      "errorProcessing": "Erro ao processar o certificado. Tenta novamente.",
+      "autoClose": "A fechar em {{seconds}}s...",
+      "successDetail": "Os metadados foram extraídos com sucesso pela nossa IA."
+    },
     "empty": {
       "noResultsTitle": "Sem resultados para essa pesquisa",
       "noResultsDesc": "Tenta outros termos.",
@@ -224,7 +260,8 @@
     "errorSend": "Erro ao enviar mensagem.",
     "preparingAssistant": "A preparar o assistente…",
     "loadingModel": "A carregar o assistente…",
-    "disclaimer": "O assistente pode cometer erros. Verifica informações importantes."
+    "disclaimer": "O assistente pode cometer erros. Verifica informações importantes.",
+    "generating": "A processar..."
   },
   "header": {
     "aiActive": "IA Ativa",

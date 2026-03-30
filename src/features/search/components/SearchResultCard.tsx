@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   BookOpen,
   Tag,
+  DollarSign,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -182,17 +184,29 @@ export function SearchResultCard({
             {course.durationHours}h
           </span>
         )}
-        {course.rating && (
-          <span className="flex items-center gap-1 text-amber-500">
-            <Star className="h-3 w-3 fill-current" />
+        {course.rating !== undefined && (
+          <span className="flex items-center gap-1 text-amber-500 font-bold">
+            <Star className="h-3.5 w-3.5 fill-current" />
             {course.rating.toFixed(1)}
           </span>
         )}
-        {course.similarityScore !== undefined && (
-          <span className="ml-auto text-[11px] text-primary/70 font-medium">
-            {Math.round(course.similarityScore * 100)}% relevante
+        {(course.relevanceScore !== undefined || course.similarityScore !== undefined || course.relevance !== undefined) && (
+          <span className="flex items-center gap-1 text-blue-500 font-bold">
+            <BarChart3 className="h-3.5 w-3.5" />
+            {Math.round(((course.relevanceScore || course.similarityScore || course.relevance || 0)) * 100)}%
           </span>
         )}
+        <div className="ml-auto">
+          <span className={cn(
+            "rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-widest border",
+            course.price && course.price.toLowerCase().includes('free') 
+              ? "bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800"
+              : "bg-muted border-border text-muted-foreground"
+          )}>
+            <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
+            {course.price || 'Free'}
+          </span>
+        </div>
       </div>
 
       {/* Description */}

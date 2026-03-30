@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, ShieldOff, UserX, UserCheck, Search, ChevronUp, ChevronDown } from 'lucide-react';
+import { ShieldCheck, ShieldOff, UserX, UserCheck, Search, ChevronUp, ChevronDown, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { adminApi } from '@/services/api';
-import type { AdminUser } from '@/types';
+import type { AdminUser, Role } from '@/types';
 import { cn } from '@/lib/utils';
 
 // ─── Confirm modal ────────────────────────────────────────────────────────────
@@ -64,10 +64,13 @@ function RoleBadge({ role }: { role: string }) {
         'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold',
         role === 'ADMIN'
           ? 'bg-softinsa-blue/10 text-softinsa-blue dark:bg-softinsa-blue/20'
+          : role === 'SERVICE_LINE_MANAGER'
+          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
           : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
       )}
     >
       {role === 'ADMIN' && <ShieldCheck className="h-3 w-3" />}
+      {role === 'SERVICE_LINE_MANAGER' && <Award className="h-3 w-3" />}
       {role}
     </span>
   );
@@ -140,7 +143,7 @@ export function UsersTab() {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortAsc, setSortAsc] = useState(true);
-  const [confirm, setConfirm] = useState<null | { type: 'promote' | 'demote' | 'deactivate' | 'activate'; user: AdminUser }>(null);
+  const [confirm, setConfirm] = useState<null | { type: 'promote' | 'demote' | 'promote_slm' | 'deactivate' | 'activate'; user: AdminUser }>(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin', 'users'],
@@ -155,7 +158,7 @@ export function UsersTab() {
   });
 
   const roleMutation = useMutation({
-    mutationFn: ({ id, role }: { id: string; role: 'ADMIN' | 'USER' }) =>
+    mutationFn: ({ id, role }: { id: string; role: Role }) =>
       adminApi.updateUserRole(id, { role }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'users'] }); toast.success('Role atualizado.'); },
     onError: () => toast.error('Erro ao atualizar role.'),
@@ -192,6 +195,7 @@ export function UsersTab() {
     if (!confirm) return;
     const { type, user } = confirm;
     if (type === 'promote') roleMutation.mutate({ id: user.id, role: 'ADMIN' });
+    if (type === 'promote_slm') roleMutation.mutate({ id: user.id, role: 'SERVICE_LINE_MANAGER' });
     if (type === 'demote') roleMutation.mutate({ id: user.id, role: 'USER' });
     if (type === 'deactivate') statusMutation.mutate({ id: user.id, activate: false });
     if (type === 'activate') statusMutation.mutate({ id: user.id, activate: true });
@@ -200,6 +204,7 @@ export function UsersTab() {
 
   const confirmMeta = {
     promote: { title: t('admin.users.confirmPromote', { name: confirm?.user.name }), description: `${confirm?.user.name} terá acesso total ao backoffice.`, label: t('admin.users.promote'), danger: false },
+    promote_slm: { title: `Tornar ${confirm?.user.name} Chefe de Linha?`, description: `${confirm?.user.name} terá acesso à gestão da sua equipa.`, label: 'Tornar Chefe', danger: false },
     demote: { title: t('admin.users.confirmDemote', { name: confirm?.user.name }), description: `${confirm?.user.name} passará a utilizador normal.`, label: t('admin.users.demote'), danger: true },
     deactivate: { title: t('admin.users.confirmDeactivate', { name: confirm?.user.name }), description: `${confirm?.user.name} não conseguirá iniciar sessão.`, label: t('admin.users.deactivate'), danger: true },
     activate: { title: t('admin.users.confirmActivate', { name: confirm?.user.name }), description: `${confirm?.user.name} voltará a ter acesso à plataforma.`, label: t('admin.users.activate'), danger: false },
@@ -281,23 +286,34 @@ export function UsersTab() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {user.role === 'USER' ? (
-                          <button
-                            onClick={() => setConfirm({ type: 'promote', user })}
-                            title={t('admin.users.promote')}
-                            className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
-                          >
-                            <ShieldCheck className="h-3.5 w-3.5 text-softinsa-blue" />
-                            {t('admin.users.promote')}
-                          </button>
-                        ) : (
+                        {user.role === 'USER' && (
+                          <>
+                            <button
+                              onClick={() => setConfirm({ type: 'promote', user })}
+                              title={t('admin.users.promote')}
+                              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                            >
+                              <ShieldCheck className="h-3.5 w-3.5 text-softinsa-blue" />
+                              Admin
+                            </button>
+                            <button
+                              onClick={() => setConfirm({ type: 'promote_slm', user })}
+                              title="Tornar Chefe de Linha"
+                              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                            >
+                              <Award className="h-3.5 w-3.5 text-amber-500" />
+                              Chefe
+                            </button>
+                          </>
+                        )}
+                        {user.role !== 'USER' && (
                           <button
                             onClick={() => setConfirm({ type: 'demote', user })}
                             title={t('admin.users.demote')}
                             className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                           >
                             <ShieldOff className="h-3.5 w-3.5 text-orange-500" />
-                            {t('admin.users.demote')}
+                            Retirar Permissões
                           </button>
                         )}
                         {user.isActive ? (
@@ -307,7 +323,7 @@ export function UsersTab() {
                             className="flex items-center gap-1.5 rounded-lg border border-red-200 dark:border-red-900/40 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
                             <UserX className="h-3.5 w-3.5" />
-                            {t('admin.users.deactivate')}
+                            Bloquear
                           </button>
                         ) : (
                           <button
@@ -316,7 +332,7 @@ export function UsersTab() {
                             className="flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-900/40 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                           >
                             <UserCheck className="h-3.5 w-3.5" />
-                            {t('admin.users.activate')}
+                            Ativar
                           </button>
                         )}
                       </div>
