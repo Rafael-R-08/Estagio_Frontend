@@ -14,7 +14,7 @@ export function computeMonthlyHours(timeline: TrainingRecord[]): { label: string
         const c = new Date(t.completedAt);
         return c.getFullYear() === d.getFullYear() && c.getMonth() === d.getMonth();
       })
-      .reduce((sum) => sum + 1, 0); // Count courses instead of hours
+      .reduce((sum, t) => sum + (t.durationHours || 0), 0);
     return { label: MONTH_LABELS[d.getMonth()], hours };
   });
 }
@@ -43,26 +43,27 @@ export function LearningImpactCard({ stats, timeline }: { stats?: TrainingStats;
   const comparisonMax = Math.max(userHours, COMPANY_AVG_HOURS, 1);
 
   return (
-    <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-2xl backdrop-blur-2xl">
-      <div className="border-b border-border/40 px-6 py-4">
-        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Learning Impact</h2>
+    <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-2xl backdrop-blur-2xl overflow-hidden">
+      <div className="border-b border-border/40 px-6 py-4 bg-muted/10">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Impacto e Progresso</h2>
+        <p className="font-black text-foreground tracking-tight">Learning Impact</p>
       </div>
       <div className="space-y-8 p-6">
         {/* Top stats */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xl font-bold text-foreground">{userHours}h</p>
-            <p className="text-[11px] text-muted-foreground">Horas totais</p>
+          <div className="rounded-2xl bg-muted/40 p-4 border border-border/40">
+            <p className="text-xl font-black text-foreground">{userHours}h</p>
+            <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">Horas Totais</p>
           </div>
-          <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xl font-bold text-foreground">{stats?.completed ?? 0}</p>
-            <p className="text-[11px] text-muted-foreground">Formações</p>
+          <div className="rounded-2xl bg-muted/40 p-4 border border-border/40">
+            <p className="text-xl font-black text-foreground">{stats?.completed ?? 0}</p>
+            <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">Cursos Concluídos</p>
           </div>
-          <div className={cn('rounded-lg p-3', streak > 0 ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-muted/40')}>
-            <p className={cn('text-xl font-bold', streak > 0 ? 'text-amber-500' : 'text-foreground')}>
+          <div className={cn('rounded-2xl p-4 border border-border/40 transition-colors', streak > 0 ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/50' : 'bg-muted/40')}>
+            <p className={cn('text-xl font-black', streak > 0 ? 'text-amber-500' : 'text-foreground')}>
               {streak} {streak > 0 && '🔥'}
             </p>
-            <p className="text-[11px] text-muted-foreground">Streak (dias)</p>
+            <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">Streak (Dias)</p>
           </div>
         </div>
 

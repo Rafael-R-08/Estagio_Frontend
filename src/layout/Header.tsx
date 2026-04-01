@@ -61,7 +61,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Notificações */}
-        <button className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+        <button id="tour-notifications" className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
           <Bell className="h-5 w-5" />
           {/* Badge exemplo */}
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
@@ -69,6 +69,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
         {/* Avatar */}
         <button
+          id="tour-profile-header"
           onClick={() => navigate('/profile')}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-opacity"
           title={user?.name}

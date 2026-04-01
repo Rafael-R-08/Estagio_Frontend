@@ -26,9 +26,9 @@ import { SearchResultCard, SearchResultCardSkeleton } from '../components/Search
 // ─── Level config ─────────────────────────────────────────────────────────────
 
 const LEVEL_STYLES: Record<string, string> = {
-  beginner:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  beginner: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced:     'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  advanced: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 };
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
@@ -263,8 +263,8 @@ export default function CourseDetailPage() {
             <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4" />
               {existingRecord.status === 'completed' ? 'Concluído' :
-               existingRecord.status === 'ongoing' ? 'Em progresso' :
-               existingRecord.status === 'priority' ? 'Prioritário' : 'Guardado'}
+                existingRecord.status === 'ongoing' ? 'Em progresso' :
+                  existingRecord.status === 'priority' ? 'Prioritário' : 'Guardado'}
             </span>
           )}
         </div>

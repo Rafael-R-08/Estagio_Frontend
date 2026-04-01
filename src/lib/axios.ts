@@ -5,9 +5,9 @@ const BASE_URL = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/,
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // O Axios deteta automaticamente o Content-Type: application/json para objetos
+  // e multipart/form-data para FormData. Definir aqui manualmente causa erros em uploads.
+  headers: {},
   // NestJS espera chaves repetidas para arrays: platforms=A&platforms=B
   // O comportamento padrão do Axios seria platforms[]=A&platforms[]=B
   paramsSerializer: {
@@ -31,10 +31,10 @@ if (import.meta.env.DEV) {
   console.info('[API] baseURL =', BASE_URL);
 }
 
-// Adiciona o token em cada pedido
+// Adiciona o token em cada pedido de forma segura
 api.interceptors.request.use((config) => {
   const token = storage.getToken();
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

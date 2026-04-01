@@ -275,9 +275,19 @@ export function UnifiedRecommendationCard({
            )}
 
            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-border/40 pt-6 gap-4">
-              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Context-Aware RAG Engine
+              <div className="flex items-center gap-3">
+                {data?.metadata?.qualityScore !== undefined && (
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest bg-muted/20 px-2 py-1 rounded-md">
+                    <div className={cn(
+                      "h-1.5 w-1.5 rounded-full animate-pulse",
+                      data.metadata.qualityScore > 0.7 ? "bg-emerald-500" : "bg-amber-500"
+                    )} />
+                    Confiança: {Math.round(data.metadata.qualityScore * 100)}%
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                  Context-Aware RAG Engine
+                </div>
               </div>
               <a
                 href="/ai"

@@ -89,6 +89,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <li key={href}>
                   <Link
                     to={href}
+                    id={`tour-${labelKey.split('.').pop()?.toLowerCase()}`}
                     title={collapsed ? t(labelKey) : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
@@ -200,7 +201,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Account */}
         <div className="px-3 mt-4">
           {!collapsed && (
-            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+            <p id="tour-account-section" className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
               {t('nav.account')}
             </p>
           )}
@@ -211,6 +212,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <li key={href}>
                   <Link
                     to={href}
+                    id={`tour-${labelKey.split('.').pop()?.toLowerCase()}`}
                     title={collapsed ? t(labelKey) : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',

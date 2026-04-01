@@ -13,8 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { recommendationsApi, trainingApi, certificatesApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { toList } from '@/lib/api';
-import { cn } from '@/lib/utils';
-
 import { UnifiedRecommendationCard } from '../components/UnifiedRecommendationCard';
 import { ProgressCard, ProgressCardSkeleton } from '../components/ProgressCard';
 import { QuickActions } from '../components/QuickActions';
@@ -22,39 +20,6 @@ import { AlertBanner } from '../components/AlertBanner';
 import { PendingFeedbackModal } from '../components/PendingFeedbackModal';
 
 import type { TrainingStats, TrainingRecord } from '@/types';
-
-// ─── Stat card ────────────────────────────────────────────────────────────────
-
-interface StatCardProps {
-  icon: React.ElementType;
-  label: string;
-  value: number | string;
-  color: string;
-  loading?: boolean;
-}
-
-function StatCard({ icon: Icon, label, value, color, loading }: StatCardProps) {
-  return (
-    <div className="flex items-center gap-4 rounded-[2rem] border border-border/60 bg-muted/40 backdrop-blur-md px-6 py-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.2rem]', color)}>
-        <Icon className="h-5 w-5" />
-      </div>
-      <div>
-        {loading ? (
-          <div className="space-y-1">
-            <div className="h-6 w-12 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-          </div>
-        ) : (
-          <>
-            <p className="text-2xl font-black text-foreground leading-none">{value}</p>
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-1.5 opacity-80">{label}</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ─── Section header ───────────────────────────────────────────────────────────
 
@@ -124,7 +89,7 @@ export default function DashboardPage() {
     return () => { mounted = false; };
   }, []);
 
-  // 2.1 — AI Recommendations
+  // 1. Data Fetching
   const {
     data: recs,
     isLoading: recsLoading,
@@ -134,38 +99,21 @@ export default function DashboardPage() {
     queryKey: ['recommendations'],
     queryFn: () => recommendationsApi.getForMe().then((r) => r.data),
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 min
+    staleTime: 1000 * 60 * 5,
   });
 
-  // 2.2 — Cursos em progresso
   const { data: inProgress = [], isLoading: progressLoading, refetch: refetchOngoing } = useQuery({
     queryKey: ['trainings', 'ongoing'],
     queryFn: () => trainingApi.getAll({ status: 'ongoing' }).then((r) => toList(r.data)),
     staleTime: 1000 * 60 * 2,
   });
 
-  // 2.3 — Cursos concluídos
-  const { data: completed = [], isLoading: completedLoading, refetch: refetchCompleted } = useQuery({
-    queryKey: ['trainings', 'completed'],
-    queryFn: () => trainingApi.getAll({ status: 'completed' }).then((r) => toList(r.data)),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  // 2.4 — Cursos guardados
-  const { data: saved = [], isLoading: savedLoading, refetch: refetchSaved } = useQuery({
-    queryKey: ['trainings', 'later'],
-    queryFn: () => trainingApi.getAll({ status: 'later' }).then((r) => toList(r.data)),
-    staleTime: 1000 * 60 * 2,
-  });
-
-  // Stats
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['trainings', 'stats'],
     queryFn: () => trainingApi.getStats().then((r) => r.data as TrainingStats),
     staleTime: 1000 * 60 * 2,
   });
 
-  // 2.5 — Alertas de certificados a expirar e conhecimento obsoleto
   const { data: renewalAlerts, isLoading: alertsLoading } = useQuery({
     queryKey: ['certificates', 'renewal-alerts'],
     queryFn: () => certificatesApi.getRenewalAlerts().then((r) => r.data),
@@ -189,168 +137,106 @@ export default function DashboardPage() {
     year: 'numeric',
   });
 
+  // Most recent course
+  const latestCourse = inProgress[0];
+
   return (
-    <div className="space-y-6">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 px-2">
-        <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-60">{today}</p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            {greeting}{user?.name ? `, ` : ''} <span className="text-blue-600 dark:text-blue-400">{user?.name ? user.name.split(' ')[0] : ''}</span>
+    <div className="space-y-8 pb-12">
+      {/* ── Header & Quick Stats ───────────────────────────────────────── */}
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between px-2">
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/50">{today}</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+            {greeting}{user?.name ? `, ` : ''} <span className="text-blue-600 dark:text-blue-400 font-black">{user?.name ? user.name.split(' ')[0] : ''}</span>
           </h1>
+        </div>
+
+        {/* Small header chips instead of large cards */}
+        <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-right-4 duration-700">
+          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-2 backdrop-blur-md">
+            <BookOpen className="h-3.5 w-3.5 text-blue-500" />
+            <span className="text-xs font-bold text-foreground">
+              {statsLoading ? '...' : stats?.total ?? 0} <span className="text-muted-foreground font-medium lowercase">formaçōes</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-2 backdrop-blur-md">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+            <span className="text-xs font-bold text-foreground">
+              {statsLoading ? '...' : stats?.completed ?? 0} <span className="text-muted-foreground font-medium lowercase">concluídas</span>
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── 2.5 Alertas ─────────────────────────────────────────────────── */}
-      {alertsLoading ? (
-        <div className="flex animate-pulse items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 h-16" />
-      ) : renewalAlerts && (renewalAlerts.expiringAlerts?.length > 0 || renewalAlerts.staleKnowledgeSuggestions?.length > 0) && (
+      {!alertsLoading && renewalAlerts && (renewalAlerts.expiringAlerts?.length > 0 || renewalAlerts.staleKnowledgeSuggestions?.length > 0) && (
         <AlertBanner data={renewalAlerts} />
       )}
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard
-          icon={BookOpen}
-          label={t('dashboard.stats.total')}
-          value={stats?.total ?? 0}
-          color="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-          loading={statsLoading}
-        />
-        <StatCard
-          icon={TrendingUp}
-          label={t('dashboard.stats.ongoing')}
-          value={stats?.ongoing ?? 0}
-          color="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
-          loading={statsLoading}
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label={t('dashboard.stats.completed')}
-          value={stats?.completed ?? 0}
-          color="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-          loading={statsLoading}
-        />
-        <StatCard
-          icon={Bookmark}
-          label={t('dashboard.stats.saved')}
-          value={stats?.later ?? 0}
-          color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
-          loading={statsLoading}
-        />
-      </div>
+      {/* ── Main Responsive Grid ────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 
-      {/* ── Main grid ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left column — 2/3 width */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* 2.1 AI Recommendations — Unified Tabbed Card */}
-          <div className="mb-6">
+        {/* Left column — 2/3 width — Focus on Discovery */}
+        <div className="lg:col-span-2 space-y-8">
+
+          {/* AI Recommendations - Primary Feature */}
+          <section className="animate-in fade-in zoom-in-95 duration-500">
             <UnifiedRecommendationCard
               data={recs}
               isLoading={recsLoading}
               isError={recsError}
               onRetry={() => recsRefetch()}
             />
-          </div>
+          </section>
 
-          {/* 2.2 Cursos em progresso */}
-          <div className="space-y-3">
+          {/* Continuar a Aprender - Smart Focus */}
+          <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
             <SectionHeader
-              title={t('dashboard.inProgress')}
-              count={inProgress.length}
+              title={t('dashboard.continueLearning', 'Continuar a Aprender')}
               linkTo="/my-learning"
               linkLabel={t('dashboard.viewAll')}
             />
             {progressLoading ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <ProgressCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : inProgress.length === 0 ? (
+              <ProgressCardSkeleton />
+            ) : !latestCourse ? (
               <EmptyState
                 icon={TrendingUp}
                 message={t('dashboard.empty.progress')}
               />
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {inProgress.slice(0, 4).map((r) => (
-                  <ProgressCard key={r.id} record={r} variant="progress" onUpdate={refetchOngoing} />
-                ))}
+              <div className="relative group">
+                {/* High-end decorative glow for active course */}
+                <div className="absolute inset-0 bg-blue-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <ProgressCard
+                  record={latestCourse}
+                  variant="progress"
+                  onUpdate={refetchOngoing}
+                />
               </div>
             )}
-          </div>
-
-          {/* 2.3 Cursos concluídos */}
-          <div className="space-y-3">
-            <SectionHeader
-              title={t('dashboard.completed')}
-              count={completed.length}
-              linkTo="/my-learning"
-              linkLabel={t('dashboard.viewAll')}
-            />
-            {completedLoading ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <ProgressCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : completed.length === 0 ? (
-              <EmptyState
-                icon={CheckCircle2}
-                message={t('dashboard.empty.completed')}
-              />
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {completed.slice(0, 4).map((r) => (
-                  <ProgressCard key={r.id} record={r} variant="completed" onUpdate={refetchCompleted} />
-                ))}
-              </div>
-            )}
-          </div>
+          </section>
         </div>
 
-        {/* Right column — 1/3 width */}
-        <div className="space-y-6">
-          {/* 2.4 Quick Actions */}
+        {/* Right column — 1/3 width — Focus on Utility */}
+        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700 delay-300">
+
+          {/* Quick Actions at the top for accessibility */}
           <QuickActions />
 
-          {/* 2.3 Cursos guardados */}
-          <div className="space-y-3">
-            <SectionHeader
-              title={t('dashboard.saved')}
-              count={saved.length}
-              linkTo="/my-learning"
-            />
-            {savedLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <ProgressCardSkeleton key={i} />
-                ))}
+          {/* Mini-seção de Cursos Guardados ou Novidades */}
+          <div className="space-y-4">
+            <SectionHeader title={t('dashboard.saved')} />
+            <div className="rounded-[2.5rem] border border-border/40 bg-muted/10 p-2">
+              <div className="h-40 flex flex-col items-center justify-center text-center p-6 grayscale opacity-40">
+                <Bookmark className="h-8 w-8 mb-2" />
+                <p className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                  {t('dashboard.savedEmpty', 'Sem itens guardados')}
+                </p>
               </div>
-            ) : saved.length === 0 ? (
-              <EmptyState
-                icon={Bookmark}
-                message={t('dashboard.empty.saved')}
-              />
-            ) : (
-              <div className="space-y-3">
-                {saved.slice(0, 3).map((r) => (
-                  <ProgressCard key={r.id} record={r} variant="saved" onUpdate={refetchSaved} />
-                ))}
-                {saved.length > 3 && (
-                  <button
-                    onClick={() => {}}
-                    className="w-full rounded-xl border border-dashed border-border py-2.5 text-xs font-medium text-muted-foreground transition hover:bg-muted"
-                  >
-                    +{saved.length - 3} mais guardados
-                  </button>
-                )}
-              </div>
-            )}
+            </div>
           </div>
         </div>
+
       </div>
 
       {/* Pending Feedback Modal */}

@@ -12,7 +12,8 @@ applyTheme(savedTheme);
 
 // Pages — Auth
 const LandingPage = lazy(() => import('./features/landing/pages/LandingPage'));
-const LoginPage = lazy(() => import('./features/auth/pages/LoginPage'));
+// LoginPage can be removed if fully unified, but keeping it for now if needed as a chunk
+// const LoginPage = lazy(() => import('./features/auth/pages/LoginPage'));
 
 // Pages — App
 const DashboardPage = lazy(() => import('./features/dashboard/pages/DashboardPage'));
@@ -47,7 +48,7 @@ function App() {
             <Routes>
               {/* Public */}
               <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<LandingPage />} />
 
 
               {/* Protected — layout comum */}

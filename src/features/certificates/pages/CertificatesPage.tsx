@@ -95,17 +95,17 @@ export default function CertificatesPage() {
 
   // ── Counts for filter pills ──────────────────────────────────────────────
   const counts = {
-    all:      certs.length,
-    active:   certs.filter((c) => getCertStatus(c, now) === 'active').length,
+    all: certs.length,
+    active: certs.filter((c) => getCertStatus(c, now) === 'active').length,
     expiring: certs.filter((c) => getCertStatus(c, now) === 'expiring').length,
-    expired:  certs.filter((c) => getCertStatus(c, now) === 'expired').length,
+    expired: certs.filter((c) => getCertStatus(c, now) === 'expired').length,
   };
 
   const FILTERS: { id: typeof statusFilter; label: string }[] = [
-    { id: 'all',      label: t('certificates.filters.all') },
-    { id: 'active',   label: t('certificates.filters.active') },
+    { id: 'all', label: t('certificates.filters.all') },
+    { id: 'active', label: t('certificates.filters.active') },
     { id: 'expiring', label: t('certificates.filters.expiring') },
-    { id: 'expired',  label: t('certificates.filters.expired') },
+    { id: 'expired', label: t('certificates.filters.expired') },
   ];
 
   return (
@@ -151,16 +151,14 @@ export default function CertificatesPage() {
                 <button
                   key={f.id}
                   onClick={() => setStatusFilter(f.id)}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 ${
-                    isActive
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 ${isActive
                       ? 'bg-foreground text-background shadow-xl'
                       : 'bg-background/40 border border-border/60 text-muted-foreground hover:bg-background/80'
-                  }`}
+                    }`}
                 >
                   {f.label}
-                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
-                    isActive ? 'bg-background text-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
-                  }`}>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${isActive ? 'bg-background text-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+                    }`}>
                     {count}
                   </span>
                 </button>

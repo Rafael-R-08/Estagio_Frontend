@@ -76,7 +76,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
   const [trainingId, setTrainingId] = useState('');
   const [meta, setMeta] = useState<UpdateCertificateDto>({});
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   // Job states
   const [jobId, setJobId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(2);
@@ -87,7 +87,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
     if ((state !== 'processing' && state !== 'uploading') || !jobId) return;
 
     let interval: number | ReturnType<typeof setTimeout>;
-    
+
     interval = setInterval(async () => {
       try {
         const res = await certificatesApi.getJobStatus(jobId);
@@ -157,7 +157,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
     setFile(f);
     setState('preview');
     setErrorMsg('');
-    
+
     // Auto-extract name from filename
     const nameWithoutExt = f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     setMeta(prev => ({ ...prev, courseName: nameWithoutExt }));
@@ -183,7 +183,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-background/40" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[2rem] border border-border bg-card shadow-2xl">
-        
+
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-8 py-6">
           <div className="flex items-center gap-3">
@@ -253,7 +253,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                   />
                 </div>
               </div>
-              
+
               {errorMsg && (
                 <div className="flex items-center gap-3 rounded-2xl bg-red-500/10 p-4 text-red-500 border border-red-500/20">
                   <AlertCircle className="h-5 w-5 shrink-0" />
@@ -294,7 +294,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                   <h3 className="text-lg font-black tracking-tight text-foreground">{t('certificates.uploadModal.states.COMPLETED')}</h3>
                   <p className="text-xs font-medium text-muted-foreground">{t('certificates.uploadModal.successDetail')}</p>
                 </div>
-                
+
                 <div className="divide-y divide-border/40 rounded-3xl border border-border/60 bg-muted/10">
                   <div className="flex items-center justify-between px-5 py-3">
                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('certificates.uploadModal.fields.courseName')}</span>
@@ -323,7 +323,7 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
         <div className="flex shrink-0 justify-end gap-3 border-t border-border/60 px-8 py-5 bg-muted/10">
           {(state === 'idle' || state === 'preview' || state === 'error') && (
             <>
-              <button 
+              <button
                 onClick={onClose}
                 disabled={uploadMutation.isPending}
                 className="rounded-full px-6 py-3 text-sm font-bold text-muted-foreground transition hover:bg-muted active:scale-95 disabled:opacity-50"
@@ -343,9 +343,9 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
             </>
           )}
           {state === 'completed' && (
-             <button onClick={onSuccess} className="rounded-full bg-foreground px-8 py-3 text-sm font-black text-background shadow-xl transition hover:opacity-90 active:scale-95">
-               {t('common.close') || 'Close'}
-             </button>
+            <button onClick={onSuccess} className="rounded-full bg-foreground px-8 py-3 text-sm font-black text-background shadow-xl transition hover:opacity-90 active:scale-95">
+              {t('common.close') || 'Close'}
+            </button>
           )}
         </div>
       </div>

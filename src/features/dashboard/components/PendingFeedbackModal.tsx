@@ -60,7 +60,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
             <X className="h-4 w-4" />
           </button>
         </div>
-        
+
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
           <p className="text-sm text-foreground/80 mb-4">
             Notámos que acedeste recentemente a estas formações. Confirma o teu estado para mantermos o teu histórico atualizado:
@@ -81,7 +81,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="flex flex-col gap-2 shrink-0 sm:items-end w-full sm:w-auto">
                   <button
                     onClick={() => handleAction(course.id, 'ongoing')}

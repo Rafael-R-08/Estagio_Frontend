@@ -1,17 +1,35 @@
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { Moon, Sun, Sparkles, BadgeCheck, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Moon, Sun, Sparkles, BadgeCheck, MessageSquare, X } from 'lucide-react';
 import { applyTheme } from '../../../utils/theme';
+import LoginCard from '../../auth/components/LoginCard';
 
 export default function LandingPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     return document.documentElement.classList.contains('dark');
   });
+
+  // Check if we should open login modal based on URL
+  useEffect(() => {
+    if (location.pathname === '/login' || location.search.includes('login=true')) {
+      setIsLoginModalOpen(true);
+    }
+  }, [location]);
 
   const toggleTheme = () => {
     const newTheme = isDark ? 'light' : 'dark';
     applyTheme(newTheme);
     setIsDark(!isDark);
+  };
+
+  const closeLoginModal = () => {
+    setIsLoginModalOpen(false);
+    if (location.pathname === '/login') {
+      navigate('/', { replace: true });
+    }
   };
 
   return (
@@ -30,12 +48,12 @@ export default function LandingPage() {
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <Link
-              to="/login"
+            <button
+              onClick={() => setIsLoginModalOpen(true)}
               className="hidden sm:inline-flex h-9 items-center justify-center px-4 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
             >
               Iniciar sessão
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -57,12 +75,12 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center pt-4">
-            <Link
-              to="/login"
+            <button
+              onClick={() => setIsLoginModalOpen(true)}
               className="h-12 inline-flex items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background transition-all hover:bg-foreground/90 active:scale-95 shadow-lg shadow-foreground/5"
             >
               Iniciar sessão
-            </Link>
+            </button>
           </div>
 
           <div className="pt-6">
@@ -250,6 +268,29 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      {/* ── Login Modal Overlay ── */}
+      {isLoginModalOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300"
+          onClick={closeLoginModal}
+        >
+          {/* Backdrop Blur Layer */}
+          <div className="absolute inset-0 bg-background/20 backdrop-blur-3xl" />
+          
+          {/* Login Card */}
+          <div className="relative z-10 w-full max-w-[420px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-500">
+            <LoginCard />
+            
+            {/* Optional Close hint or button if needed, but per request clicking BG is enough */}
+            <button 
+              className="absolute -top-12 right-0 p-2 text-foreground/40 hover:text-foreground transition-colors sm:hidden"
+              onClick={closeLoginModal}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

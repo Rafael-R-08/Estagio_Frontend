@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bot, PanelRight, PanelRightClose, Sparkles } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
-import { recommendationsApi } from '@/services/api';
+import { recommendationsApi, chatApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import type { AiMessage } from '@/types';
+import { storage } from '@/lib/storage';
+import type { AiMessage, AiConversation, RagResponse } from '@/types';
 
 import { ChatBubble } from '../components/ChatBubble';
 import { ChatInput } from '../components/ChatInput';
@@ -47,16 +48,29 @@ export default function AiAssistantPage() {
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [recentQueries, setRecentQueries] = useState<string[]>([]);
+  const [conversations, setConversations] = useState<AiConversation[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const initializedRef = useRef(false);
   const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // ─── Fetch History ────────────────────────────────────────────────────────
+  const fetchConversations = useCallback(async () => {
+    try {
+      const res = await chatApi.listConversations();
+      setConversations(res.data);
+    } catch (err) {
+      console.error('Failed to fetch conversations', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       setRecentQueries(loadRecent(user.id));
+      fetchConversations();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchConversations]);
 
   // ── Initial recommendations ──────────────────────────────────────────────
   useEffect(() => {
@@ -84,14 +98,21 @@ export default function AiAssistantPage() {
       if (cancelled || initializedRef.current) return;
       initializedRef.current = true;
 
-      const contentStr = res.data.welcome || res.data.answer || t('ai.welcomeMessage');
+      const data = res.data as RagResponse;
       
+      // The backend now returns structured fields. 
+      // We can join them or pick the most relevant one for a greeting.
+      const contentStr = data.welcome || 
+        (data.improvement && data.interests ? `${data.improvement}\n\n${data.interests}` : null) ||
+        data.answer || 
+        t('ai.welcomeMessage');
+
       const assistantMessage: AiMessage = {
         id: makeId(),
         role: 'assistant',
         content: contentStr,
         timestamp: new Date().toISOString(),
-        sources: res.data.sources,
+        sources: data.sources,
       };
 
       setMessages([assistantMessage]);
@@ -106,8 +127,8 @@ export default function AiAssistantPage() {
         abortControllerRef.current.abort();
       }
     };
-  // run once on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Auto-scroll during streaming ──────────────────────────────────────────
@@ -140,12 +161,12 @@ export default function AiAssistantPage() {
       setMessages((prev) => [
         ...prev,
         { id: msgUserId, role: 'user', content: text, timestamp: new Date().toISOString() },
-        { 
-          id: assistantMsgId, 
-          role: 'assistant', 
-          content: '', 
-          timestamp: new Date().toISOString(), 
-          isStreaming: true 
+        {
+          id: assistantMsgId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date().toISOString(),
+          isStreaming: true
         },
       ]);
 
@@ -156,19 +177,20 @@ export default function AiAssistantPage() {
       setIsTyping(true);
 
       try {
-        const token = localStorage.getItem('auth-token');
+        const token = storage.getToken();
         const apiBase = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
-        
+
         const response = await fetch(`${apiBase}/ai/chat/stream`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token || ''}`,
           },
-          body: JSON.stringify({ 
-            query: text, 
+          body: JSON.stringify({
+            prompt: text, // Changed from "query" to "prompt" per new contract
+            conversationId, // Send current conversation ID if we have one
             history,
-            language: i18n.language // Pass current UI language (pt-PT or en)
+            language: i18n.language
           }),
           signal: ctrl.signal,
         });
@@ -199,13 +221,18 @@ export default function AiAssistantPage() {
 
             try {
               const data = JSON.parse(dataStr);
+              
+              if (data.conversationId && !conversationId) {
+                setConversationId(data.conversationId);
+                fetchConversations(); // Update list to show new session
+              }
+
               if (data.text) {
                 accumulatedText += data.text;
-                // Batch updates to avoid too many re-renders
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsgId
-                      ? { ...m, content: accumulatedText }
+                      ? { ...m, content: accumulatedText, conversationId: data.conversationId }
                       : m
                   )
                 );
@@ -227,10 +254,10 @@ export default function AiAssistantPage() {
         }
       } catch (err: any) {
         if (err.name === 'AbortError') {
-          setMessages((prev) => 
-            prev.map((m) => 
-              m.id === assistantMsgId 
-                ? { ...m, content: (m.content || '') + '\n\n**[Geração interrompida]**', isStreaming: false } 
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: (m.content || '') + '\n\n**[Geração interrompida]**', isStreaming: false }
                 : m
             )
           );
@@ -241,13 +268,54 @@ export default function AiAssistantPage() {
       } finally {
         setIsTyping(false);
         abortControllerRef.current = null;
-        setMessages((prev) => 
+        setMessages((prev) =>
           prev.map((m) => m.id === assistantMsgId ? { ...m, isStreaming: false } : m)
         );
       }
     },
-    [messages, user?.id, t, i18n.language, isTyping],
+    [messages, user?.id, t, i18n.language, isTyping, conversationId, fetchConversations],
   );
+
+  const handleStartNewChat = useCallback(() => {
+    setConversationId(null);
+    setMessages([
+      {
+        id: makeId(),
+        role: 'assistant',
+        content: `Ok, vamos começar uma nova conversa! Como posso ajudar hoje?`,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  }, []);
+
+  const handleDeleteConversation = useCallback(async (id: string) => {
+    try {
+      await chatApi.deleteConversation(id);
+      if (conversationId === id) {
+        handleStartNewChat();
+      }
+      fetchConversations();
+      toast.success('Conversa eliminada');
+    } catch (err) {
+      toast.error('Erro ao eliminar conversa');
+    }
+  }, [conversationId, fetchConversations, handleStartNewChat]);
+
+  const handleSelectConversation = useCallback(async (conv: AiConversation) => {
+    setConversationId(conv.id);
+    setSidebarOpen(false);
+    // Ideally we would fetch messages for this conversation here
+    // For now we just reset state to that conversation context
+    setMessages([
+      {
+        id: makeId(),
+        role: 'assistant',
+        content: `A carregar a conversa: **${conv.title || 'Sem título'}**...`,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+    // Note: If the backend supports fetching messages by conversationId, add it here.
+  }, []);
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
@@ -354,6 +422,11 @@ export default function AiAssistantPage() {
             user={user ?? undefined}
             recentQueries={recentQueries}
             onClearRecent={handleClearRecent}
+            conversations={conversations}
+            onSelectConversation={handleSelectConversation}
+            onDeleteConversation={handleDeleteConversation}
+            onNewChat={handleStartNewChat}
+            currentConversationId={conversationId ?? undefined}
           />
         </div>
 
@@ -370,6 +443,14 @@ export default function AiAssistantPage() {
                 user={user ?? undefined}
                 recentQueries={recentQueries}
                 onClearRecent={handleClearRecent}
+                conversations={conversations}
+                onSelectConversation={(c) => {
+                  handleSelectConversation(c);
+                  setSidebarOpen(false);
+                }}
+                onDeleteConversation={handleDeleteConversation}
+                onNewChat={handleStartNewChat}
+                currentConversationId={conversationId ?? undefined}
               />
             </div>
           </div>

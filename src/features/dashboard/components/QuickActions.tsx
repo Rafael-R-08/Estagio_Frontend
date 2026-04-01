@@ -49,18 +49,21 @@ export function QuickActions() {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl p-6 shadow-sm">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
-          <Sparkles className="h-4 w-4" />
+    <div className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-xl p-8 shadow-xl shadow-foreground/5 relative overflow-hidden group">
+      {/* Decorative background element */}
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+
+      <div className="mb-8 flex items-center gap-4 relative z-10">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background shadow-lg shadow-foreground/10">
+          <Sparkles className="h-5 w-5" />
         </div>
         <div className="space-y-0.5">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-70">Ações Rápidas</h2>
-          <p className="font-bold text-foreground">Atalhos principais</p>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Ações Rápidas</h2>
+          <p className="text-lg font-black tracking-tight text-foreground">Gestão Direta</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4 relative z-10">
         {ACTIONS.map((action) => {
           const Icon = action.icon;
           return (
@@ -68,16 +71,16 @@ export function QuickActions() {
               key={action.href}
               onClick={() => navigate(action.href)}
               className={cn(
-                'group flex flex-col gap-3 rounded-[2rem] border border-border/60 bg-background/50 p-4',
-                'text-left transition-all duration-300 hover:border-border hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]',
+                'group/btn flex flex-col gap-4 rounded-3xl border border-border/60 bg-background/40 p-5',
+                'text-left transition-all duration-300 hover:border-primary/30 hover:bg-background/60 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 active:scale-[0.98]',
               )}
             >
-              <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg transition', action.color)}>
-                <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+              <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:rotate-3 shadow-sm', action.color)}>
+                <Icon className="h-5 w-5" />
               </div>
-              <div>
-                <p className="text-xs font-semibold text-foreground leading-tight">{action.label}</p>
-                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">{action.description}</p>
+              <div className="space-y-1">
+                <p className="text-[13px] font-bold text-foreground leading-tight tracking-tight">{action.label}</p>
+                <p className="text-[11px] font-medium text-muted-foreground/80 leading-relaxed line-clamp-1 group-hover/btn:text-muted-foreground transition-colors">{action.description}</p>
               </div>
             </button>
           );

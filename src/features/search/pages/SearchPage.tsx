@@ -65,7 +65,14 @@ export default function SearchPage() {
 
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<Filters>({ platforms: [], levels: [], isFree: undefined, minRating: undefined });
+  const [filters, setFilters] = useState<Filters>({
+    platforms: [],
+    level: undefined,
+    isFree: undefined,
+    minInternalRating: undefined,
+    minRelevance: undefined,
+    language: undefined
+  });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // ── Available platforms ──────────────────────────────────────────────────
@@ -82,7 +89,16 @@ export default function SearchPage() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['search', searchQuery, filters.platforms, filters.isFree, filters.minRating],
+    queryKey: [
+      'search',
+      searchQuery,
+      filters.platforms,
+      filters.isFree,
+      filters.minInternalRating,
+      filters.minRelevance,
+      filters.level,
+      filters.language
+    ],
     queryFn: () =>
       searchApi
         .search(
@@ -90,7 +106,10 @@ export default function SearchPage() {
           20,
           filters.platforms.length ? filters.platforms : undefined,
           filters.isFree,
-          filters.minRating
+          filters.minInternalRating,
+          filters.minRelevance,
+          filters.level,
+          filters.language
         )
         .then((r) => r.data),
     enabled: searchQuery.trim().length >= 2,
@@ -128,12 +147,8 @@ export default function SearchPage() {
 
   // ── Apply client-side level filter ───────────────────────────────────────
   const filteredResults = useMemo(() => {
-    const results = searchResponse?.results ?? [];
-    if (filters.levels.length === 0) return results;
-    return results.filter(
-      (c) => c.level && (filters.levels as string[]).includes(c.level),
-    );
-  }, [searchResponse, filters.levels]);
+    return searchResponse?.results ?? [];
+  }, [searchResponse]);
 
   // ── Training mutations ────────────────────────────────────────────────────
   const createTraining = useMutation({
@@ -242,8 +257,8 @@ export default function SearchPage() {
                 {isFetching
                   ? 'A pesquisar…'
                   : filteredResults.length > 0
-                  ? `${filteredResults.length} resultado${filteredResults.length !== 1 ? 's' : ''}`
-                  : ''}
+                    ? `${filteredResults.length} resultado${filteredResults.length !== 1 ? 's' : ''}`
+                    : ''}
               </p>
               <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
                 <button

@@ -72,14 +72,14 @@ function PlatformModal({
   const [form, setForm] = useState<PlatformFormData>(() =>
     platform
       ? {
-          name: platform.name,
-          baseUrl: platform.baseUrl ?? '',
-          logoUrl: platform.logoUrl ?? '',
-          apiKey: platform.apiKey ?? '',
-          isActive: platform.isActive,
-          isSearchEnabled: platform.isSearchEnabled,
-          configEntries: configToEntries(platform.config),
-        }
+        name: platform.name,
+        baseUrl: platform.baseUrl ?? '',
+        logoUrl: platform.logoUrl ?? '',
+        apiKey: platform.apiKey ?? '',
+        isActive: platform.isActive,
+        isSearchEnabled: platform.isSearchEnabled,
+        configEntries: configToEntries(platform.config),
+      }
       : EMPTY_FORM,
   );
 
@@ -117,130 +117,130 @@ function PlatformModal({
 
         <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden">
           <div className="overflow-y-auto px-6 py-5 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nome *</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="ex. Udemy"
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL base</label>
-            <input
-              type="url"
-              value={form.baseUrl}
-              onChange={(e) => setForm((f) => ({ ...f, baseUrl: e.target.value }))}
-              placeholder="https://..."
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL do logo</label>
-            <input
-              type="url"
-              value={form.logoUrl}
-              onChange={(e) => setForm((f) => ({ ...f, logoUrl: e.target.value }))}
-              placeholder="https://..."
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-              <KeyRound className="h-3 w-3" />
-              API Key
-            </label>
-            <div className="relative">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nome *</label>
               <input
-                type={showApiKey ? 'text' : 'password'}
-                value={form.apiKey}
-                onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
-                placeholder="Deixa em branco para não alterar"
-                autoComplete="new-password"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 font-mono"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="ex. Udemy"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
-              <button
-                type="button"
-                onClick={() => setShowApiKey((v) => !v)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">Necessária para plataformas com pesquisa via API (ex. Udemy, Coursera).</p>
-          </div>
 
-          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">Plataforma ativa</p>
-              <p className="text-xs text-muted-foreground">Visível para os utilizadores</p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL base</label>
+              <input
+                type="url"
+                value={form.baseUrl}
+                onChange={(e) => setForm((f) => ({ ...f, baseUrl: e.target.value }))}
+                placeholder="https://..."
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+              />
             </div>
-            <ToggleSwitch checked={form.isActive} onChange={(v) => setForm((f) => ({ ...f, isActive: v }))} />
-          </div>
 
-          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">Pesquisa ativada</p>
-              <p className="text-xs text-muted-foreground">Permite pesquisar cursos nesta plataforma</p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL do logo</label>
+              <input
+                type="url"
+                value={form.logoUrl}
+                onChange={(e) => setForm((f) => ({ ...f, logoUrl: e.target.value }))}
+                placeholder="https://..."
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+              />
             </div>
-            <ToggleSwitch checked={form.isSearchEnabled} onChange={(v) => setForm((f) => ({ ...f, isSearchEnabled: v }))} />
-          </div>
 
-          {/* Config entries */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                <Settings2 className="h-3 w-3" />
-                Config (credenciais)
+                <KeyRound className="h-3 w-3" />
+                API Key
               </label>
-              <button
-                type="button"
-                onClick={addEntry}
-                className="flex items-center gap-1 rounded-lg border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Adicionar campo
-              </button>
-            </div>
-            {form.configEntries.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground px-1">
-                Nenhum campo configurado. Usa para credenciais OAuth (ex. <code className="font-mono">clientId</code>, <code className="font-mono">clientSecret</code>).
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {form.configEntries.map((entry, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="chave"
-                      value={entry.key}
-                      onChange={(e) => updateEntry(i, 'key', e.target.value)}
-                      className="w-2/5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
-                    />
-                    <input
-                      type="text"
-                      placeholder="valor"
-                      value={entry.value}
-                      onChange={(e) => updateEntry(i, 'value', e.target.value)}
-                      className="flex-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeEntry(i)}
-                      className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={form.apiKey}
+                  onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
+                  placeholder="Deixa em branco para não alterar"
+                  autoComplete="new-password"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey((v) => !v)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
-            )}
-          </div>
+              <p className="text-[11px] text-muted-foreground">Necessária para plataformas com pesquisa via API (ex. Udemy, Coursera).</p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Plataforma ativa</p>
+                <p className="text-xs text-muted-foreground">Visível para os utilizadores</p>
+              </div>
+              <ToggleSwitch checked={form.isActive} onChange={(v) => setForm((f) => ({ ...f, isActive: v }))} />
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Pesquisa ativada</p>
+                <p className="text-xs text-muted-foreground">Permite pesquisar cursos nesta plataforma</p>
+              </div>
+              <ToggleSwitch checked={form.isSearchEnabled} onChange={(v) => setForm((f) => ({ ...f, isSearchEnabled: v }))} />
+            </div>
+
+            {/* Config entries */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <Settings2 className="h-3 w-3" />
+                  Config (credenciais)
+                </label>
+                <button
+                  type="button"
+                  onClick={addEntry}
+                  className="flex items-center gap-1 rounded-lg border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                >
+                  <Plus className="h-3 w-3" />
+                  Adicionar campo
+                </button>
+              </div>
+              {form.configEntries.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground px-1">
+                  Nenhum campo configurado. Usa para credenciais OAuth (ex. <code className="font-mono">clientId</code>, <code className="font-mono">clientSecret</code>).
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {form.configEntries.map((entry, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="chave"
+                        value={entry.key}
+                        onChange={(e) => updateEntry(i, 'key', e.target.value)}
+                        className="w-2/5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+                      />
+                      <input
+                        type="text"
+                        placeholder="valor"
+                        value={entry.value}
+                        onChange={(e) => updateEntry(i, 'value', e.target.value)}
+                        className="flex-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeEntry(i)}
+                        className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
           </div>{/* end scroll area */}
 

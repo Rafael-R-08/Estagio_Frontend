@@ -1,5 +1,6 @@
-import { Sparkles, Award, BookOpen, Brain, Clock, X } from 'lucide-react';
-import type { User } from '@/types';
+import { Sparkles, Award, BookOpen, Brain, Clock, X, MessageSquare, Trash2, PlusCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { User, AiConversation } from '@/types';
 
 // ─── Shortcut presets ─────────────────────────────────────────────────────────
 
@@ -41,11 +42,26 @@ interface Props {
   user?: User;
   recentQueries: string[];
   onClearRecent: () => void;
+  conversations: AiConversation[];
+  onSelectConversation: (conv: AiConversation) => void;
+  onDeleteConversation: (id: string) => void;
+  onNewChat: () => void;
+  currentConversationId?: string;
 }
 
 // ─── SuggestionsPanel ─────────────────────────────────────────────────────────
 
-export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent }: Props) {
+export function SuggestionsPanel({ 
+  onSelect, 
+  user, 
+  recentQueries, 
+  onClearRecent,
+  conversations,
+  onSelectConversation,
+  onDeleteConversation,
+  onNewChat,
+  currentConversationId
+}: Props) {
   const skills = user?.techStack ?? [];
 
   return (
@@ -89,6 +105,65 @@ export function SuggestionsPanel({ onSelect, user, recentQueries, onClearRecent 
               >
                 {skill}
               </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* New Chat */}
+      <section>
+        <button
+          onClick={onNewChat}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-lg transition hover:opacity-90 active:scale-95"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Nova Conversa
+        </button>
+      </section>
+
+      {/* History */}
+      {conversations.length > 0 && (
+        <section>
+          <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+            Histórico de Conversas
+          </h3>
+          <div className="space-y-2">
+            {conversations.map((conv) => (
+              <div
+                key={conv.id}
+                className={cn(
+                  "group flex items-center gap-2 rounded-xl border border-transparent p-1 transition-all",
+                  currentConversationId === conv.id ? "bg-background/80 border-border/60 shadow-sm" : "hover:bg-background/40"
+                )}
+              >
+                <button
+                  onClick={() => onSelectConversation(conv)}
+                  className="flex flex-1 items-center gap-3 px-3 py-2 text-left transition-all"
+                >
+                  <MessageSquare className={cn("h-4 w-4 shrink-0 opacity-40", currentConversationId === conv.id && "text-primary opacity-100")} />
+                  <div className="flex flex-col">
+                    <span className={cn(
+                      "text-[11px] font-bold line-clamp-1",
+                      currentConversationId === conv.id ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {conv.title || 'Sem título'}
+                    </span>
+                    <span className="text-[9px] font-medium text-muted-foreground/40 uppercase tracking-tighter">
+                      {new Date(conv.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteConversation(conv.id);
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 opacity-0 transition hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100"
+                  title="Eliminar conversa"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             ))}
           </div>
         </section>

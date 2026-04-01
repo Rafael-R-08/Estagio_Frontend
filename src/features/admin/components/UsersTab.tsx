@@ -65,8 +65,8 @@ function RoleBadge({ role }: { role: string }) {
         role === 'ADMIN'
           ? 'bg-softinsa-blue/10 text-softinsa-blue dark:bg-softinsa-blue/20'
           : role === 'SERVICE_LINE_MANAGER'
-          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-          : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
+            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+            : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
       )}
     >
       {role === 'ADMIN' && <ShieldCheck className="h-3 w-3" />}
@@ -231,7 +231,7 @@ export function UsersTab() {
             <thead>
               <tr className="border-b border-border/40 bg-muted/20">
                 {(
-                  [  
+                  [
                     { key: 'name', labelKey: 'admin.users.columns.name' },
                     { key: 'email', labelKey: 'admin.users.columns.email' },
                     { key: 'role', labelKey: 'admin.users.columns.role' },

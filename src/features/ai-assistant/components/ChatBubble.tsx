@@ -121,12 +121,12 @@ export function ChatBubble({ message }: { message: AiMessage }) {
         )}>
           {/* Pulsing indicator for active streaming */}
           {message.isStreaming && !displayContent && (
-             <div className="flex items-center gap-2 mb-2">
-               <Sparkles className="h-3 w-3 animate-pulse text-primary" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 animate-pulse">
-                 {t('ai.generating') || 'Reflecting...'}
-               </span>
-             </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-3 w-3 animate-pulse text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 animate-pulse">
+                {t('ai.generating') || 'Reflecting...'}
+              </span>
+            </div>
           )}
 
           <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-li:my-1.5 transition-all duration-500">
@@ -153,7 +153,7 @@ export function ChatBubble({ message }: { message: AiMessage }) {
             >
               {truncatedContent}
             </ReactMarkdown>
-            
+
             {/* Blinking cursor effect at end of stream content */}
             {message.isStreaming && displayContent && (
               <span className="inline-block h-3.5 w-1.5 animate-pulse bg-primary/40 ml-1 rounded-full align-middle" />

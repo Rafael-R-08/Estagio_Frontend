@@ -8,11 +8,13 @@ import { useState } from 'react';
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<TrainingStatus, { label: string; className: string }> = {
-  ongoing:   { label: 'Em progresso',  className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  completed: { label: 'Concluído',     className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  priority:  { label: 'Prioritário',   className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  later:     { label: 'Guardado',      className: 'bg-muted text-muted-foreground' },
+  ongoing: { label: 'Em progresso', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  completed: { label: 'Concluído', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  priority: { label: 'Prioritário', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  later: { label: 'Guardado', className: 'bg-muted text-muted-foreground' },
+  cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
 };
+
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -145,7 +147,7 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
               </div>
             )}
           </div>
-          
+
           {record.documents && record.documents.length > 0 && (
             <div className="space-y-1.5">
               <span className="text-[9px] font-bold text-muted-foreground uppercase">Documentos</span>

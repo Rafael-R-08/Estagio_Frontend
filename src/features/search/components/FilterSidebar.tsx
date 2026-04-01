@@ -11,6 +11,12 @@ const LEVELS: { value: LevelFilter; label: string; color: string }[] = [
   { value: 'advanced',     label: 'Avançado',      color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
 ];
 
+const LANGUAGES = [
+  { value: undefined, label: 'Todos' },
+  { value: 'pt', label: 'Português' },
+  { value: 'en', label: 'Inglês' },
+];
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Platform {
@@ -20,9 +26,11 @@ interface Platform {
 
 export interface Filters {
   platforms: string[];   // platform names
-  levels: LevelFilter[];
+  level?: LevelFilter;
   isFree?: boolean;
-  minRating?: number;
+  minInternalRating?: number;
+  minRelevance?: number;
+  language?: 'pt' | 'en';
 }
 
 interface FilterSidebarProps {
@@ -77,7 +85,13 @@ export function FilterSidebar({
   onChange,
 }: FilterSidebarProps) {
   const safePlatforms = Array.isArray(platforms) ? platforms : [];
-  const activeCount = filters.platforms.length + filters.levels.length;
+  const activeCount = 
+    filters.platforms.length + 
+    (filters.level ? 1 : 0) + 
+    (filters.isFree !== undefined ? 1 : 0) + 
+    (filters.minInternalRating ? 1 : 0) + 
+    (filters.minRelevance ? 1 : 0) + 
+    (filters.language ? 1 : 0);
   const hasActiveFilters = activeCount > 0;
 
   const togglePlatform = (name: string) => {
@@ -87,14 +101,18 @@ export function FilterSidebar({
     onChange({ ...filters, platforms: next });
   };
 
-  const toggleLevel = (level: LevelFilter) => {
-    const next = filters.levels.includes(level)
-      ? filters.levels.filter((l) => l !== level)
-      : [...filters.levels, level];
-    onChange({ ...filters, levels: next });
+  const setLevel = (level: LevelFilter | undefined) => {
+    onChange({ ...filters, level: filters.level === level ? undefined : level });
   };
 
-  const reset = () => onChange({ platforms: [], levels: [], isFree: undefined, minRating: undefined });
+  const reset = () => onChange({ 
+    platforms: [], 
+    level: undefined, 
+    isFree: undefined, 
+    minInternalRating: undefined,
+    minRelevance: undefined,
+    language: undefined
+  });
 
   return (
     <div className="w-56 shrink-0 space-y-4">
@@ -144,19 +162,51 @@ export function FilterSidebar({
         <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
           Nível
         </p>
-        {LEVELS.map((l) => (
-          <FilterCheckbox
-            key={l.value}
-            label={l.label}
-            checked={filters.levels.includes(l.value)}
-            onChange={() => toggleLevel(l.value)}
-            badge={
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', l.color)}>
-                {l.label[0]}
+        <div className="flex flex-col gap-1">
+          {LEVELS.map((l) => (
+            <button
+              key={l.value}
+              onClick={() => setLevel(l.value)}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition text-xs font-bold",
+                filters.level === l.value 
+                  ? "bg-foreground text-background" 
+                  : "hover:bg-muted text-foreground"
+              )}
+            >
+              <span>{l.label}</span>
+              <span className={cn(
+                'rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wider',
+                filters.level === l.value ? 'bg-background/20 text-background' : l.color
+              )}>
+                {l.value[0]}
               </span>
-            }
-          />
-        ))}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Language */}
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
+          Idioma
+        </p>
+        <div className="flex bg-muted/40 p-1 rounded-xl border border-border/40">
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.label}
+              onClick={() => onChange({ ...filters, language: lang.value as any })}
+              className={cn(
+                "flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                filters.language === lang.value 
+                  ? "bg-foreground text-background shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Price */}
@@ -182,27 +232,51 @@ export function FilterSidebar({
         ))}
       </div>
 
-      {/* Minimum Rating */}
+      {/* Classificação Colegas (Internal Rating) */}
       <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
         <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Avaliação Mínima
+          Classificação Colegas
         </p>
         <div className="flex gap-2 px-2 pt-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => onChange({ ...filters, minRating: filters.minRating === star ? undefined : star })}
+              onClick={() => onChange({ ...filters, minInternalRating: filters.minInternalRating === star ? undefined : star })}
               className={cn(
                 "transition hover:scale-110",
-                (filters.minRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
+                (filters.minInternalRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
               )}
             >
               <Star className="h-6 w-6 fill-current" />
             </button>
           ))}
         </div>
-        <p className="px-2 pt-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground opacity-70">
-          {filters.minRating ? `${filters.minRating} ou mais estrelas` : 'Qualquer avaliação'}
+        <p className="px-2 pt-3 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground opacity-60">
+          {filters.minInternalRating ? `${filters.minInternalRating} ou mais estrelas` : 'Qualquer classificação'}
+        </p>
+      </div>
+
+      {/* Relevância Softinsa (Internal Relevance) */}
+      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
+        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
+          Relevância Softinsa
+        </p>
+        <div className="flex gap-2 px-2 pt-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => onChange({ ...filters, minRelevance: filters.minRelevance === star ? undefined : star })}
+              className={cn(
+                "transition hover:scale-110",
+                (filters.minRelevance || 0) >= star ? "text-blue-500" : "text-border hover:text-blue-500/50"
+              )}
+            >
+              <Star className="h-6 w-6 fill-current" />
+            </button>
+          ))}
+        </div>
+        <p className="px-2 pt-3 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground opacity-60">
+          {filters.minRelevance ? `${filters.minRelevance} ou mais relevância` : 'Qualquer relevância'}
         </p>
       </div>
     </div>

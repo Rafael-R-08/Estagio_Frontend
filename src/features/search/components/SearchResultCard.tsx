@@ -20,9 +20,9 @@ import type { CourseSearchResult } from '@/types';
 // ─── Level badge ──────────────────────────────────────────────────────────────
 
 const LEVEL_STYLES: Record<string, string> = {
-  beginner:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  beginner: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced:     'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  advanced: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 };
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
@@ -199,7 +199,7 @@ export function SearchResultCard({
         <div className="ml-auto">
           <span className={cn(
             "rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-widest border",
-            course.price && course.price.toLowerCase().includes('free') 
+            course.price && course.price.toLowerCase().includes('free')
               ? "bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800"
               : "bg-muted border-border text-muted-foreground"
           )}>

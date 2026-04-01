@@ -11,12 +11,13 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { settingsApi } from '../../../services/api';
-import type { UserSettings, UpdateUserSettingsDto } from '../../../types';
-import { cn } from '../../../lib/utils';
-import { applyTheme, type Theme } from '../../../utils/theme';
-import i18n from '../../../i18n';
-import { usePWAInstall } from '../../../hooks/usePWAInstall';
+import { settingsApi } from '@/services/api';
+import type { UserSettings, UpdateUserSettingsDto } from '@/types';
+import { cn } from '@/lib/utils';
+import { applyTheme, type Theme } from '@/utils/theme';
+import i18n from '@/i18n';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
+
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -512,9 +513,9 @@ export default function SettingsPage() {
             {activeSection === 'app' && (
               <SectionPanel title="Aplicação" icon={Smartphone}>
                 <SectionItem>
-                  <SettingRow 
-                    label="Instalar Aplicação" 
-                    description={isInstallable 
+                  <SettingRow
+                    label="Instalar Aplicação"
+                    description={isInstallable
                       ? "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa."
                       : "A aplicação já está instalada ou o teu browser não suporta esta funcionalidade."}
                   >
@@ -524,7 +525,7 @@ export default function SettingsPage() {
                       disabled={!isInstallable}
                       className={cn(
                         "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                        isInstallable 
+                        isInstallable
                           ? "border-softinsa-blue/20 bg-softinsa-blue/10 text-softinsa-blue hover:bg-softinsa-blue/20 dark:border-softinsa-blue/30 dark:bg-softinsa-blue/20 dark:text-blue-400 dark:hover:bg-softinsa-blue/30"
                           : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
                       )}

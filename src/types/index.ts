@@ -17,13 +17,11 @@ export const SERVICE_LINE_LABELS: Record<ServiceLine, string> = {
   SOURCING_TALENT_MANAGEMENT: 'Sourcing & Talent Management',
 };
 
-export type ExperienceLevel = 'JUNIOR' | 'MID' | 'SENIOR';
+export type ExperienceLevel = 'junior' | 'intermedio' | 'senior' | 'especialista' | 'lider';
 
-export type TrainingStatus = 'ongoing' | 'completed' | 'priority' | 'later';
+export type TrainingStatus = 'ongoing' | 'completed' | 'priority' | 'later' | 'cancelled';
 
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
-
-export type ExperienceLevelBackend = 'junior' | 'mid' | 'senior' | 'lead';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -34,8 +32,8 @@ export interface AuthResponse {
 }
 
 export interface UserSkill {
-  name: string;
-  level: number; // 1-5
+  skillName: string;
+  level: 'iniciante' | 'intermedio' | 'experiente';
 }
 
 export interface User {
@@ -50,6 +48,7 @@ export interface User {
   experienceLevel?: ExperienceLevel;
   interests?: string[];
   skills?: UserSkill[];
+  techStack?: string[];
   preferences?: UserPreferences;
   createdAt?: string;
   updatedAt?: string;
@@ -181,7 +180,26 @@ export interface TrainingRecord {
   priorityOrder?: number;
   certificate?: Certificate;
   documents?: TrainingDocument[];
+  resources?: TrainingResource[];
   createdAt?: string;
+}
+
+export interface TrainingResource {
+  id: string;
+  trainingId: string;
+  title: string;
+  content: string;
+  files: ResourceFile[];
+  position: number;
+  createdAt: string;
+}
+
+export interface ResourceFile {
+  id: string;
+  resourceId: string;
+  fileUrl: string;
+  fileName: string;
+  createdAt: string;
 }
 
 export interface TrainingDocument {
@@ -217,6 +235,7 @@ export interface TrainingStats {
   completed: number;
   priority: number;
   later: number;
+  cancelled: number;
   avgRating: number;
   totalHours: number;
 }
@@ -226,7 +245,7 @@ export interface TrainingStats {
 export type CertificateStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
 export interface CertificateJob {
-  certificateId? : string;
+  certificateId?: string;
   jobId: string;
   status: CertificateStatus;
   errorMessage?: string;
@@ -244,8 +263,8 @@ export interface Certificate {
   expirationDate?: string;
   durationHours?: number;
   extractedMetadata?: Record<string, unknown>;
-  status? : CertificateStatus;
-  jobId? : string;
+  status?: CertificateStatus;
+  jobId?: string;
   createdAt?: string;
 }
 
@@ -277,18 +296,44 @@ export interface RagSource {
   id: string;
   content: string;
   similarity: number;
+  source?: string;
 }
 
+/** Response from POST /ai/recommendations */
 export interface RagResponse {
+  // Recommendations endpoint — always 3 structured fields
+  improvement?: string;
+  interests?: string;
+  missing_skills?: string;
+  // Chat / welcome endpoints
   query?: string;
   answer?: string;
-  interests?: string;
-  improvement?: string;
-  missing_skills?: string;
-  recommendations?: string;
   welcome?: string;
   sources?: RagSource[];
-  metadata?: Record<string, unknown>;
+  metadata?: {
+    sourcesCount?: number;
+    qualityScore?: number;
+    timestamp?: string;
+    [key: string]: unknown;
+  };
+}
+
+/** Response from POST /ai/chat and POST /ai/chat/stream (final frame) */
+export interface AiChatResponse {
+  query: string;
+  answer: string;
+  conversationId: string;
+  qualityScore: number;
+  sources: RagSource[];
+}
+
+/** A stored chat session returned by GET /ai/conversations */
+export interface AiConversation {
+  id: string;
+  title?: string;
+  createdAt: string;
+  updatedAt?: string;
+  messageCount?: number;
 }
 
 export interface AiMessage {
@@ -299,6 +344,8 @@ export interface AiMessage {
   timestamp: string;
   courses?: CourseSearchResult[];
   sources?: RagSource[];
+  qualityScore?: number;
+  conversationId?: string;
   isLoading?: boolean;
   isStreaming?: boolean;
 }

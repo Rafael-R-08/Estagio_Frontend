@@ -133,10 +133,10 @@ export function AnalyticsTab() {
   });
 
   const analytics: AdminAnalytics = {
-    completedByMonth:     data?.completedByMonth     ?? MOCK_ANALYTICS.completedByMonth,
-    platformUsage:        data?.platformUsage        ?? MOCK_ANALYTICS.platformUsage,
-    userGrowth:           data?.userGrowth           ?? MOCK_ANALYTICS.userGrowth,
-    topSkills:            data?.topSkills            ?? MOCK_ANALYTICS.topSkills,
+    completedByMonth: data?.completedByMonth ?? MOCK_ANALYTICS.completedByMonth,
+    platformUsage: data?.platformUsage ?? MOCK_ANALYTICS.platformUsage,
+    userGrowth: data?.userGrowth ?? MOCK_ANALYTICS.userGrowth,
+    topSkills: data?.topSkills ?? MOCK_ANALYTICS.topSkills,
     expiringCertificates: data?.expiringCertificates ?? MOCK_ANALYTICS.expiringCertificates,
   };
 

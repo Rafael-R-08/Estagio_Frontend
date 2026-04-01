@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Save, CheckCircle2, Star, ExternalLink, User as UserIcon, Edit2,
+  Save, User as UserIcon, Edit2,
   Download, RefreshCw, Briefcase, Link2,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
@@ -11,28 +11,11 @@ import { toList } from '@/lib/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { SERVICE_LINE_LABELS } from '@/types';
-import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine } from '@/types';
+import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine, UserSkill } from '@/types';
 
 import { TagInput } from '../components/TagInput';
 import { LearningImpactCard } from '../components/LearningImpactCard';
-
-// ─── RatingStars ─────────────────────────────────────────────────────────────
-
-function RatingStars({ rating }: { rating: number }) {
-  return (
-    <span className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className={cn(
-            'h-3 w-3',
-            i < Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/20',
-          )}
-        />
-      ))}
-    </span>
-  );
-}
+import { SkillsSection } from '../components/SkillsSection';
 
 // ─── UserAvatar ───────────────────────────────────────────────────────────────
 
@@ -53,15 +36,19 @@ function UserAvatar({ name }: { name: string }) {
 // ─── LEVELS ──────────────────────────────────────────────────────────────────
 
 const LEVELS: { value: ExperienceLevel; label: string }[] = [
-  { value: 'JUNIOR', label: 'Junior' },
-  { value: 'MID', label: 'Mid-level' },
-  { value: 'SENIOR', label: 'Senior' },
+  { value: 'junior', label: 'Junior' },
+  { value: 'intermedio', label: 'Intermédio' },
+  { value: 'senior', label: 'Sénior' },
+  { value: 'especialista', label: 'Especialista' },
+  { value: 'lider', label: 'Líder' },
 ];
 
 const LEVEL_SUBTITLE: Record<ExperienceLevel, string> = {
-  JUNIOR: 'Junior Professional',
-  MID: 'Mid-level Professional',
-  SENIOR: 'Senior Professional',
+  junior: 'Junior Professional',
+  intermedio: 'Mid-level Professional',
+  senior: 'Senior Professional',
+  especialista: 'Technical Specialist',
+  lider: 'Team Lead / Manager',
 };
 
 
@@ -74,20 +61,22 @@ interface SidebarProps {
   draftName: string;
   draftLevel: ExperienceLevel | undefined;
   draftInterests: string[];
+  draftSkills: UserSkill[];
   draftUserFunction: string;
   draftServiceLine: ServiceLine | null;
   onNameChange: (v: string) => void;
   onLevelChange: (v: ExperienceLevel | undefined) => void;
   onInterestsChange: (v: string[]) => void;
+  onSkillsChange: (v: UserSkill[]) => void;
   onUserFunctionChange: (v: string) => void;
   onServiceLineChange: (v: ServiceLine | null) => void;
 }
 
 function ProfileSidebar({
   user, isEditing, onEditToggle,
-  draftName, draftLevel, draftInterests,
+  draftName, draftLevel, draftInterests, draftSkills,
   draftUserFunction, draftServiceLine,
-  onNameChange, onLevelChange, onInterestsChange,
+  onNameChange, onLevelChange, onInterestsChange, onSkillsChange,
   onUserFunctionChange, onServiceLineChange,
 }: SidebarProps) {
   const { t } = useTranslation();
@@ -112,7 +101,7 @@ function ProfileSidebar({
               {draftLevel ? LEVEL_SUBTITLE[draftLevel] : user.role === 'ADMIN' ? t('profile.admin') : t('profile.collaborator')}
             </p>
             {draftLevel && (
-              <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">
                 {draftLevel}
               </span>
             )}
@@ -156,9 +145,9 @@ function ProfileSidebar({
                       type="button"
                       onClick={() => onLevelChange(draftLevel === l.value ? undefined : l.value)}
                       className={cn(
-                        'rounded-full px-3 py-0.5 text-xs font-medium transition',
+                        'rounded-full px-3 py-0.5 text-[10px] font-medium transition uppercase',
                         draftLevel === l.value
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
                           : 'border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
                       )}
                     >
@@ -167,8 +156,8 @@ function ProfileSidebar({
                   ))}
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">{t('profile.jobTitle')}</p>
+              <div className="space-y-1.5 text-left">
+                <p className="text-xs font-medium text-muted-foreground ml-1">{t('profile.jobTitle')}</p>
                 <input
                   type="text"
                   value={draftUserFunction}
@@ -177,8 +166,8 @@ function ProfileSidebar({
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Service Line</p>
+              <div className="space-y-1.5 text-left">
+                <p className="text-xs font-medium text-muted-foreground ml-1">Service Line</p>
                 <select
                   value={draftServiceLine || ''}
                   onChange={(e) => onServiceLineChange((e.target.value as ServiceLine) || null)}
@@ -207,29 +196,30 @@ function ProfileSidebar({
 
 
       {/* Learning Interests */}
-      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl">
+      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl relative overflow-hidden group">
+        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/5 blur-2xl group-hover:bg-violet-500/10 transition-colors" />
         {isEditing ? (
           <TagInput
-            label="Interesses"
-            description="Áreas temáticas que queres explorar"
+            label="Interesses de Aprendizagem"
+            description="Áreas que gostarias de explorar"
             tags={draftInterests}
             onChange={onInterestsChange}
-            placeholder="Ex: Cloud, DevOps, Machine Learning…"
-            colorClass="bg-violet-100 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400"
+            placeholder="Ex: Cloud, DevOps..."
+            colorClass="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400"
           />
         ) : (
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="relative z-10">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
               Learning Interests
             </p>
             {draftInterests.length === 0 ? (
-              <p className="text-xs text-muted-foreground/50">Nenhum interesse adicionado.</p>
+              <p className="text-xs text-muted-foreground/40 italic">Nenhum interesse adicionado.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {draftInterests.map((interest) => (
                   <span
                     key={interest}
-                    className="rounded-md bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700 dark:bg-violet-900/20 dark:text-violet-400"
+                    className="rounded-md bg-violet-100/80 px-2.5 py-1 text-[11px] font-bold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200/50 dark:border-violet-800/30"
                   >
                     {interest}
                   </span>
@@ -240,8 +230,20 @@ function ProfileSidebar({
         )}
       </div>
 
+      {/* Technical Skills - NEW */}
+      <div className="rounded-[2rem] border border-border/60 bg-card/40 p-6 shadow-xl backdrop-blur-2xl relative overflow-hidden group">
+        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
+        <div className="relative z-10">
+          <SkillsSection
+            label="Competências Técnicas"
+            description="Aptidões e níveis de proficiência"
+            skills={draftSkills}
+            onChange={onSkillsChange}
+            isEditing={isEditing}
+          />
+        </div>
+      </div>
 
-      {/* Learning Impact */}
     </div>
   );
 }
@@ -250,57 +252,7 @@ function ProfileSidebar({
 
 // ─── TimelineItem ─────────────────────────────────────────────────────────────
 
-function TimelineItem({ training, isLast }: { training: TrainingRecord; isLast: boolean }) {
-  return (
-    <li className={cn('pb-5', isLast && 'pb-0')}>
-      <div className="absolute -left-[7px] flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-background bg-emerald-500">
-        <CheckCircle2 className="h-2.5 w-2.5 text-white" />
-      </div>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">{training.title}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-2">
-            {training.platform?.name && (
-              <span className="text-xs text-muted-foreground">{training.platform.name}</span>
-            )}
-            {training.rating != null && (
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-muted-foreground">Rating:</span>
-                <RatingStars rating={training.rating} />
-              </div>
-            )}
-            {training.relevance != null && (
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-muted-foreground">Relevância:</span>
-                <RatingStars rating={training.relevance} />
-              </div>
-            )}
-          </div>
-          <p className="mt-0.5 text-[11px] text-muted-foreground/50">
-            {training.completedAt
-              ? new Date(training.completedAt).toLocaleDateString('pt-PT', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })
-              : '—'}
-          </p>
-        </div>
-        <a
-          href={training.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 rounded-md p-1 text-muted-foreground/50 transition hover:text-foreground"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      </div>
-    </li>
-  );
-}
-
 // ─── ProfileFormBody ──────────────────────────────────────────────────────────
-// Isolated with `key` so it remounts when profile loads
 
 interface FormBodyProps {
   initialValues: User;
@@ -318,6 +270,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   const [draftName, setDraftName] = useState(initialValues.name ?? '');
   const [draftLevel, setDraftLevel] = useState<ExperienceLevel | undefined>(initialValues.experienceLevel);
   const [draftInterests, setDraftInterests] = useState<string[]>(initialValues.interests ?? []);
+  const [draftSkills, setDraftSkills] = useState<UserSkill[]>(initialValues.skills ?? []);
   const [draftUserFunction, setDraftUserFunction] = useState(initialValues.userFunction ?? '');
   const [draftServiceLine, setDraftServiceLine] = useState<ServiceLine | null>(initialValues.serviceLine ?? null);
 
@@ -326,9 +279,10 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       draftName !== (initialValues.name ?? '') ||
       draftLevel !== initialValues.experienceLevel ||
       JSON.stringify(draftInterests) !== JSON.stringify(initialValues.interests ?? []) ||
+      JSON.stringify(draftSkills) !== JSON.stringify(initialValues.skills ?? []) ||
       draftUserFunction !== (initialValues.userFunction ?? '') ||
       draftServiceLine !== (initialValues.serviceLine ?? null),
-    [draftName, draftLevel, draftInterests, draftUserFunction, draftServiceLine, initialValues],
+    [draftName, draftLevel, draftInterests, draftSkills, draftUserFunction, draftServiceLine, initialValues],
   );
 
   const saveMutation = useMutation({
@@ -337,6 +291,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         name: draftName || undefined,
         experienceLevel: draftLevel,
         interests: draftInterests,
+        skills: draftSkills,
         userFunction: draftUserFunction,
         serviceLine: draftServiceLine || undefined,
       }),
@@ -352,7 +307,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 pb-12">
       {/* ── Left sidebar ── */}
       <div className="lg:col-span-1">
         <div className="space-y-4 lg:sticky lg:top-6">
@@ -363,11 +318,13 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
             draftName={draftName}
             draftLevel={draftLevel}
             draftInterests={draftInterests}
+            draftSkills={draftSkills}
             draftUserFunction={draftUserFunction}
             draftServiceLine={draftServiceLine}
             onNameChange={setDraftName}
             onLevelChange={setDraftLevel}
             onInterestsChange={setDraftInterests}
+            onSkillsChange={setDraftSkills}
             onUserFunctionChange={setDraftUserFunction}
             onServiceLineChange={setDraftServiceLine}
           />
@@ -378,15 +335,15 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       <div className="flex flex-col gap-5 lg:col-span-2">
         {/* Save bar */}
         {dirty && (
-          <div className="flex items-center justify-between rounded-full border border-foreground/10 bg-foreground px-6 py-3 text-background shadow-2xl animate-in fade-in slide-in-from-top-4">
-            <p className="text-sm font-bold">Tens alterações por guardar.</p>
+          <div className="flex items-center justify-between rounded-full border border-foreground/10 bg-foreground px-6 py-3 text-background shadow-2xl animate-in fade-in slide-in-from-top-4 relative z-50">
+            <p className="text-sm font-black tracking-tight">Tens alterações por guardar.</p>
             <button
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
-              className="flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-bold text-foreground transition hover:opacity-90 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-full bg-background px-6 py-2 text-xs font-black text-foreground transition hover:opacity-90 disabled:opacity-60 active:scale-95 shadow-lg"
             >
               <Save className="h-4 w-4" />
-              {saveMutation.isPending ? 'A guardar…' : 'Guardar'}
+              {saveMutation.isPending ? 'A guardar…' : 'GRAVAR PERFIL'}
             </button>
           </div>
         )}
@@ -394,71 +351,65 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         {/* Learning Impact */}
         <LearningImpactCard stats={stats} timeline={timeline} />
 
-        {/* Learning Timeline */}
-        <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl">
-          <div className="flex items-center justify-between border-b border-border/40 px-6 py-4">
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Learning Timeline</h2>
-            {timeline.length > 0 && (
-              <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-black text-background">
-                {timeline.length}
-              </span>
-            )}
-          </div>
-          <div className="p-6">
-            {timeline.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground/60">
-                Ainda não concluíste nenhuma formação.
-              </p>
-            ) : (
-              <ol className="relative space-y-0 border-l border-border pl-6">
-                {timeline.map((t, i) => (
-                  <TimelineItem key={t.id} training={t} isLast={i === timeline.length - 1} />
-                ))}
-              </ol>
-            )}
-          </div>
-        </div>
-
         {/* Integrações & Ações */}
-        <div className="rounded-xl border border-border bg-card shadow-sm">
-          <div className="border-b border-border px-5 py-3">
-            <h2 className="text-sm font-semibold text-foreground">Integrações &amp; Ações</h2>
+        <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl overflow-hidden">
+          <div className="border-b border-border/40 px-8 py-6 bg-muted/10">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Conectividade</h2>
+            <p className="font-black text-foreground tracking-tight">Integrações & Ações</p>
           </div>
-          <div className="grid grid-cols-2 gap-3 p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-8">
             <button
               type="button"
-              onClick={() => toast.success('Integração LinkedIn Learning brevemente disponível.')}
-              className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-left transition hover:bg-muted"
+              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
-              <RefreshCw className="h-4 w-4 shrink-0 text-blue-500" />
-              <span className="text-xs font-medium text-foreground">LinkedIn Learning</span>
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[13px] font-bold text-foreground">LinkedIn Learning</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Sincronizar progresso</p>
+              </div>
             </button>
             <button
               type="button"
-              onClick={() => toast.success('Integração Credly brevemente disponível.')}
-              className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-left transition hover:bg-muted"
+              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
-              <RefreshCw className="h-4 w-4 shrink-0 text-orange-500" />
-              <span className="text-xs font-medium text-foreground">Credly</span>
+              <div className="p-2 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[13px] font-bold text-foreground">Credly</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Badges digitais</p>
+              </div>
             </button>
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-left transition hover:bg-muted"
+              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
-              <Download className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span className="text-xs font-medium text-foreground">Exportar CV PDF</span>
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                <Download className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[13px] font-bold text-foreground">Exportar CV PDF</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Formato oficial Softinsa</p>
+              </div>
             </button>
             <button
               type="button"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                toast.success('Link copiado para a área de transferência!');
+                toast.success('Link de perfil copiado!');
               }}
-              className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-left transition hover:bg-muted"
+              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
-              <Link2 className="h-4 w-4 shrink-0 text-violet-500" />
-              <span className="text-xs font-medium text-foreground">Partilhar perfil</span>
+              <div className="p-2 rounded-xl bg-violet-500/10 text-violet-500 group-hover:scale-110 transition-transform">
+                <Link2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[13px] font-bold text-foreground">Partilhar perfil</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Link interno direto</p>
+              </div>
             </button>
           </div>
         </div>
@@ -513,12 +464,12 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+      <div className="px-2">
+        <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-5xl">
           {t('profile.title')}
         </h1>
-        <p className="mt-1 text-base text-muted-foreground">
-          Gere a tua presença e visualiza o teu impacto.
+        <p className="mt-2 text-base font-medium text-muted-foreground max-w-2xl">
+          Gere a tua presença digital na Softinsa, visualiza as tuas conquistas e partilha o teu impacto com a equipa.
         </p>
       </div>
       {formSource && (

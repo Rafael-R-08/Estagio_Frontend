@@ -38,11 +38,11 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
   const queryClient = useQueryClient();
 
   const [meta, setMeta] = useState<UpdateCertificateDto>({
-    courseName:     cert.courseName,
-    provider:       cert.provider,
+    courseName: cert.courseName,
+    provider: cert.provider,
     completionDate: cert.completionDate,
     expirationDate: cert.expirationDate,
-    durationHours:  cert.durationHours,
+    durationHours: cert.durationHours,
   });
   const [dirty, setDirty] = useState(false);
 
@@ -69,11 +69,11 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
       queryClient.invalidateQueries({ queryKey: ['certificates'] });
       const data = res.data;
       setMeta({
-        courseName:     data.courseName,
-        provider:       data.provider,
+        courseName: data.courseName,
+        provider: data.provider,
         completionDate: data.completionDate,
         expirationDate: data.expirationDate,
-        durationHours:  data.durationHours,
+        durationHours: data.durationHours,
       });
       toast.success('Metadados re-extraídos com IA.');
       setDirty(false);
