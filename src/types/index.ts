@@ -19,7 +19,7 @@ export const SERVICE_LINE_LABELS: Record<ServiceLine, string> = {
 
 export type ExperienceLevel = 'junior' | 'intermedio' | 'senior' | 'especialista' | 'lider';
 
-export type TrainingStatus = 'ongoing' | 'completed' | 'priority' | 'later' | 'cancelled';
+export type TrainingStatus = 'ongoing' | 'completed' | 'priority' | 'later' | 'accessed' | 'cancelled';
 
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
 
@@ -130,6 +130,7 @@ export interface CourseSearchResult {
   description?: string;
   url: string;
   instructor?: string;
+  language?: string;
   rating?: number;
   durationHours?: number;
   level?: 'beginner' | 'intermediate' | 'advanced';
@@ -149,14 +150,19 @@ export interface CourseDetail extends CourseSearchResult {
 export interface SearchResponse {
   query: string;
   total: number;
+  page?: number;
+  totalPages?: number;
   results: CourseSearchResult[];
-  platforms: string[];
-  semanticRanking: boolean;
+  platforms?: string[];
+  platformsAnalyzed?: string[];
+  semanticRanking?: boolean;
+  timestamp?: string;
 }
 
 export interface SearchQuery {
   q: string;
   limit?: number;
+  page?: number;
   platforms?: string[];
 }
 
@@ -246,8 +252,12 @@ export type CertificateStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED
 
 export interface CertificateJob {
   certificateId?: string;
-  jobId: string;
-  status: CertificateStatus;
+  jobId?: string;
+  status?: CertificateStatus;
+  state?: string;
+  progress?: number | Record<string, unknown>;
+  result?: Certificate;
+  failedReason?: string;
   errorMessage?: string;
 }
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type DragEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, type DragEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Upload, FileText, ImageIcon, Sparkles, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,8 @@ import type { TrainingRecord, UpdateCertificateDto, Certificate } from '@/types'
 
 interface Props {
   trainings: TrainingRecord[];
+  certificates: Certificate[];
+  replaceTarget?: Certificate | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -21,11 +23,12 @@ type UploadState = 'idle' | 'preview' | 'uploading' | 'processing' | 'completed'
 
 function FilePreview({ file }: { file: File }) {
   const isPdf = file.type === 'application/pdf';
+  const isImage = file.type.startsWith('image/');
   const imgUrlRef = useRef<string | null>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isPdf && file) {
+    if (isImage && file) {
       const url = URL.createObjectURL(file);
       imgUrlRef.current = url;
       setImgUrl(url);
@@ -33,7 +36,7 @@ function FilePreview({ file }: { file: File }) {
     return () => {
       if (imgUrlRef.current) URL.revokeObjectURL(imgUrlRef.current);
     };
-  }, [file, isPdf]);
+  }, [file, isImage]);
 
   if (isPdf) {
     return (
@@ -49,22 +52,39 @@ function FilePreview({ file }: { file: File }) {
     );
   }
 
+  if (isImage) {
+    return (
+      <div className="relative h-32 w-full overflow-hidden rounded-xl border border-border bg-muted/10">
+        {imgUrl ? (
+          <img src={imgUrl} alt="Preview" className="h-full w-full object-contain" />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <ImageIcon className="h-10 w-10 text-muted-foreground/20" />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const ext = file.name.split('.').pop()?.toUpperCase() || 'FILE';
   return (
     <div className="relative h-32 w-full overflow-hidden rounded-xl border border-border bg-muted/10">
-      {imgUrl ? (
-        <img src={imgUrl} alt="Preview" className="h-full w-full object-contain" />
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <ImageIcon className="h-10 w-10 text-muted-foreground/20" />
+      <div className="flex h-full items-center justify-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground/10 text-foreground/70">
+          <FileText className="h-6 w-6" />
         </div>
-      )}
+        <div className="text-left">
+          <p className="text-sm font-bold text-foreground truncate max-w-[200px]">{file.name}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{ext} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>
+        </div>
+      </div>
     </div>
   );
 }
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 
-export function UploadModal({ trainings, onClose, onSuccess }: Props) {
+export function UploadModal({ trainings, certificates, replaceTarget, onClose, onSuccess }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -82,6 +102,43 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
   const [countdown, setCountdown] = useState(2);
   const [finalData, setFinalData] = useState<Certificate | null>(null);
 
+  const certificateByTrainingId = useMemo(() => {
+    const map = new Map<string, Certificate>();
+    for (const cert of certificates) {
+      map.set(cert.trainingId, cert);
+    }
+    return map;
+  }, [certificates]);
+
+  const isExpired = (cert?: Certificate) => {
+    if (!cert?.expirationDate) return false;
+    return new Date(cert.expirationDate).getTime() < Date.now();
+  };
+
+  const isInactive = (cert?: Certificate) => {
+    if (!cert) return true;
+    return cert.status === 'FAILED' || isExpired(cert);
+  };
+
+  const linkable = useMemo(
+    () =>
+      trainings
+        .filter((t) => t.status === 'completed')
+        .filter((t) => {
+          const cert = certificateByTrainingId.get(t.id);
+          if (!cert) return true;
+          if (replaceTarget?.id === cert.id) return true;
+          return isInactive(cert);
+        }),
+    [trainings, certificateByTrainingId, replaceTarget?.id],
+  );
+
+  useEffect(() => {
+    if (replaceTarget?.trainingId) {
+      setTrainingId(replaceTarget.trainingId);
+    }
+  }, [replaceTarget?.trainingId]);
+
   // ── Polling logic ───────────────────────────────────────────────────────
   useEffect(() => {
     if ((state !== 'processing' && state !== 'uploading') || !jobId) return;
@@ -91,21 +148,30 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
     interval = setInterval(async () => {
       try {
         const res = await certificatesApi.getJobStatus(jobId);
-        const { status, errorMessage, certificateId } = res.data;
+        const { state, failedReason, result } = res.data;
+        const normalizedState = String(state || '').toLowerCase();
 
-        if (status === 'COMPLETED') {
+        if (normalizedState === 'completed') {
           clearInterval(interval);
-          // Fetch final certificate data to show the results
+
+          const certificateId =
+            result && typeof result === 'object' && 'id' in result && typeof result.id === 'string'
+              ? result.id
+              : undefined;
+
           if (certificateId) {
             const certRes = await certificatesApi.getById(certificateId);
             setFinalData(certRes.data);
+          } else if (result && typeof result === 'object') {
+            setFinalData(result as Certificate);
           }
+
           setState('completed');
           queryClient.invalidateQueries({ queryKey: ['certificates'] });
           toast.success(t('certificates.uploadModal.states.COMPLETED'));
-        } else if (status === 'FAILED') {
+        } else if (normalizedState === 'failed') {
           clearInterval(interval);
-          setErrorMsg(errorMessage || t('certificates.uploadModal.errorProcessing'));
+          setErrorMsg(failedReason || t('certificates.uploadModal.errorProcessing'));
           setState('error');
         }
       } catch (err) {
@@ -130,7 +196,12 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
   const uploadMutation = useMutation({
     mutationFn: () => certificatesApi.upload(file!, trainingId, meta),
     onSuccess: (res) => {
-      setJobId(res.data.jobId);
+      if (!res.data.jobId) {
+        setErrorMsg(t('certificates.uploadModal.errorProcessing'));
+        setState('error');
+        return;
+      }
+      setJobId(String(res.data.jobId));
       setState('processing');
     },
     onError: (err: any) => {
@@ -141,9 +212,21 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
 
   // ── File handling ─────────────────────────────────────────────────────
   function acceptFile(f: File) {
-    const valid = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!valid.includes(f.type)) {
-      setErrorMsg('Invalid format. Use PDF, PNG or JPG.');
+    const validMimeTypes = [
+      'application/pdf',
+      'text/plain',
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/webp',
+      'image/bmp',
+      'image/tiff',
+    ];
+    const validExtensions = ['pdf', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tif', 'tiff'];
+    const ext = f.name.split('.').pop()?.toLowerCase() || '';
+
+    if (!(validMimeTypes.includes(f.type) || validExtensions.includes(ext))) {
+      setErrorMsg('Formato inválido. Usa PDF, PNG, JPG, WEBP, BMP, TIFF ou TXT.');
       setState('error');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
@@ -170,14 +253,42 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
     if (f) acceptFile(f);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!file || !trainingId) return;
+
+    const existingCertificate = certificateByTrainingId.get(trainingId);
+    const canReplaceExisting =
+      !!existingCertificate &&
+      (replaceTarget?.id === existingCertificate.id || isInactive(existingCertificate));
+
+    if (existingCertificate && !canReplaceExisting) {
+      setErrorMsg('Este curso já tem um certificado ativo. Remove ou substitui primeiro.');
+      setState('error');
+      return;
+    }
+
     setErrorMsg('');
     setState('uploading');
-    uploadMutation.mutate();
-  }
 
-  const linkable = trainings.filter(t => !t.certificate || (t.certificate.status === 'FAILED'));
+    try {
+      if (existingCertificate && canReplaceExisting) {
+        try {
+          await certificatesApi.delete(existingCertificate.id);
+        } catch (err: any) {
+          if (err?.response?.status !== 404) {
+            throw err;
+          }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['certificates'] });
+      }
+
+      await uploadMutation.mutateAsync();
+    } catch (err: any) {
+      setErrorMsg(err?.response?.data?.message || t('certificates.uploadModal.errorProcessing'));
+      setState('error');
+    }
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -218,9 +329,9 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
               </div>
               <div className="text-center">
                 <p className="text-sm font-bold text-foreground">Click to upload or drag & drop</p>
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40">PDF, PNG, JPG (Max 10MB)</p>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40">PDF, PNG, JPG, WEBP, BMP, TIFF, TXT (Max 10MB)</p>
               </div>
-              <input ref={fileInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) acceptFile(f); }} />
+              <input ref={fileInputRef} type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) acceptFile(f); }} />
             </div>
           )}
 
@@ -237,9 +348,39 @@ export function UploadModal({ trainings, onClose, onSuccess }: Props) {
                     onChange={(e) => setTrainingId(e.target.value)}
                     className="h-12 w-full rounded-xl border border-border/60 bg-muted/20 px-4 text-sm font-medium focus:ring-4 focus:ring-foreground/5 outline-none transition"
                   >
-                    <option value="">Select a training...</option>
-                    {linkable.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                    <option value="">Seleciona uma formação concluída...</option>
+                    {linkable.map((t) => {
+                      const cert = certificateByTrainingId.get(t.id);
+                      const suffix = !cert
+                        ? ''
+                        : replaceTarget?.id === cert.id
+                          ? ' (substituição)'
+                          : cert.status === 'FAILED'
+                            ? ' (falhou - será substituído)'
+                            : isExpired(cert)
+                              ? ' (expirado - será substituído)'
+                              : ' (será substituído)';
+
+                      return (
+                        <option key={t.id} value={t.id}>
+                          {t.title}{suffix}
+                        </option>
+                      );
+                    })}
                   </select>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+                    Apenas formações com estado concluído podem ter certificado.
+                  </p>
+                  {replaceTarget && (
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      Modo substituição ativo para este certificado.
+                    </p>
+                  )}
+                  {linkable.length === 0 && (
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-red-500">
+                      Sem formações elegíveis: conclui uma formação ou remove o certificado atual.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

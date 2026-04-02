@@ -61,6 +61,7 @@ export default function CertificatesPage() {
   const { t } = useTranslation();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selected, setSelected] = useState<Certificate | null>(null);
+  const [replaceTarget, setReplaceTarget] = useState<Certificate | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
 
@@ -119,7 +120,10 @@ export default function CertificatesPage() {
           </p>
         </div>
         <button
-          onClick={() => setUploadOpen(true)}
+          onClick={() => {
+            setReplaceTarget(null);
+            setUploadOpen(true);
+          }}
           className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition active:scale-95"
         >
           <Plus className="h-4 w-4" />
@@ -184,7 +188,10 @@ export default function CertificatesPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           hasSearch={!!(search || statusFilter !== 'all')}
-          onUpload={() => setUploadOpen(true)}
+          onUpload={() => {
+            setReplaceTarget(null);
+            setUploadOpen(true);
+          }}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -198,8 +205,16 @@ export default function CertificatesPage() {
       {uploadOpen && (
         <UploadModal
           trainings={trainings}
-          onClose={() => setUploadOpen(false)}
-          onSuccess={() => setUploadOpen(false)}
+          certificates={certs}
+          replaceTarget={replaceTarget}
+          onClose={() => {
+            setUploadOpen(false);
+            setReplaceTarget(null);
+          }}
+          onSuccess={() => {
+            setUploadOpen(false);
+            setReplaceTarget(null);
+          }}
         />
       )}
 
@@ -209,6 +224,7 @@ export default function CertificatesPage() {
           cert={selected}
           onClose={() => setSelected(null)}
           onReplace={() => {
+            setReplaceTarget(selected);
             setSelected(null);
             setUploadOpen(true);
           }}

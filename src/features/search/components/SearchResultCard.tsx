@@ -3,13 +3,13 @@ import {
   Clock,
   ExternalLink,
   Bookmark,
-  Flame,
-  PlusCircle,
   CheckCircle2,
   BookOpen,
   Tag,
   DollarSign,
   BarChart3,
+  User,
+  Globe,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,9 +20,9 @@ import type { CourseSearchResult } from '@/types';
 // ─── Level badge ──────────────────────────────────────────────────────────────
 
 const LEVEL_STYLES: Record<string, string> = {
-  beginner: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200/50',
+  intermediate: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200/50',
+  advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400 border-violet-200/50',
 };
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
@@ -33,25 +33,21 @@ const LEVEL_LABELS: Record<string, string> = {
 export function SearchResultCardSkeleton() {
   return (
     <div className="animate-pulse rounded-[2rem] border border-border/60 bg-background/40 backdrop-blur-md p-6 space-y-4">
-      <div className="flex justify-between">
-        <div className="h-5 w-2/3 rounded-lg bg-muted" />
-        <div className="h-6 w-16 rounded-full bg-muted" />
+      <div className="flex justify-between items-start">
+        <div className="h-6 w-3/4 rounded-lg bg-muted" />
+        <div className="h-6 w-20 rounded-full bg-muted" />
       </div>
-      <div className="h-3 w-24 rounded bg-muted" />
+      <div className="flex gap-3">
+        <div className="h-4 w-24 rounded bg-muted" />
+        <div className="h-4 w-24 rounded bg-muted" />
+      </div>
       <div className="space-y-2">
         <div className="h-3 w-full rounded bg-muted" />
-        <div className="h-3 w-5/6 rounded bg-muted" />
+        <div className="h-3 w-2/3 rounded bg-muted" />
       </div>
-      <div className="flex gap-2">
-        <div className="h-7 w-16 rounded-full bg-muted" />
-        <div className="h-7 w-20 rounded-full bg-muted" />
-      </div>
-      <div className="flex justify-between pt-2">
-        <div className="flex gap-2">
-          <div className="h-9 w-24 rounded-full bg-muted" />
-          <div className="h-9 w-24 rounded-full bg-muted" />
-        </div>
+      <div className="flex justify-between items-center pt-2">
         <div className="h-9 w-28 rounded-full bg-muted" />
+        <div className="h-9 w-32 rounded-full bg-muted" />
       </div>
     </div>
   );
@@ -91,42 +87,33 @@ interface SearchResultCardProps {
   course: CourseSearchResult;
   alreadyAttended?: boolean;
   onSave?: (c: CourseSearchResult) => void;
-  onPriority?: (c: CourseSearchResult) => void;
-  onAddToPlan?: (c: CourseSearchResult) => void;
   savedExternalIds?: Set<string>;
-  priorityExternalIds?: Set<string>;
-  ongoingExternalIds?: Set<string>;
 }
 
 export function SearchResultCard({
   course,
   alreadyAttended = false,
   onSave,
-  onPriority,
-  onAddToPlan,
   savedExternalIds = new Set(),
-  priorityExternalIds = new Set(),
-  ongoingExternalIds = new Set(),
 }: SearchResultCardProps) {
   const navigate = useNavigate();
   const [localSaved, setLocalSaved] = useState(savedExternalIds.has(course.externalId));
-  const [localPriority, setLocalPriority] = useState(priorityExternalIds.has(course.externalId));
-  const [localOngoing, setLocalOngoing] = useState(ongoingExternalIds.has(course.externalId));
 
   const levelStyle = course.level ? LEVEL_STYLES[course.level] : undefined;
   const levelLabel = course.level ? LEVEL_LABELS[course.level] : undefined;
 
+  const formatDuration = (h?: number) => {
+    if (!h) return 'Variável';
+    const hrs = Math.floor(h);
+    const mins = Math.round((h - hrs) * 60);
+    if (hrs === 0) return `${mins}m`;
+    if (mins === 0) return `${hrs}h`;
+    return `${hrs}h ${mins}m`;
+  };
+
   const handleSave = () => {
     setLocalSaved((v) => !v);
     onSave?.(course);
-  };
-  const handlePriority = () => {
-    setLocalPriority((v) => !v);
-    onPriority?.(course);
-  };
-  const handlePlan = () => {
-    setLocalOngoing((v) => !v);
-    onAddToPlan?.(course);
   };
 
   const handleViewCourse = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -159,49 +146,65 @@ export function SearchResultCard({
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-4 pr-5">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="line-clamp-2 text-xl font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-2 text-xl font-black text-foreground leading-[1.2] group-hover:text-primary transition-colors tracking-tight">
             {course.title}
           </h3>
         </div>
         {levelStyle && (
-          <span className={cn('shrink-0 rounded-full px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold', levelStyle)}>
+          <span className={cn('shrink-0 rounded-full border px-3 py-1 text-[10px] uppercase tracking-widest font-black shadow-sm', levelStyle)}>
             {levelLabel}
           </span>
         )}
       </div>
 
-      {/* Platform + meta */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1 font-medium text-foreground/80">
-          <BookOpen className="h-3.5 w-3.5 text-primary/70" />
+      {/* Primary Meta (Platform, Instructor, Language) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
+        <span className="flex items-center gap-1.5 text-foreground/90">
+          <BookOpen className="h-3.5 w-3.5 text-primary" />
           {course.platformName}
         </span>
-        {course.durationHours && (
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {course.durationHours}h
+        {course.instructor && (
+          <span className="flex items-center gap-1.5">
+            <User className="h-3.5 w-3.5" />
+            {course.instructor}
           </span>
+        )}
+        {course.language && (
+          <span className="flex items-center gap-1.5">
+            <Globe className="h-3.5 w-3.5" />
+            {course.language}
+          </span>
+        )}
+      </div>
+
+      {/* Secondary Meta (Duration, Rating, Relevance, Price) */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+        {course.durationHours && (
+          <div className="flex items-center gap-1 rounded-md bg-muted/50 px-2 py-0.5 text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {formatDuration(course.durationHours)}
+          </div>
         )}
         {course.rating !== undefined && (
-          <span className="flex items-center gap-1 text-amber-500 font-bold">
+          <div className="flex items-center gap-1 rounded-md bg-amber-50/50 px-2 py-0.5 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 font-bold border border-amber-200/30">
             <Star className="h-3.5 w-3.5 fill-current" />
             {course.rating.toFixed(1)}
-          </span>
+          </div>
         )}
         {(course.relevanceScore !== undefined || course.similarityScore !== undefined || course.relevance !== undefined) && (
-          <span className="flex items-center gap-1 text-blue-500 font-bold">
+          <div className="flex items-center gap-1 rounded-md bg-blue-50/50 px-2 py-0.5 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-bold border border-blue-200/30">
             <BarChart3 className="h-3.5 w-3.5" />
             {Math.round(((course.relevanceScore || course.similarityScore || course.relevance || 0)) * 100)}%
-          </span>
+          </div>
         )}
         <div className="ml-auto">
           <span className={cn(
-            "rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-widest border",
+            "rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-widest border shadow-sm",
             course.price && course.price.toLowerCase().includes('free')
               ? "bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800"
-              : "bg-muted border-border text-muted-foreground"
+              : "bg-muted/80 border-border text-muted-foreground"
           )}>
             <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
             {course.price || 'Free'}
@@ -237,28 +240,14 @@ export function SearchResultCard({
       )}
 
       {/* Actions footer */}
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center justify-between gap-4 pt-2 mt-auto border-t border-border/40">
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <ActionBtn
             icon={Bookmark}
             label={localSaved ? 'Guardado' : 'Guardar'}
             onClick={handleSave}
             active={localSaved}
-            activeClass="bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400"
-          />
-          <ActionBtn
-            icon={Flame}
-            label={localPriority ? 'Prioritário' : 'Prioritário'}
-            onClick={handlePriority}
-            active={localPriority}
-            activeClass="bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400"
-          />
-          <ActionBtn
-            icon={PlusCircle}
-            label={localOngoing ? 'A fazer' : 'Plano'}
-            onClick={handlePlan}
-            active={localOngoing}
-            activeClass="bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400"
+            activeClass="bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/20"
           />
         </div>
 
@@ -267,7 +256,7 @@ export function SearchResultCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleViewCourse}
-          className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-md shadow-foreground/5 ml-auto"
+          className="flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-xl shadow-foreground/10"
         >
           Ver curso
           <ExternalLink className="h-3.5 w-3.5" />

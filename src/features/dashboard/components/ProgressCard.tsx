@@ -12,6 +12,7 @@ const STATUS_CONFIG: Record<TrainingStatus, { label: string; className: string }
   completed: { label: 'Concluído', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
   priority: { label: 'Prioritário', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
   later: { label: 'Guardado', className: 'bg-muted text-muted-foreground' },
+  accessed: { label: 'Acedido', className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
 };
 

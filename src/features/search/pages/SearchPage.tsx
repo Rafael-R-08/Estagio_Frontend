@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, AlertCircle, LayoutGrid, List } from 'lucide-react';
+import { Search, AlertCircle, LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
 
@@ -57,7 +57,9 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-// ─── SearchPage ───────────────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const PAGE_SIZE = 20;
 
 export default function SearchPage() {
   const { t } = useTranslation();
@@ -65,6 +67,7 @@ export default function SearchPage() {
 
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<Filters>({
     platforms: [],
     level: undefined,
@@ -74,6 +77,17 @@ export default function SearchPage() {
     language: undefined
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Reset page when search or filters change
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    setPage(1);
+  };
 
   // ── Available platforms ──────────────────────────────────────────────────
   const { data: platforms = [] } = useQuery({
@@ -92,6 +106,7 @@ export default function SearchPage() {
     queryKey: [
       'search',
       searchQuery,
+      page,
       filters.platforms,
       filters.isFree,
       filters.minInternalRating,
@@ -103,13 +118,14 @@ export default function SearchPage() {
       searchApi
         .search(
           searchQuery,
-          20,
+          PAGE_SIZE,
           filters.platforms.length ? filters.platforms : undefined,
           filters.isFree,
           filters.minInternalRating,
           filters.minRelevance,
           filters.level,
-          filters.language
+          filters.language,
+          page
         )
         .then((r) => r.data),
     enabled: searchQuery.trim().length >= 2,
@@ -136,14 +152,6 @@ export default function SearchPage() {
       ),
     [trainings],
   );
-  const priorityUrls = useMemo(
-    () => new Set(trainings.filter((t) => t.status === 'priority').map((t) => t.url)),
-    [trainings],
-  );
-  const ongoingUrls = useMemo(
-    () => new Set(trainings.filter((t) => t.status === 'ongoing').map((t) => t.url)),
-    [trainings],
-  );
 
   // ── Apply client-side level filter ───────────────────────────────────────
   const filteredResults = useMemo(() => {
@@ -160,7 +168,7 @@ export default function SearchPage() {
 
   const handleSave = (course: CourseSearchResult) => {
     const existing = trainings.find((t) => t.url === course.url);
-    if (existing) return; // already saved — toggle handled by card local state
+    if (existing) return;
     createTraining.mutate(
       {
         title: course.title,
@@ -175,41 +183,6 @@ export default function SearchPage() {
     );
   };
 
-  const handlePriority = (course: CourseSearchResult) => {
-    const existing = trainings.find((t) => t.url === course.url);
-    if (existing) return;
-    createTraining.mutate(
-      {
-        title: course.title,
-        url: course.url,
-        status: 'priority',
-        platformId: course.platformId,
-      },
-      {
-        onSuccess: () => toast.success(`"${course.title}" marcado como prioritário!`),
-        onError: () => toast.error('Erro ao marcar como prioritário.'),
-      },
-    );
-  };
-
-  const handleAddToPlan = (course: CourseSearchResult) => {
-    const existing = trainings.find((t) => t.url === course.url);
-    if (existing) return;
-    createTraining.mutate(
-      {
-        title: course.title,
-        url: course.url,
-        status: 'ongoing',
-        platformId: course.platformId,
-      },
-      {
-        onSuccess: () => toast.success(`"${course.title}" adicionado ao plano!`),
-        onError: () => toast.error('Erro ao adicionar ao plano.'),
-      },
-    );
-  };
-
-  const handleSearch = (q: string) => setSearchQuery(q);
 
   return (
     <div className="space-y-5">
@@ -222,31 +195,32 @@ export default function SearchPage() {
       </div>
 
       {/* ── Search bar ────────────────────────────────────────────────── */}
-      <SearchBar
-        value={inputValue}
-        onChange={setInputValue}
-        onSearch={handleSearch}
-        isLoading={isFetching}
-        className="w-full"
-      />
+      <div className="relative group">
+        <SearchBar
+          value={inputValue}
+          onChange={setInputValue}
+          onSearch={handleSearch}
+          isLoading={isFetching}
+          className="w-full"
+        />
+        {searchResponse?.semanticRanking && (
+          <p className="absolute -bottom-6 left-2 text-[10px] text-primary font-black uppercase tracking-widest opacity-80 animate-pulse">
+            ✦ Resultados ordenados por relevância semântica
+          </p>
+        )}
+      </div>
 
-      {/* ── Semantic ranking badge ─────────────────────────────────────── */}
-      {searchResponse?.semanticRanking && (
-        <p className="text-xs text-primary/80 font-medium">
-          ✦ Resultados ordenados por relevância semântica
-        </p>
-      )}
+      {/* ── Filters Bar ────────────────────────────────────────────────── */}
+      <div className="pt-4 border-t border-border/40">
+        <FilterSidebar
+          platforms={platforms}
+          filters={filters}
+          onChange={handleFilterChange}
+        />
+      </div>
 
-      {/* ── Main layout ────────────────────────────────────────────────── */}
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="hidden md:block">
-          <FilterSidebar
-            platforms={platforms}
-            filters={filters}
-            onChange={setFilters}
-          />
-        </div>
+      {/* ── Results Area ─────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-6">
 
         {/* Results */}
         <div className="min-w-0 flex-1 space-y-4">
@@ -256,8 +230,8 @@ export default function SearchPage() {
               <p className="text-xs text-muted-foreground">
                 {isFetching
                   ? 'A pesquisar…'
-                  : filteredResults.length > 0
-                    ? `${filteredResults.length} resultado${filteredResults.length !== 1 ? 's' : ''}`
+                  : (searchResponse?.total ?? 0) > 0
+                    ? `${searchResponse?.total} resultado${searchResponse?.total !== 1 ? 's' : ''}`
                     : ''}
               </p>
               <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
@@ -319,13 +293,38 @@ export default function SearchPage() {
                   course={course}
                   alreadyAttended={attendedUrls.has(course.url)}
                   savedExternalIds={savedExternalIds}
-                  priorityExternalIds={priorityUrls}
-                  ongoingExternalIds={ongoingUrls}
                   onSave={handleSave}
-                  onPriority={handlePriority}
-                  onAddToPlan={handleAddToPlan}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isFetching && !isError && searchResponse && (searchResponse.totalPages ?? 0) > 1 && (
+            <div className="flex items-center justify-center gap-4 py-8 border-t border-border/40">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-4 py-2 text-xs font-bold text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </button>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-widest text-foreground">
+                  Página {page} de {searchResponse.totalPages}
+                </span>
+              </div>
+
+              <button
+                disabled={page >= (searchResponse.totalPages ?? 1)}
+                onClick={() => setPage(p => Math.min((searchResponse.totalPages ?? 1), p + 1))}
+                className="flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-4 py-2 text-xs font-bold text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Próximo
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>

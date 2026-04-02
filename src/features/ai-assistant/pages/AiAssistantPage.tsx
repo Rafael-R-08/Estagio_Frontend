@@ -42,7 +42,7 @@ function makeId() {
 
 export default function AiAssistantPage() {
   const { user } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<AiMessage[]>([]);
@@ -59,16 +59,19 @@ export default function AiAssistantPage() {
   const fetchConversations = useCallback(async () => {
     try {
       const res = await chatApi.listConversations();
-      setConversations(res.data);
+      const list = Array.isArray(res.data) ? res.data : [];
+      setConversations(list);
+      return list;
     } catch (err) {
       console.error('Failed to fetch conversations', err);
+      return [] as AiConversation[];
     }
   }, []);
 
   useEffect(() => {
     if (user?.id) {
       setRecentQueries(loadRecent(user.id));
-      fetchConversations();
+      void fetchConversations();
     }
   }, [user?.id, fetchConversations]);
 
@@ -152,12 +155,6 @@ export default function AiAssistantPage() {
       const msgUserId = makeId();
       const assistantMsgId = makeId();
 
-      // Build history (limit to last 10 messages for token efficiency)
-      const history = messages
-        .filter((m) => !m.isLoading && m.content)
-        .slice(-10)
-        .map((m) => ({ role: m.role, content: m.content }));
-
       setMessages((prev) => [
         ...prev,
         { id: msgUserId, role: 'user', content: text, timestamp: new Date().toISOString() },
@@ -187,10 +184,8 @@ export default function AiAssistantPage() {
             'Authorization': `Bearer ${token || ''}`,
           },
           body: JSON.stringify({
-            prompt: text, // Changed from "query" to "prompt" per new contract
-            conversationId, // Send current conversation ID if we have one
-            history,
-            language: i18n.language
+            prompt: text,
+            conversationId,
           }),
           signal: ctrl.signal,
         });
@@ -203,54 +198,110 @@ export default function AiAssistantPage() {
         const decoder = new TextDecoder();
         let accumulatedText = '';
         let sources: any[] = [];
+        let sseBuffer = '';
+        let nextConversationId = conversationId || undefined;
 
-        // Robust SSE Loop
+        const appendAssistantText = (textChunk: string, convId?: string) => {
+          if (!textChunk) return;
+          accumulatedText += textChunk;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: accumulatedText, conversationId: convId || nextConversationId }
+                : m,
+            ),
+          );
+        };
+
+        const applySources = (nextSources: unknown) => {
+          if (!Array.isArray(nextSources)) return;
+          sources = nextSources;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMsgId ? { ...m, sources } : m)),
+          );
+        };
+
+        const handlePayload = (rawPayload: string) => {
+          if (!rawPayload) return false;
+          if (rawPayload === '[DONE]') return true;
+
+          try {
+            const data = JSON.parse(rawPayload);
+
+            const chunkConversationId =
+              typeof data?.conversationId === 'string' ? data.conversationId : undefined;
+            if (chunkConversationId) {
+              nextConversationId = chunkConversationId;
+            }
+
+            const textChunk =
+              typeof data?.text === 'string'
+                ? data.text
+                : typeof data?.answer === 'string'
+                  ? data.answer
+                  : typeof data?.chunk === 'string'
+                    ? data.chunk
+                    : '';
+
+            if (textChunk) {
+              appendAssistantText(textChunk, chunkConversationId);
+            }
+
+            applySources(data?.sources);
+          } catch {
+            // Backend SSE currently streams plain text chunks.
+            appendAssistantText(rawPayload);
+          }
+
+          return false;
+        };
+
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          sseBuffer += decoder.decode(value, { stream: true });
+          const frames = sseBuffer.split('\n\n');
+          sseBuffer = frames.pop() || '';
 
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+          let shouldStop = false;
+          for (const frame of frames) {
+            const payload = frame
+              .split('\n')
+              .filter((line) => line.startsWith('data:'))
+              .map((line) => {
+                const dataPart = line.slice(5);
+                return dataPart.startsWith(' ') ? dataPart.slice(1) : dataPart;
+              })
+              .join('\n');
 
-            const dataStr = trimmed.slice(6);
-            if (dataStr === '[DONE]') break;
-
-            try {
-              const data = JSON.parse(dataStr);
-              
-              if (data.conversationId && !conversationId) {
-                setConversationId(data.conversationId);
-                fetchConversations(); // Update list to show new session
-              }
-
-              if (data.text) {
-                accumulatedText += data.text;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsgId
-                      ? { ...m, content: accumulatedText, conversationId: data.conversationId }
-                      : m
-                  )
-                );
-              }
-              if (data.sources) {
-                sources = data.sources;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsgId
-                      ? { ...m, sources }
-                      : m
-                  )
-                );
-              }
-            } catch (e) {
-              // Partial JSON chunks can be ignored until completion
+            if (handlePayload(payload)) {
+              shouldStop = true;
+              break;
             }
           }
+
+          if (shouldStop) break;
+        }
+
+        if (sseBuffer.trim()) {
+          const tailPayload = sseBuffer
+            .split('\n')
+            .filter((line) => line.startsWith('data:'))
+            .map((line) => {
+              const dataPart = line.slice(5);
+              return dataPart.startsWith(' ') ? dataPart.slice(1) : dataPart;
+            })
+            .join('\n');
+
+          handlePayload(tailPayload);
+        }
+
+        const refreshed = await fetchConversations();
+        if (nextConversationId) {
+          setConversationId(nextConversationId);
+        } else if (refreshed[0]?.id) {
+          setConversationId(refreshed[0].id);
         }
       } catch (err: any) {
         if (err.name === 'AbortError') {
@@ -273,7 +324,7 @@ export default function AiAssistantPage() {
         );
       }
     },
-    [messages, user?.id, t, i18n.language, isTyping, conversationId, fetchConversations],
+    [user?.id, t, isTyping, conversationId, fetchConversations],
   );
 
   const handleStartNewChat = useCallback(() => {
@@ -294,7 +345,7 @@ export default function AiAssistantPage() {
       if (conversationId === id) {
         handleStartNewChat();
       }
-      fetchConversations();
+      void fetchConversations();
       toast.success('Conversa eliminada');
     } catch (err) {
       toast.error('Erro ao eliminar conversa');

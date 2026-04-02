@@ -45,6 +45,11 @@ const STATUS_CONFIG: Record<
     color: 'bg-muted text-muted-foreground',
     icon: <Bookmark className="h-3 w-3" />,
   },
+  accessed: {
+    label: 'Acedido',
+    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+    icon: <Timer className="h-3 w-3" />,
+  },
   cancelled: {
     label: 'Cancelado',
     color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',

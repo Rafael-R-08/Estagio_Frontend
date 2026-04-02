@@ -8,11 +8,15 @@ import {
   BookOpen,
   Tag,
   CheckCircle2,
-  TrendingUp,
   Bookmark,
-  Flame,
   AlertCircle,
   Sparkles,
+  User,
+  Globe,
+  DollarSign,
+  ShieldCheck,
+  ChevronRight,
+  BarChart3,
 } from 'lucide-react';
 
 import { searchApi, trainingApi } from '@/services/api';
@@ -21,14 +25,14 @@ import { toast } from '@/lib/toast-store';
 import { cn } from '@/lib/utils';
 import type { CourseSearchResult } from '@/types';
 
-import { SearchResultCard, SearchResultCardSkeleton } from '../components/SearchResultCard';
+import { SearchResultCard } from '../components/SearchResultCard';
 
 // ─── Level config ─────────────────────────────────────────────────────────────
 
 const LEVEL_STYLES: Record<string, string> = {
-  beginner: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200/50',
+  intermediate: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200/50',
+  advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400 border-violet-200/50',
 };
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
@@ -42,27 +46,27 @@ function Sk({ className }: { className?: string }) {
 
 function DetailSkeleton() {
   return (
-    <div className="space-y-6">
-      <Sk className="h-5 w-32" />
-      <div className="space-y-3">
-        <Sk className="h-8 w-3/4" />
-        <Sk className="h-4 w-48" />
-        <div className="flex gap-3">
-          <Sk className="h-6 w-20 rounded-full" />
-          <Sk className="h-6 w-20 rounded-full" />
-          <Sk className="h-6 w-24 rounded-full" />
+    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8">
+      <Sk className="h-4 w-32" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-4">
+            <Sk className="h-6 w-24 rounded-full" />
+            <Sk className="h-12 w-full" />
+            <Sk className="h-12 w-2/3" />
+          </div>
+          <div className="flex gap-6">
+            <Sk className="h-4 w-32" />
+            <Sk className="h-4 w-32" />
+          </div>
+          <Sk className="h-24 w-full rounded-3xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <Sk key={i} className="h-24 rounded-3xl" />)}
+          </div>
         </div>
-      </div>
-      <div className="space-y-2">
-        <Sk className="h-4 w-full" />
-        <Sk className="h-4 w-full" />
-        <Sk className="h-4 w-5/6" />
-        <Sk className="h-4 w-4/5" />
-      </div>
-      <div className="flex gap-3">
-        <Sk className="h-10 w-32 rounded-xl" />
-        <Sk className="h-10 w-32 rounded-xl" />
-        <Sk className="h-10 w-36 rounded-xl" />
+        <div className="space-y-6">
+          <Sk className="h-80 rounded-[2.5rem]" />
+        </div>
       </div>
     </div>
   );
@@ -75,26 +79,40 @@ interface ActionProps {
   label: string;
   onClick: () => void;
   active?: boolean;
-  color?: string;
+  className?: string;
   loading?: boolean;
 }
 
-function ActionButton({ icon: Icon, label, onClick, active, color = '', loading }: ActionProps) {
+function ActionButton({ icon: Icon, label, onClick, active, className, loading }: ActionProps) {
   return (
     <button
       onClick={onClick}
       disabled={loading}
       className={cn(
-        'flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-bold transition active:scale-95',
+        'flex items-center gap-2 rounded-full border px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
         active
-          ? cn('border-transparent shadow-xl', color)
-          : 'border-border/60 text-foreground hover:bg-background/80',
-        loading && 'opacity-60 cursor-not-allowed',
+          ? 'bg-primary text-primary-foreground border-transparent shadow-xl shadow-primary/20'
+          : 'border-border/60 bg-background/40 text-muted-foreground hover:border-foreground/20 hover:text-foreground',
+        className
       )}
     >
       <Icon className="h-4 w-4" />
       {label}
     </button>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, colorClass }: { icon: React.ElementType, label: string, value: string | number, colorClass?: string }) {
+  return (
+    <div className="flex flex-col gap-2 rounded-3xl border border-border/40 bg-background/40 p-5 backdrop-blur-md transition-all hover:border-foreground/10 hover:bg-background/60 shadow-sm">
+      <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/50", colorClass)}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 leading-none mb-1.5">{label}</p>
+        <p className="text-sm font-black text-foreground">{value}</p>
+      </div>
+    </div>
   );
 }
 
@@ -135,7 +153,7 @@ export default function CourseDetailPage() {
 
   const existingRecord = trainings.find((t) => t.url === course?.url);
 
-  // Create training mutation
+  // Create/Update training mutation
   const createTraining = useMutation({
     mutationFn: trainingApi.create,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
@@ -146,11 +164,11 @@ export default function CourseDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
   });
 
-  const handleAction = (status: 'ongoing' | 'completed' | 'later' | 'priority') => {
+  const handleAction = (status: 'ongoing' | 'completed' | 'later') => {
     if (!course) return;
 
     if (existingRecord) {
-      if (existingRecord.status === status) return; // no-op
+      if (existingRecord.status === status) return;
       updateTraining.mutate(
         { id: existingRecord.id, dto: { status } },
         {
@@ -167,7 +185,6 @@ export default function CourseDetailPage() {
               ongoing: 'Adicionado ao plano!',
               completed: 'Marcado como concluído!',
               later: 'Guardado!',
-              priority: 'Marcado como prioritário!',
             };
             toast.success(labels[status]);
           },
@@ -179,14 +196,8 @@ export default function CourseDetailPage() {
 
   const isPending = createTraining.isPending || updateTraining.isPending;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   if (isLoading) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-6">
-        <DetailSkeleton />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (isError || !course) {
@@ -196,16 +207,16 @@ export default function CourseDetailPage() {
           <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
         <div>
-          <p className="text-sm font-medium text-foreground">Curso não encontrado</p>
+          <p className="text-sm font-black text-foreground">Curso não encontrado</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Este curso pode não estar na cache ainda. Tenta pesquisar primeiro.
+            Este curso pode não estar disponível ou houve um erro ao carregar.
           </p>
         </div>
         <button
           onClick={() => navigate('/search')}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          className="rounded-full bg-foreground px-6 py-3 text-xs font-black uppercase tracking-widest text-background hover:opacity-90 transition-all"
         >
-          Ir para pesquisa
+          Pesquisar outros cursos
         </button>
       </div>
     );
@@ -214,170 +225,209 @@ export default function CourseDetailPage() {
   const levelStyle = course.level ? LEVEL_STYLES[course.level] : undefined;
   const levelLabel = course.level ? LEVEL_LABELS[course.level] : undefined;
 
+  const formatHours = (h?: number) => {
+    if (!h) return 'Variável';
+    const hrs = Math.floor(h);
+    const mins = Math.round((h - hrs) * 60);
+    if (hrs === 0) return `${mins}min`;
+    if (mins === 0) return `${hrs}h`;
+    return `${hrs}h ${mins}min`;
+  };
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      {/* ── Back ────────────────────────────────────────────────────────── */}
+    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8">
+      {/* ── Navigation ────────────────────────────────────────────────── */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
+        className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-all hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Voltar
+        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        Voltar à pesquisa
       </button>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <div className="space-y-6 rounded-[2.5rem] border border-border/60 bg-card/40 p-8 shadow-2xl backdrop-blur-2xl">
-        {/* Title + level */}
-        <div className="space-y-4">
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl leading-tight">
-            {course.title}
-          </h1>
-          {levelStyle && (
-            <span className={cn('inline-block rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-sm', levelStyle)}>
-              {levelLabel}
-            </span>
-          )}
-        </div>
-
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-muted-foreground">
-          <span className="flex items-center gap-2 text-foreground">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background">
-              <BookOpen className="h-4 w-4" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+        {/* ── Left Column: Main Info ────────────────────────────────────── */}
+        <div className="lg:col-span-2 space-y-10">
+          {/* Hero Section */}
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary border border-primary/20">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {course.platformName}
+                </span>
+                {levelStyle && (
+                  <span className={cn('rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-sm', levelStyle)}>
+                    {levelLabel}
+                  </span>
+                )}
+                {existingRecord && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-500/20">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    {existingRecord.status === 'completed' ? 'Concluído' : 'Guardado'}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl leading-[1.1]">
+                {course.title}
+              </h1>
             </div>
-            {course.platformName}
-          </span>
-          {course.durationHours && (
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              {course.durationHours} horas
-            </span>
-          )}
-          {course.rating && (
-            <span className="flex items-center gap-2 text-amber-500">
-              <Star className="h-4 w-4 fill-current" />
-              {course.rating.toFixed(1)} / 5
-            </span>
-          )}
-          {existingRecord && (
-            <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-4 w-4" />
-              {existingRecord.status === 'completed' ? 'Concluído' :
-                existingRecord.status === 'ongoing' ? 'Em progresso' :
-                  existingRecord.status === 'priority' ? 'Prioritário' : 'Guardado'}
-            </span>
+
+            <div className="flex flex-wrap items-center gap-x-10 gap-y-4 text-xs font-black uppercase tracking-widest text-muted-foreground/80">
+              {course.instructor && (
+                <span className="flex items-center gap-2.5">
+                  <User className="h-4 w-4 text-primary/60" />
+                  {course.instructor}
+                </span>
+              )}
+              {course.language && (
+                <span className="flex items-center gap-2.5">
+                  <Globe className="h-4 w-4 text-primary/60" />
+                  {course.language}
+                </span>
+              )}
+            </div>
+
+            {course.description && (
+              <p className="text-lg leading-relaxed text-muted-foreground/90 font-medium italic border-l-4 border-primary/20 pl-6 py-2">
+                {course.description}
+              </p>
+            )}
+
+            {/* Tags */}
+            {course.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2.5 pt-2">
+                {course.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1.5 rounded-full bg-muted/40 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground border border-border/40 transition-all hover:border-foreground/20 hover:text-foreground hover:bg-muted/60"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard 
+              icon={Clock} 
+              label="Duração" 
+              value={formatHours(course.durationHours)} 
+            />
+            <StatCard 
+              icon={Star} 
+              label="Avaliação" 
+              value={course.rating ? `${course.rating.toFixed(1)} / 5.0` : 'N/A'}
+              colorClass="text-amber-500"
+            />
+            <StatCard 
+              icon={BarChart3} 
+              label="Relevância" 
+              value={course.similarityScore ? `${Math.round(course.similarityScore * 100)}%` : 'N/A'}
+              colorClass="text-blue-500"
+            />
+            <StatCard 
+              icon={DollarSign} 
+              label="Investimento" 
+              value={course.price || 'Free'}
+              colorClass={course.price?.toLowerCase().includes('free') ? 'text-emerald-500' : ''}
+            />
+          </div>
+
+          {/* Why recommended? */}
+          {course.similarityScore !== undefined && (
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-primary/20 bg-primary/5 p-8 backdrop-blur-md">
+              <div className="absolute -right-10 -top-10 h-60 w-60 rounded-full bg-primary/10 blur-[80px]" />
+              <div className="relative flex items-center gap-5 mb-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-primary text-white shadow-2xl shadow-primary/30">
+                  <Sparkles className="h-7 w-7" />
+                </div>
+                <div>
+                  <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-1">Algoritmo Softinsa</h2>
+                  <p className="text-sm font-bold text-foreground/60">Análise de IA de Alta Precisão</p>
+                </div>
+              </div>
+              <p className="relative text-xl leading-relaxed text-foreground/80 font-medium tracking-tight">
+                Este curso foi priorizado no teu dashboard com uma aderência de <span className="font-black text-primary underline decoration-primary/30 underline-offset-8 decoration-2">{Math.round(course.similarityScore * 100)}%</span>. 
+                Identificámos que o conteúdo em <span className="font-black text-foreground">{course.tags.slice(0, 3).join(', ')}</span> é fundamental para o teu desenvolvimento atual.
+              </p>
+            </div>
           )}
         </div>
 
-        {/* Description */}
-        {course.description && (
-          <p className="text-lg leading-relaxed text-muted-foreground/80">
-            {course.description}
-          </p>
-        )}
+        {/* ── Right Column: Sidebar Actions ───────────────────────────────── */}
+        <div className="space-y-6">
+          <div className="sticky top-10 rounded-[2.5rem] border border-border/60 bg-background/60 p-8 shadow-2xl shadow-foreground/5 backdrop-blur-3xl space-y-8 border-t-primary/20 border-t-2">
+            <div className="space-y-6">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 border-b border-border/40 pb-4">Gestão de Aprendisagem</h3>
+              <div className="flex flex-col gap-4">
+                <ActionButton
+                  icon={Bookmark}
+                  label={existingRecord?.status === 'later' ? 'Curso Guardado' : 'Guardar Curso'}
+                  onClick={() => handleAction('later')}
+                  active={existingRecord?.status === 'later'}
+                  loading={isPending}
+                />
+                <ActionButton
+                  icon={CheckCircle2}
+                  label={existingRecord?.status === 'completed' ? 'Curso Concluído' : 'Marcar como Concluído'}
+                  onClick={() => handleAction('completed')}
+                  active={existingRecord?.status === 'completed'}
+                  loading={isPending}
+                />
+              </div>
+            </div>
 
-        {/* Tags */}
-        {course.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {course.tags.map((tag) => (
-              <span
-                key={tag}
-                className="flex items-center gap-1.5 rounded-full bg-background/40 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 leading-relaxed">
+                  Acesso Externo
+                </p>
+                <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
+                  Serás redirecionado para a plataforma oficial do fornecedor para iniciar o conteúdo.
+                </p>
+              </div>
+              <a
+                href={course.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-foreground px-8 py-5 text-xs font-black uppercase tracking-[0.25em] text-background shadow-2xl transition-all hover:scale-[1.02] active:scale-95 hover:shadow-primary/10"
               >
-                <Tag className="h-3 w-3" />
-                {tag}
-              </span>
-            ))}
+                Começar agora
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
           </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex flex-wrap items-center gap-3 pt-4">
-          <div className="flex flex-wrap gap-2">
-            <ActionButton
-              icon={TrendingUp}
-              label="Adicionar ao plano"
-              onClick={() => handleAction('ongoing')}
-              active={existingRecord?.status === 'ongoing'}
-              color="bg-foreground text-background"
-              loading={isPending}
-            />
-            <ActionButton
-              icon={CheckCircle2}
-              label="Marcar concluído"
-              onClick={() => handleAction('completed')}
-              active={existingRecord?.status === 'completed'}
-              color="bg-emerald-500 text-white"
-              loading={isPending}
-            />
-            <ActionButton
-              icon={Bookmark}
-              label="Guardar"
-              onClick={() => handleAction('later')}
-              active={existingRecord?.status === 'later'}
-              color="bg-blue-500 text-white"
-              loading={isPending}
-            />
-            <ActionButton
-              icon={Flame}
-              label="Prioritário"
-              onClick={() => handleAction('priority')}
-              active={existingRecord?.status === 'priority'}
-              color="bg-orange-500 text-white"
-              loading={isPending}
-            />
-          </div>
-          <a
-            href={course.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition hover:opacity-90 min-w-max"
-          >
-            Abrir curso
-            <ExternalLink className="h-4 w-4" />
-          </a>
         </div>
       </div>
 
-      {/* ── Why recommended ──────────────────────────────────────────────── */}
-      {course.similarityScore !== undefined && (
-        <div className="rounded-[2.5rem] border border-border/60 bg-background/60 p-8 shadow-2xl backdrop-blur-2xl">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-foreground text-background">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Por que é recomendado?</h2>
-          </div>
-          <p className="text-lg leading-relaxed text-muted-foreground/80">
-            Este curso tem uma relevância semântica de{' '}
-            <span className="font-black text-foreground">
-              {Math.round(course.similarityScore * 100)}%
-            </span>{' '}
-            em relação à tua pesquisa, baseada em análise de conteúdo por IA. As tags{' '}
-            <span className="font-bold text-foreground">
-              {course.tags.slice(0, 3).join(', ')}
-            </span>{' '}
-            correspondem ao teu perfil e interesses.
-          </p>
-        </div>
-      )}
-
       {/* ── Related courses ───────────────────────────────────────────────── */}
       {related.length > 0 && (
-        <div className="space-y-6">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Cursos relacionados</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {related.slice(0, 4).map((r: CourseSearchResult) =>
-              isLoading ? (
-                <SearchResultCardSkeleton key={r.externalId} />
-              ) : (
-                <SearchResultCard
-                  key={r.externalId}
-                  course={r}
-                  alreadyAttended={trainings.some((t) => t.url === r.url)}
-                />
-              ),
-            )}
+        <div className="space-y-10 pt-20 border-t border-border/40">
+          <div className="flex items-center justify-between px-2">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black tracking-tight text-foreground">Sugestões Semelhantes</h2>
+              <p className="text-sm text-muted-foreground font-medium italic">Baseado no conteúdo deste curso</p>
+            </div>
+            <button 
+              onClick={() => navigate('/search')}
+              className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-all"
+            >
+              Ver todos os resultados
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1.5" />
+            </button>
+          </div>
+          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {related.slice(0, 3).map((r: CourseSearchResult) => (
+              <SearchResultCard
+                key={r.externalId}
+                course={r}
+                alreadyAttended={trainings.some((t) => t.url === r.url)}
+              />
+            ))}
           </div>
         </div>
       )}

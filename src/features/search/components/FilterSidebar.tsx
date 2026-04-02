@@ -1,4 +1,5 @@
-import { SlidersHorizontal, RotateCcw, Star } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Star, ChevronDown, Check, Globe, DollarSign, BarChart3, Layers } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 // ─── Level badge config ───────────────────────────────────────────────────────
@@ -39,41 +40,58 @@ interface FilterSidebarProps {
   onChange: (f: Filters) => void;
 }
 
-// ─── Checkbox helper ──────────────────────────────────────────────────────────
 
-function FilterCheckbox({
+// ─── Main component ───────────────────────────────────────────────────────────
+
+// ─── Dropdown Component ──────────────────────────────────────────────────────
+
+function FilterDropdown({
   label,
-  checked,
-  onChange,
-  badge,
+  icon: Icon,
+  active,
+  children,
 }: {
   label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  badge?: React.ReactNode;
+  icon: React.ElementType;
+  active?: boolean;
+  children: React.ReactNode;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition hover:bg-muted/50">
-      <div className="flex items-center gap-2">
-        <div
-          className={cn(
-            'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition',
-            checked
-              ? 'border-primary bg-primary text-primary-foreground'
-              : 'border-border bg-background',
-          )}
-          onClick={() => onChange(!checked)}
-        >
-          {checked && (
-            <svg className="h-2.5 w-2.5" viewBox="0 0 10 10" fill="none">
-              <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
+    <div className="relative" ref={containerRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          'flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300',
+          active
+            ? 'border-primary bg-primary/5 text-primary shadow-sm'
+            : 'border-border/60 bg-background/40 text-muted-foreground hover:border-foreground/20 hover:text-foreground',
+          isOpen && 'border-foreground/20 bg-background/60 shadow-md translate-y-[-1px]'
+        )}
+      >
+        <Icon className={cn('h-3.5 w-3.5', active ? 'text-primary' : 'text-muted-foreground/60')} />
+        {label}
+        <ChevronDown className={cn('h-3 w-3 transition-transform duration-300', isOpen && 'rotate-180')} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full z-50 mt-2 min-w-[200px] max-h-[300px] overflow-y-auto rounded-2xl border border-border/60 bg-background/90 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in duration-200">
+          {children}
         </div>
-        <span className="text-sm text-foreground">{label}</span>
-      </div>
-      {badge}
-    </label>
+      )}
+    </div>
   );
 }
 
@@ -85,6 +103,7 @@ export function FilterSidebar({
   onChange,
 }: FilterSidebarProps) {
   const safePlatforms = Array.isArray(platforms) ? platforms : [];
+  
   const activeCount = 
     filters.platforms.length + 
     (filters.level ? 1 : 0) + 
@@ -92,6 +111,7 @@ export function FilterSidebar({
     (filters.minInternalRating ? 1 : 0) + 
     (filters.minRelevance ? 1 : 0) + 
     (filters.language ? 1 : 0);
+  
   const hasActiveFilters = activeCount > 0;
 
   const togglePlatform = (name: string) => {
@@ -115,170 +135,167 @@ export function FilterSidebar({
   });
 
   return (
-    <div className="w-56 shrink-0 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <SlidersHorizontal className="h-4 w-4 text-primary" />
-          Filtros
-          {activeCount > 0 && (
-            <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-              {activeCount}
-            </span>
+    <div className="flex flex-wrap items-center gap-3 w-full py-2">
+      {/* Platform Dropdown */}
+      <FilterDropdown 
+        label="Plataformas" 
+        icon={Layers} 
+        active={filters.platforms.length > 0}
+      >
+        <div className="space-y-1 p-1">
+          {safePlatforms.length === 0 ? (
+            <p className="px-3 py-2 text-[10px] text-muted-foreground">Nenhuma plataforma encontrada</p>
+          ) : (
+            safePlatforms.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => togglePlatform(p.name)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition italic",
+                  filters.platforms.includes(p.name) ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
+                )}
+              >
+                {p.name}
+                {filters.platforms.includes(p.name) && <Check className="h-3.5 w-3.5" />}
+              </button>
+            ))
           )}
         </div>
-        {hasActiveFilters && (
-          <button
-            onClick={reset}
-            className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition hover:text-foreground"
-          >
-            <RotateCcw className="h-3 w-3" />
-            Limpar
-          </button>
-        )}
-      </div>
+      </FilterDropdown>
 
-      {/* Platforms */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Plataformas
-        </p>
-        {safePlatforms.length === 0 ? (
-          <p className="px-2 text-[11px] font-medium text-muted-foreground">Nenhuma disponível</p>
-        ) : (
-          safePlatforms.map((p) => (
-            <FilterCheckbox
-              key={p.id}
-              label={p.name}
-              checked={filters.platforms.includes(p.name)}
-              onChange={() => togglePlatform(p.name)}
-            />
-          ))
-        )}
-      </div>
-
-      {/* Difficulty level */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Nível
-        </p>
-        <div className="flex flex-col gap-1">
+      {/* Level Dropdown */}
+      <FilterDropdown 
+        label="Nível" 
+        icon={BarChart3} 
+        active={!!filters.level}
+      >
+        <div className="space-y-1 p-1">
           {LEVELS.map((l) => (
             <button
               key={l.value}
               onClick={() => setLevel(l.value)}
               className={cn(
-                "flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition text-xs font-bold",
-                filters.level === l.value 
-                  ? "bg-foreground text-background" 
-                  : "hover:bg-muted text-foreground"
+                "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition",
+                filters.level === l.value ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
               )}
             >
-              <span>{l.label}</span>
-              <span className={cn(
-                'rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wider',
-                filters.level === l.value ? 'bg-background/20 text-background' : l.color
-              )}>
-                {l.value[0]}
-              </span>
+              {l.label}
+              {filters.level === l.value && <Check className="h-3.5 w-3.5" />}
             </button>
           ))}
         </div>
-      </div>
+      </FilterDropdown>
 
-      {/* Language */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Idioma
-        </p>
-        <div className="flex bg-muted/40 p-1 rounded-xl border border-border/40">
+      {/* Language Dropdown */}
+      <FilterDropdown 
+        label="Idioma" 
+        icon={Globe} 
+        active={!!filters.language}
+      >
+        <div className="space-y-1 p-1">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.label}
               onClick={() => onChange({ ...filters, language: lang.value as any })}
               className={cn(
-                "flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all",
-                filters.language === lang.value 
-                  ? "bg-foreground text-background shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground"
+                "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition",
+                filters.language === lang.value ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
               )}
             >
               {lang.label}
+              {filters.language === lang.value && <Check className="h-3.5 w-3.5" />}
             </button>
           ))}
         </div>
-      </div>
+      </FilterDropdown>
 
-      {/* Price */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Preço
-        </p>
-        {[
-          { label: 'Todos os Preços', value: undefined },
-          { label: 'Grátis', value: true },
-          { label: 'Pago', value: false },
-        ].map((opt, i) => (
-          <label key={i} className="flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-muted/50 cursor-pointer text-[13px] font-medium text-foreground">
-            <input 
-              type="radio" 
-              className="h-4 w-4 border-muted text-foreground focus:ring-foreground/20 accent-foreground"
-              name="price-filter"
-              checked={filters.isFree === opt.value}
-              onChange={() => onChange({ ...filters, isFree: opt.value })}
-            />
-            {opt.label}
-          </label>
-        ))}
-      </div>
-
-      {/* Classificação Colegas (Internal Rating) */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Classificação Colegas
-        </p>
-        <div className="flex gap-2 px-2 pt-1">
-          {[1, 2, 3, 4, 5].map((star) => (
+      {/* Price Dropdown */}
+      <FilterDropdown 
+        label="Preço" 
+        icon={DollarSign} 
+        active={filters.isFree !== undefined}
+      >
+        <div className="space-y-1 p-1">
+          {[
+            { label: 'Todos os Preços', value: undefined },
+            { label: 'Grátis', value: true },
+            { label: 'Pago', value: false },
+          ].map((opt, i) => (
             <button
-              key={star}
-              onClick={() => onChange({ ...filters, minInternalRating: filters.minInternalRating === star ? undefined : star })}
+              key={i}
+              onClick={() => onChange({ ...filters, isFree: opt.value })}
               className={cn(
-                "transition hover:scale-110",
-                (filters.minInternalRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
+                "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition",
+                filters.isFree === opt.value ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
               )}
             >
-              <Star className="h-6 w-6 fill-current" />
+              {opt.label}
+              {filters.isFree === opt.value && <Check className="h-3.5 w-3.5" />}
             </button>
           ))}
         </div>
-        <p className="px-2 pt-3 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground opacity-60">
-          {filters.minInternalRating ? `${filters.minInternalRating} ou mais estrelas` : 'Qualquer classificação'}
-        </p>
-      </div>
+      </FilterDropdown>
 
-      {/* Relevância Softinsa (Internal Relevance) */}
-      <div className="rounded-[1.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-4 space-y-1">
-        <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-80">
-          Relevância Softinsa
-        </p>
-        <div className="flex gap-2 px-2 pt-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => onChange({ ...filters, minRelevance: filters.minRelevance === star ? undefined : star })}
-              className={cn(
-                "transition hover:scale-110",
-                (filters.minRelevance || 0) >= star ? "text-blue-500" : "text-border hover:text-blue-500/50"
-              )}
-            >
-              <Star className="h-6 w-6 fill-current" />
-            </button>
-          ))}
+      {/* Ratings Dropdown */}
+      <FilterDropdown 
+        label="Classificação" 
+        icon={Star} 
+        active={!!filters.minInternalRating}
+      >
+        <div className="p-3 space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Mínimo de estrelas</p>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => onChange({ ...filters, minInternalRating: filters.minInternalRating === star ? undefined : star })}
+                className={cn(
+                  "transition-all duration-300 hover:scale-125",
+                  (filters.minInternalRating || 0) >= star ? "text-amber-500" : "text-border hover:text-amber-500/50"
+                )}
+              >
+                <Star className={cn("h-6 w-6", (filters.minInternalRating || 0) >= star && "fill-current")} />
+              </button>
+            ))}
+          </div>
         </div>
-        <p className="px-2 pt-3 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground opacity-60">
-          {filters.minRelevance ? `${filters.minRelevance} ou mais relevância` : 'Qualquer relevância'}
-        </p>
-      </div>
+      </FilterDropdown>
+
+      {/* Relevance Dropdown */}
+      <FilterDropdown 
+        label="Relevância" 
+        icon={SlidersHorizontal} 
+        active={!!filters.minRelevance}
+      >
+        <div className="p-3 space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Mínimo de relevância</p>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => onChange({ ...filters, minRelevance: filters.minRelevance === star ? undefined : star })}
+                className={cn(
+                  "transition-all duration-300 hover:scale-125",
+                  (filters.minRelevance || 0) >= star ? "text-blue-500" : "text-border hover:text-blue-500/50"
+                )}
+              >
+                <Star className={cn("h-6 w-6", (filters.minRelevance || 0) >= star && "fill-current")} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </FilterDropdown>
+
+      {/* Reset Button */}
+      {hasActiveFilters && (
+        <button
+          onClick={reset}
+          className="ml-auto flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/5 px-4 py-2 text-xs font-black uppercase tracking-widest text-destructive transition-all hover:bg-destructive hover:text-white"
+        >
+          <RotateCcw className="h-3 w-3" />
+          Limpar ({activeCount})
+        </button>
+      )}
     </div>
   );
 }

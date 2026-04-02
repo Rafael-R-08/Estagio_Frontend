@@ -32,6 +32,124 @@ import type {
   AiConversation,
 } from '../types';
 
+type RawCourseResult = Partial<CourseSearchResult> & {
+  similarity?: number;
+  metadata?: Record<string, unknown>;
+};
+
+type RawConversation = AiConversation & {
+  _count?: { messages?: number };
+};
+
+function normalizeRelevance(minRelevance?: number) {
+  if (typeof minRelevance !== 'number') return undefined;
+  const normalized = minRelevance > 1 ? minRelevance / 5 : minRelevance;
+  return Math.max(0, Math.min(1, Number(normalized.toFixed(2))));
+}
+
+function normalizeCourseResult(course: RawCourseResult): CourseSearchResult {
+  const metadata =
+    course.metadata && typeof course.metadata === 'object'
+      ? (course.metadata as Record<string, unknown>)
+      : {};
+
+  const normalizeLevel = (l?: string) => {
+    if (!l) return undefined;
+    const lower = l.toLowerCase();
+    if (lower.includes('begin') || lower.includes('inician')) return 'beginner';
+    if (lower.includes('intermed')) return 'intermediate';
+    if (lower.includes('advanc') || lower.includes('avanç')) return 'advanced';
+    return undefined;
+  };
+
+  const normalizedLevel = normalizeLevel(course.level as string);
+
+  const tags = Array.isArray(course.tags)
+    ? course.tags.filter((tag): tag is string => typeof tag === 'string')
+    : [];
+
+  const fallbackUrl = typeof metadata.url === 'string' ? metadata.url : '#';
+  const fallbackPlatformId = typeof metadata.platformId === 'string' ? metadata.platformId : 'external';
+  const fallbackPlatformName =
+    typeof metadata.platformName === 'string'
+      ? metadata.platformName
+      : typeof metadata.provider === 'string'
+        ? metadata.provider
+        : 'Plataforma externa';
+
+  return {
+    externalId: typeof course.externalId === 'string' ? course.externalId : '',
+    title: typeof course.title === 'string' ? course.title : 'Curso relacionado',
+    description: typeof course.description === 'string' ? course.description : undefined,
+    url: typeof course.url === 'string' ? course.url : fallbackUrl,
+    instructor: typeof course.instructor === 'string' ? course.instructor : undefined,
+    language: typeof course.language === 'string' ? course.language : undefined,
+    rating: typeof course.rating === 'number' ? course.rating : undefined,
+    durationHours: typeof course.durationHours === 'number' ? course.durationHours : undefined,
+    level: normalizedLevel,
+    tags,
+    platformId: typeof course.platformId === 'string' ? course.platformId : fallbackPlatformId,
+    platformName: typeof course.platformName === 'string' ? course.platformName : fallbackPlatformName,
+    price: typeof course.price === 'string' ? course.price : undefined,
+    relevance: typeof course.relevance === 'number' ? course.relevance : undefined,
+    similarityScore:
+      typeof course.similarityScore === 'number'
+        ? course.similarityScore
+        : typeof course.similarity === 'number'
+          ? course.similarity
+          : undefined,
+    relevanceScore:
+      typeof course.relevanceScore === 'number'
+        ? course.relevanceScore
+        : typeof course.similarity === 'number'
+          ? course.similarity
+          : undefined,
+  };
+}
+
+function normalizeSearchResponse(payload: SearchResponse | Record<string, unknown>): SearchResponse {
+  const raw = payload as Record<string, unknown>;
+  const rawResults = Array.isArray(raw.results) ? (raw.results as RawCourseResult[]) : [];
+  const results = rawResults.map(normalizeCourseResult).filter((item) => !!item.externalId);
+
+  const platforms = Array.isArray(raw.platforms)
+    ? raw.platforms.filter((item): item is string => typeof item === 'string')
+    : [];
+
+  const platformsAnalyzed = Array.isArray(raw.platformsAnalyzed)
+    ? raw.platformsAnalyzed.filter((item): item is string => typeof item === 'string')
+    : [];
+
+  return {
+    query: typeof raw.query === 'string' ? raw.query : '',
+    total: typeof raw.total === 'number' ? raw.total : results.length,
+    page: typeof raw.page === 'number' ? raw.page : undefined,
+    totalPages: typeof raw.totalPages === 'number' ? raw.totalPages : undefined,
+    results,
+    platforms: platforms.length > 0 ? platforms : platformsAnalyzed,
+    platformsAnalyzed,
+    semanticRanking:
+      typeof raw.semanticRanking === 'boolean'
+        ? raw.semanticRanking
+        : results.some(
+            (item) =>
+              typeof item.relevanceScore === 'number' || typeof item.similarityScore === 'number',
+          ),
+    timestamp: typeof raw.timestamp === 'string' ? raw.timestamp : undefined,
+  };
+}
+
+function normalizeConversation(conversation: RawConversation): AiConversation {
+  const { _count, ...rest } = conversation;
+  return {
+    ...rest,
+    messageCount:
+      typeof conversation.messageCount === 'number'
+        ? conversation.messageCount
+        : _count?.messages,
+  };
+}
+
 // ─── Auth / Profile ───────────────────────────────────────────────────────────
 
 export const profileApi = {
@@ -174,23 +292,44 @@ export const trainingApi = {
 export const searchApi = {
   search: (
     q: string,
-    limit?: number,
+    limit: number = 20,
     platforms?: string[],
     isFree?: boolean,
     minInternalRating?: number,
     minRelevance?: number,
     level?: string,
     language?: string,
+    page: number = 1
   ) =>
-    api.get<SearchResponse>('/search', {
-      params: { q, limit, platforms, isFree, minInternalRating, minRelevance, level, language },
-    }),
+    api
+      .get<SearchResponse | Record<string, unknown>>('/search', {
+        params: {
+          q,
+          limit,
+          page,
+          platforms,
+          isFree,
+          minInternalRating,
+          minRelevance: normalizeRelevance(minRelevance),
+          level,
+          language,
+        },
+      })
+      .then((res) => ({
+        ...res,
+        data: normalizeSearchResponse(res.data),
+      })),
 
   getCourse: (externalId: string) =>
     api.get<CourseSearchResult>(`/search/course/${externalId}`),
 
   getRelated: (externalId: string) =>
-    api.get<CourseSearchResult[]>(`/search/course/${externalId}/related`),
+    api.get<RawCourseResult[]>(`/search/course/${externalId}/related`).then((res) => ({
+      ...res,
+      data: (Array.isArray(res.data) ? res.data : [])
+        .map(normalizeCourseResult)
+        .filter((item) => !!item.externalId),
+    })),
 
   getPlatforms: () =>
     api.get<LearningPlatform[]>('/search/platforms'),
@@ -236,7 +375,10 @@ export const chatApi = {
    * List all stored chat sessions for the current user — GET /ai/conversations
    */
   listConversations: () =>
-    api.get<AiConversation[]>('/ai/conversations'),
+    api.get<RawConversation[]>('/ai/conversations').then((res) => ({
+      ...res,
+      data: (Array.isArray(res.data) ? res.data : []).map(normalizeConversation),
+    })),
 
   /**
    * Delete a stored chat session — DELETE /ai/conversations/:id
