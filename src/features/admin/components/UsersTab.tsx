@@ -4,7 +4,8 @@ import { ShieldCheck, ShieldOff, UserX, UserCheck, Search, ChevronUp, ChevronDow
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { adminApi } from '@/services/api';
-import type { AdminUser, Role } from '@/types';
+import type { AdminUser, Role, ServiceLine } from '@/types';
+import { SERVICE_LINE_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
 
 // ─── Confirm modal ────────────────────────────────────────────────────────────
@@ -17,6 +18,7 @@ function ConfirmModal({
   danger,
   onConfirm,
   onCancel,
+  children,
 }: {
   open: boolean;
   title: string;
@@ -25,6 +27,7 @@ function ConfirmModal({
   danger?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  children?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   if (!open) return null;
@@ -33,6 +36,7 @@ function ConfirmModal({
       <div className="w-full max-w-sm rounded-[2rem] border border-border/60 bg-background/60 p-6 shadow-2xl backdrop-blur-2xl">
         <h3 className="text-lg font-bold text-foreground">{title}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+        {children}
         <div className="mt-5 flex gap-3 justify-end">
           <button
             onClick={onCancel}
@@ -144,6 +148,7 @@ export function UsersTab() {
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortAsc, setSortAsc] = useState(true);
   const [confirm, setConfirm] = useState<null | { type: 'promote' | 'demote' | 'promote_slm' | 'deactivate' | 'activate'; user: AdminUser }>(null);
+  const [slmLine, setSlmLine] = useState<ServiceLine | ''>('');
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin', 'users'],
@@ -158,8 +163,8 @@ export function UsersTab() {
   });
 
   const roleMutation = useMutation({
-    mutationFn: ({ id, role }: { id: string; role: Role }) =>
-      adminApi.updateUserRole(id, { role }),
+    mutationFn: ({ id, role, managedLineId }: { id: string; role: Role; managedLineId?: ServiceLine }) =>
+      adminApi.updateUserRole(id, { role, managedLineId }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'users'] }); toast.success('Role atualizado.'); },
     onError: () => toast.error('Erro ao atualizar role.'),
   });
@@ -195,17 +200,28 @@ export function UsersTab() {
     if (!confirm) return;
     const { type, user } = confirm;
     if (type === 'promote') roleMutation.mutate({ id: user.id, role: 'ADMIN' });
-    if (type === 'promote_slm') roleMutation.mutate({ id: user.id, role: 'SERVICE_LINE_MANAGER' });
+    if (type === 'promote_slm') {
+      if (!slmLine) { toast.error('Seleciona a linha de serviço.'); return; }
+      roleMutation.mutate({ id: user.id, role: 'SERVICE_LINE_MANAGER', managedLineId: slmLine as ServiceLine });
+    }
     if (type === 'demote') roleMutation.mutate({ id: user.id, role: 'USER' });
     if (type === 'deactivate') statusMutation.mutate({ id: user.id, activate: false });
     if (type === 'activate') statusMutation.mutate({ id: user.id, activate: true });
     setConfirm(null);
+    setSlmLine('');
   }
 
   const confirmMeta = {
     promote: { title: t('admin.users.confirmPromote', { name: confirm?.user.name }), description: `${confirm?.user.name} terá acesso total ao backoffice.`, label: t('admin.users.promote'), danger: false },
     promote_slm: { title: `Tornar ${confirm?.user.name} Chefe de Linha?`, description: `${confirm?.user.name} terá acesso à gestão da sua equipa.`, label: 'Tornar Chefe', danger: false },
-    demote: { title: t('admin.users.confirmDemote', { name: confirm?.user.name }), description: `${confirm?.user.name} passará a utilizador normal.`, label: t('admin.users.demote'), danger: true },
+    demote: {
+      title: confirm?.user.role === 'SERVICE_LINE_MANAGER'
+        ? `Revogar role de Chefe de Linha de ${confirm?.user.name}?`
+        : t('admin.users.confirmDemote', { name: confirm?.user.name }),
+      description: `${confirm?.user.name} passará a utilizador normal.`,
+      label: t('admin.users.demote'),
+      danger: true,
+    },
     deactivate: { title: t('admin.users.confirmDeactivate', { name: confirm?.user.name }), description: `${confirm?.user.name} não conseguirá iniciar sessão.`, label: t('admin.users.deactivate'), danger: true },
     activate: { title: t('admin.users.confirmActivate', { name: confirm?.user.name }), description: `${confirm?.user.name} voltará a ter acesso à plataforma.`, label: t('admin.users.activate'), danger: false },
   };
@@ -358,8 +374,24 @@ export function UsersTab() {
         confirmLabel={confirm ? confirmMeta[confirm.type].label : ''}
         danger={confirm ? confirmMeta[confirm.type].danger : false}
         onConfirm={execConfirm}
-        onCancel={() => setConfirm(null)}
-      />
+        onCancel={() => { setConfirm(null); setSlmLine(''); }}
+      >
+        {confirm?.type === 'promote_slm' && (
+          <div className="mt-4">
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Linha de serviço *</label>
+            <select
+              value={slmLine}
+              onChange={(e) => setSlmLine(e.target.value as ServiceLine | '')}
+              className="mt-1.5 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
+            >
+              <option value="">-- Seleciona --</option>
+              {(Object.entries(SERVICE_LINE_LABELS) as [ServiceLine, string][]).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </ConfirmModal>
     </div>
   );
 }

@@ -1,16 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../../../lib/axios';
+import { slManagerApi } from '../../../services/api';
 
-// Re-using TrainingRecord type
-import type { TrainingRecord } from '../../../types';
-
-export function useSlManagerUserProgress(userId: string) {
+export function useSlManagerUserDetail(userId: string) {
   return useQuery({
-    queryKey: ['sl-manager', 'users', userId, 'progress'],
-    queryFn: async () => {
-      const { data } = await api.get<TrainingRecord[]>(`/sl-manager/users/${userId}/progress`);
-      return data;
-    },
+    queryKey: ['sl-manager', 'users', userId, 'detail'],
+    queryFn: () => slManagerApi.getUserDetail(userId).then((r) => r.data),
     enabled: !!userId,
   });
+}
+
+/** @deprecated Use useSlManagerUserDetail */
+export function useSlManagerUserProgress(userId: string) {
+  return useSlManagerUserDetail(userId);
 }

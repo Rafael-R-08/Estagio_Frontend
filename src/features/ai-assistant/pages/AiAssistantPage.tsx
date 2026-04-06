@@ -6,7 +6,7 @@ import { recommendationsApi, chatApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { storage } from '@/lib/storage';
-import type { AiMessage, AiConversation, RagResponse } from '@/types';
+import type { AiMessage, AiConversation, MentionableCourse } from '@/types';
 
 import { ChatBubble } from '../components/ChatBubble';
 import { ChatInput } from '../components/ChatInput';
@@ -54,6 +54,8 @@ export default function AiAssistantPage() {
   const initializedRef = useRef(false);
   const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [mentionableCourses, setMentionableCourses] = useState<MentionableCourse[]>([]);
+  const [mentionedIds, setMentionedIds] = useState<string[]>([]);
 
   // ─── Fetch History ────────────────────────────────────────────────────────
   const fetchConversations = useCallback(async () => {
@@ -72,6 +74,9 @@ export default function AiAssistantPage() {
     if (user?.id) {
       setRecentQueries(loadRecent(user.id));
       void fetchConversations();
+      chatApi.getMentionableCourses()
+        .then((res) => setMentionableCourses(Array.isArray(res.data) ? res.data : []))
+        .catch(() => {/* non-critical */});
     }
   }, [user?.id, fetchConversations]);
 
@@ -95,32 +100,22 @@ export default function AiAssistantPage() {
       }
     }, 3000);
 
-    // Call dynamic welcome endpoint
+    // Call dynamic welcome endpoint — GET /ai/recommendations/welcome → { welcome: string }
     recommendationsApi.getWelcome().then((res) => {
       clearTimeout(fallbackTimer);
       if (cancelled || initializedRef.current) return;
       initializedRef.current = true;
 
-      const data = res.data as RagResponse;
-      
-      // The backend now returns structured fields. 
-      // We can join them or pick the most relevant one for a greeting.
-      const contentStr = data.welcome || 
-        (data.improvement && data.interests ? `${data.improvement}\n\n${data.interests}` : null) ||
-        data.answer || 
-        t('ai.welcomeMessage');
+      const content = res.data?.welcome || t('ai.welcomeMessage');
 
-      const assistantMessage: AiMessage = {
+      setMessages([{
         id: makeId(),
         role: 'assistant',
-        content: contentStr,
+        content,
         timestamp: new Date().toISOString(),
-        sources: data.sources,
-      };
-
-      setMessages([assistantMessage]);
+      }]);
     }).catch(() => {
-      // fallback handles this
+      // fallback timer handles this
     });
 
     return () => {
@@ -141,8 +136,10 @@ export default function AiAssistantPage() {
 
   // ─── Stream handler ────────────────────────────────────────────────────────
   const sendQuery = useCallback(
-    async (text: string) => {
+    async (text: string, overrideMentionedIds?: string[]) => {
       if (!text.trim() || isTyping) return;
+
+      const activeMentionedIds = overrideMentionedIds ?? mentionedIds;
 
       // Cancel previous if any
       if (abortControllerRef.current) {
@@ -172,6 +169,7 @@ export default function AiAssistantPage() {
       }
 
       setIsTyping(true);
+      setMentionedIds([]);
 
       try {
         const token = storage.getToken();
@@ -186,6 +184,7 @@ export default function AiAssistantPage() {
           body: JSON.stringify({
             prompt: text,
             conversationId,
+            mentionedTrainingIds: activeMentionedIds.length > 0 ? activeMentionedIds : undefined,
           }),
           signal: ctrl.signal,
         });
@@ -324,11 +323,12 @@ export default function AiAssistantPage() {
         );
       }
     },
-    [user?.id, t, isTyping, conversationId, fetchConversations],
+    [user?.id, t, isTyping, conversationId, mentionedIds, fetchConversations],
   );
 
   const handleStartNewChat = useCallback(() => {
     setConversationId(null);
+    setMentionedIds([]);
     setMessages([
       {
         id: makeId(),
@@ -355,25 +355,57 @@ export default function AiAssistantPage() {
   const handleSelectConversation = useCallback(async (conv: AiConversation) => {
     setConversationId(conv.id);
     setSidebarOpen(false);
-    // Ideally we would fetch messages for this conversation here
-    // For now we just reset state to that conversation context
+    setMentionedIds([]);
+
+    // Optimistic loading placeholder
     setMessages([
       {
         id: makeId(),
         role: 'assistant',
-        content: `A carregar a conversa: **${conv.title || 'Sem título'}**...`,
+        content: '',
         timestamp: new Date().toISOString(),
+        isStreaming: true,
       },
     ]);
-    // Note: If the backend supports fetching messages by conversationId, add it here.
+
+    try {
+      const res = await chatApi.getConversationMessages(conv.id);
+      const loaded = res.data.messages.map((m) => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        timestamp: m.createdAt,
+      }));
+      setMessages(
+        loaded.length > 0
+          ? loaded
+          : [
+              {
+                id: makeId(),
+                role: 'assistant' as const,
+                content: `**${conv.title || 'Conversa'}** — ainda sem mensagens. Como posso ajudar?`,
+                timestamp: new Date().toISOString(),
+              },
+            ],
+      );
+    } catch {
+      setMessages([
+        {
+          id: makeId(),
+          role: 'assistant',
+          content: `Conversa retomada: **${conv.title || 'Sem título'}**. Como posso ajudar?`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    }
   }, []);
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
     if (!text) return;
     setInputValue('');
-    sendQuery(text);
-  }, [inputValue, sendQuery]);
+    sendQuery(text, mentionedIds);
+  }, [inputValue, mentionedIds, sendQuery]);
 
   const handleSelectSuggestion = useCallback(
     (query: string) => {
@@ -454,6 +486,9 @@ export default function AiAssistantPage() {
               onChange={setInputValue}
               onSend={handleSend}
               loading={isTyping}
+              mentionableCourses={mentionableCourses}
+              mentionedIds={mentionedIds}
+              onMentionedIdsChange={setMentionedIds}
             />
             <p className="mt-2 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30">
               {t('ai.disclaimer')}

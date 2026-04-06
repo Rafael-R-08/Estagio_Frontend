@@ -291,12 +291,16 @@ export interface UpdateCertificateDto {
 export interface LearningPlatform {
   id: string;
   name: string;
+  type?: string;
   baseUrl?: string;
+  apiEndpoint?: string;
   logoUrl?: string;
   apiKey?: string;
+  apiKeyRequired?: boolean;
   isActive: boolean;
   isSearchEnabled: boolean;
   config?: Record<string, unknown>;
+  totalCourses?: number;
   createdAt?: string;
 }
 
@@ -309,13 +313,74 @@ export interface RagSource {
   source?: string;
 }
 
+/** Course that can be @mentioned in chat — GET /ai/chat/mentionable-courses */
+export interface MentionableCourse {
+  id: string;
+  title: string;
+  url?: string;
+  status: TrainingStatus;
+  platform?: { name: string };
+}
+
+/** Phase in a course learning plan — POST /ai/chat/course-plan */
+export interface CoursePlanPhase {
+  phase: string;
+  topics: string[];
+  estimatedTime: string;
+}
+
+/** Response from POST /ai/chat/course-plan */
+export interface CoursePlanResponse {
+  trainingId: string;
+  courseTitle: string;
+  overview: string;
+  prerequisites: string[];
+  learningPath: CoursePlanPhase[];
+  keyObjectives: string[];
+  studyTips: string[];
+  totalEstimatedTime: string;
+  afterCompletion: string;
+}
+
+/** Welcome endpoint — GET /ai/recommendations/welcome */
+export interface WelcomeResponse {
+  welcome: string;
+}
+
+/** Single course item in POST /ai/recommendations response */
+export interface RecommendedCourse {
+  title: string;
+  category: 'improvement' | 'interests' | 'missing_skills';
+  reason: string;
+  level?: string;
+  estimatedHours?: number | null;
+}
+
+/** Metadata block returned with POST /ai/recommendations */
+export interface RecommendationMetadata {
+  sourcesCount?: number;
+  catalogueSize?: number;
+  maxSimilarity?: number;
+  profileScore?: number;
+  timestamp?: string;
+  fromCache?: boolean;
+  error?: string;
+  info?: string;
+}
+
 /** Response from POST /ai/recommendations */
+export interface RecommendationResponse {
+  courses: RecommendedCourse[];
+  hasContextualCourses: boolean;
+  summary: string;
+  metadata: RecommendationMetadata;
+}
+
+/**
+ * @deprecated Use RecommendationResponse for dashboard.
+ * Kept only for chat/welcome response compatibility.
+ */
 export interface RagResponse {
-  // Recommendations endpoint — always 3 structured fields
-  improvement?: string;
-  interests?: string;
-  missing_skills?: string;
-  // Chat / welcome endpoints
   query?: string;
   answer?: string;
   welcome?: string;
@@ -390,9 +455,66 @@ export interface AdminUser extends User {
 
 export interface UpdateUserRoleDto {
   role: Role;
+  managedLineId?: ServiceLine;
+}
+
+export interface AdminOverview {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  onboardingRate: number;
+  newUsersThisMonth: number;
+  usersByRole: Record<string, number>;
+  usersByServiceLine: Record<string, number>;
+  usersByExperienceLevel: Record<string, number>;
+}
+
+export interface AdminTrainingStats {
+  total: number;
+  byStatus: Record<string, number>;
+  completionRate: number;
+}
+
+export interface AdminCertificateStats {
+  total: number;
+  byStatus: Record<string, number>;
+  issuedThisMonth: number;
+  expiringIn30Days: number;
+  expiringIn31to60Days: number;
+}
+
+export interface AdminAiUsageStats {
+  totalConversations: number;
+  conversationsLast30Days: number;
+  totalMessages: number;
+  avgMessagesPerConversation: number;
+}
+
+export interface AdminPlatformStats {
+  total: number;
+  active: number;
+  inactive: number;
+  totalIndexedCourses: number;
+}
+
+export interface AdminRecentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  createdAt: string;
+  serviceLine: ServiceLine | null;
 }
 
 export interface AdminAnalytics {
+  // Structured sections (new)
+  overview?: AdminOverview;
+  trainingStats?: AdminTrainingStats;
+  certificateStats?: AdminCertificateStats;
+  aiUsageStats?: AdminAiUsageStats;
+  platformStats?: AdminPlatformStats;
+  recentUsers?: AdminRecentUser[];
+  // Chart data (existing)
   completedByMonth: { month: string; count: number }[];
   platformUsage: { name: string; count: number }[];
   userGrowth: { month: string; count: number }[];
@@ -425,3 +547,141 @@ export interface SoftinsaLearningContent {
 
 export type CreateSoftinsaLearningDto = Omit<SoftinsaLearningContent, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdateSoftinsaLearningDto = Partial<CreateSoftinsaLearningDto>;
+
+// ─── SL Manager ───────────────────────────────────────────────────────────────
+
+export interface SlManagerOverview {
+  serviceLine: string;
+  totalMembers: number;
+  activeMembers: number;
+  inactiveMembers: number;
+  membersByExperienceLevel: Record<string, number>;
+  trainingStats: {
+    totalCompleted: number;
+    completedLast30Days: number;
+    ongoing: number;
+    avgCompletedPerMember: number;
+  };
+  certificateStats: {
+    totalActive: number;
+    expiringIn90Days: number;
+  };
+  totalSkillsTracked: number;
+}
+
+export interface SlManagerUser {
+  id: string;
+  name: string;
+  email: string;
+  userFunction: string | null;
+  experienceLevel: string | null;
+  isActive: boolean;
+  onboardingDone: boolean;
+  joinedAt: string;
+  skillsCount: number;
+  trainings: {
+    total: number;
+    completed: number;
+    ongoing: number;
+    lastCompletedAt: string | null;
+  };
+  certificates: {
+    active: number;
+    expiringSoon: number;
+  };
+}
+
+export interface SlManagerCompletedTraining {
+  id: string;
+  title: string;
+  platform: string | null;
+  completedAt: string | null;
+  durationHours: number | null;
+  rating: number | null;
+}
+
+export interface SlManagerOngoingTraining {
+  id: string;
+  title: string;
+  platform: string | null;
+  startedAt: string | null;
+}
+
+export interface SlManagerUserCertificate {
+  id: string;
+  courseName: string | null;
+  provider: string | null;
+  completionDate: string | null;
+  expirationDate: string | null;
+  status: string;
+  fileUrl: string;
+  isExpired: boolean;
+  daysUntilExpiry: number | null;
+}
+
+export interface SlManagerUserSkill {
+  skillName: string;
+  level: string;
+  createdAt: string;
+}
+
+export interface SlManagerUserDetail {
+  profile: {
+    id: string;
+    name: string;
+    email: string;
+    userFunction: string | null;
+    experienceLevel: string | null;
+    isActive: boolean;
+    onboardingDone: boolean;
+    interests: string[];
+    joinedAt: string;
+  };
+  summary: {
+    totalTrainings: number;
+    completedTrainings: number;
+    ongoingTrainings: number;
+    totalLearningHours: number;
+    avgRating: number | null;
+    totalCertificates: number;
+    activeCertificates: number;
+    expiredCertificates: number;
+    certificatesExpiringSoon: number;
+    skillsCount: number;
+  };
+  completedTrainings: SlManagerCompletedTraining[];
+  ongoingTrainings: SlManagerOngoingTraining[];
+  certificates: SlManagerUserCertificate[];
+  skills: SlManagerUserSkill[];
+}
+
+export interface SlManagerCertExpiryAlert {
+  userId: string;
+  userName: string;
+  courseName: string;
+  expirationDate: string;
+  daysLeft: number;
+  urgency: 'critical' | 'warning' | 'info';
+}
+
+export interface SlManagerInactiveUser {
+  userId: string;
+  userName: string;
+  userFunction: string | null;
+  lastActivityAt: string | null;
+  daysSinceActivity: number | null;
+  hasNoCompletions: boolean;
+}
+
+export interface SlManagerAlerts {
+  summary: {
+    certExpiryCritical: number;
+    certExpiryWarning: number;
+    certExpiryInfo: number;
+    inactiveUsersCount: number;
+    usersWithNoTrainingsCount: number;
+  };
+  certExpiryAlerts: SlManagerCertExpiryAlert[];
+  inactiveUsers: SlManagerInactiveUser[];
+  usersWithNoTrainings: SlManagerInactiveUser[];
+}

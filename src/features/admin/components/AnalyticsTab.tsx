@@ -14,9 +14,10 @@ import {
   Line,
   Legend,
 } from 'recharts';
-import { TrendingUp, Users, Award, Calendar } from 'lucide-react';
+import { TrendingUp, Users, Award, Calendar, Bot, Database, Target, FileCheck } from 'lucide-react';
 import { adminApi } from '@/services/api';
 import type { AdminAnalytics } from '@/types';
+import { SERVICE_LINE_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -24,6 +25,45 @@ import { pt } from 'date-fns/locale';
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const MOCK_ANALYTICS: AdminAnalytics = {
+  overview: {
+    totalUsers: 61,
+    activeUsers: 55,
+    inactiveUsers: 6,
+    onboardingRate: 87,
+    newUsersThisMonth: 9,
+    usersByRole: { USER: 55, ADMIN: 2, SERVICE_LINE_MANAGER: 4 },
+    usersByServiceLine: { HYBRID_CLOUD: 15, DATA: 12, BUSINESS_APPLICATIONS: 10, APPLICATION_OPERATIONS: 14, SOURCING_TALENT_MANAGEMENT: 8 },
+    usersByExperienceLevel: { junior: 18, intermedio: 22, senior: 14, especialista: 5, lider: 2 },
+  },
+  trainingStats: {
+    total: 248,
+    byStatus: { ongoing: 45, completed: 108, priority: 28, later: 52, accessed: 12, cancelled: 3 },
+    completionRate: 44,
+  },
+  certificateStats: {
+    total: 93,
+    byStatus: { COMPLETED: 87, PROCESSING: 3, FAILED: 3 },
+    issuedThisMonth: 11,
+    expiringIn30Days: 2,
+    expiringIn31to60Days: 3,
+  },
+  aiUsageStats: {
+    totalConversations: 184,
+    conversationsLast30Days: 47,
+    totalMessages: 1240,
+    avgMessagesPerConversation: 6.7,
+  },
+  platformStats: {
+    total: 4,
+    active: 3,
+    inactive: 1,
+    totalIndexedCourses: 540,
+  },
+  recentUsers: [
+    { id: '1', name: 'Eva Lopes', email: 'eva@softinsa.pt', role: 'USER', createdAt: '2026-03-28T10:00:00Z', serviceLine: 'DATA' },
+    { id: '2', name: 'David Sousa', email: 'david@softinsa.pt', role: 'USER', createdAt: '2026-03-25T09:00:00Z', serviceLine: null },
+    { id: '3', name: 'Carla Mendes', email: 'carla@softinsa.pt', role: 'SERVICE_LINE_MANAGER', createdAt: '2026-03-20T08:00:00Z', serviceLine: 'HYBRID_CLOUD' },
+  ],
   completedByMonth: [
     { month: '2025-10', count: 12 },
     { month: '2025-11', count: 18 },
@@ -133,6 +173,12 @@ export function AnalyticsTab() {
   });
 
   const analytics: AdminAnalytics = {
+    overview: data?.overview ?? MOCK_ANALYTICS.overview,
+    trainingStats: data?.trainingStats ?? MOCK_ANALYTICS.trainingStats,
+    certificateStats: data?.certificateStats ?? MOCK_ANALYTICS.certificateStats,
+    aiUsageStats: data?.aiUsageStats ?? MOCK_ANALYTICS.aiUsageStats,
+    platformStats: data?.platformStats ?? MOCK_ANALYTICS.platformStats,
+    recentUsers: data?.recentUsers ?? MOCK_ANALYTICS.recentUsers,
     completedByMonth: data?.completedByMonth ?? MOCK_ANALYTICS.completedByMonth,
     platformUsage: data?.platformUsage ?? MOCK_ANALYTICS.platformUsage,
     userGrowth: data?.userGrowth ?? MOCK_ANALYTICS.userGrowth,
@@ -140,18 +186,27 @@ export function AnalyticsTab() {
     expiringCertificates: data?.expiringCertificates ?? MOCK_ANALYTICS.expiringCertificates,
   };
 
-  const totalCompleted = analytics.completedByMonth.reduce((s, d) => s + d.count, 0);
-  const totalUsers = analytics.userGrowth.at(-1)?.count ?? 0;
-  const totalCerts = analytics.expiringCertificates.length;
+  const totalUsers = analytics.overview?.totalUsers ?? analytics.userGrowth.at(-1)?.count ?? 0;
+  const activeUsers = analytics.overview?.activeUsers ?? totalUsers;
+  const completionRate = analytics.trainingStats?.completionRate ?? null;
+  const expiringIn30 = analytics.certificateStats?.expiringIn30Days ?? analytics.expiringCertificates.length;
 
   return (
     <div className="space-y-6">
-      {/* KPI cards */}
+      {/* KPI cards — visão geral */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Award} label="Cursos concluídos" value={isLoading ? '—' : totalCompleted} color="bg-softinsa-blue/10 text-softinsa-blue" />
-        <StatCard icon={Users} label="Utilizadores ativos" value={isLoading ? '—' : totalUsers} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" />
-        <StatCard icon={Calendar} label="Certs. a expirar" value={isLoading ? '—' : totalCerts} color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" />
-        <StatCard icon={TrendingUp} label="Skill mais pesquisada" value={isLoading ? '—' : (analytics.topSkills[0]?.skill ?? '—')} color="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" />
+        <StatCard icon={Users} label="Utilizadores ativos" value={isLoading ? '—' : activeUsers} color="bg-softinsa-blue/10 text-softinsa-blue" />
+        <StatCard icon={Award} label="Total utilizadores" value={isLoading ? '—' : totalUsers} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" />
+        <StatCard icon={Calendar} label="Certs. a expirar (30d)" value={isLoading ? '—' : expiringIn30} color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" />
+        <StatCard icon={TrendingUp} label="Skill mais procurada" value={isLoading ? '—' : (analytics.topSkills[0]?.skill ?? '—')} color="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" />
+      </div>
+
+      {/* KPI cards — segunda linha */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard icon={Target} label="Taxa de conclusão" value={isLoading ? '—' : completionRate !== null ? `${completionRate}%` : '—'} color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" />
+        <StatCard icon={FileCheck} label="Certs. emitidos/mês" value={isLoading ? '—' : (analytics.certificateStats?.issuedThisMonth ?? '—')} color="bg-softinsa-blue/10 text-softinsa-blue" />
+        <StatCard icon={Bot} label="Conversas IA (30d)" value={isLoading ? '—' : (analytics.aiUsageStats?.conversationsLast30Days ?? '—')} color="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400" />
+        <StatCard icon={Database} label="Cursos indexados" value={isLoading ? '—' : (analytics.platformStats?.totalIndexedCourses ?? '—')} color="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300" />
       </div>
 
       {/* Charts row 1 */}
@@ -309,6 +364,55 @@ export function AnalyticsTab() {
           </table>
         </div>
       </div>
+
+      {/* Recent users table */}
+      {(analytics.recentUsers?.length ?? 0) > 0 && (
+        <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+            <h3 className="text-sm font-semibold text-foreground">Utilizadores recentes</h3>
+            <span className="rounded-full bg-softinsa-blue/10 px-2.5 py-0.5 text-xs font-semibold text-softinsa-blue">
+              últimos {analytics.recentUsers?.length}
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/40 bg-muted/20">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service Line</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.recentUsers?.map((u) => (
+                  <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-softinsa-blue/10 text-softinsa-blue text-xs font-bold">
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-medium text-foreground">{u.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{u.role}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {u.serviceLine ? (SERVICE_LINE_LABELS[u.serviceLine] ?? u.serviceLine) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {format(parseISO(u.createdAt), 'dd MMM yyyy', { locale: pt })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

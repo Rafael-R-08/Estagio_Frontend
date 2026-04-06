@@ -5,16 +5,17 @@ import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff, S
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { platformsApi } from '@/services/api';
+import type { CreateAdminPlatformPayload, UpdateAdminPlatformPayload } from '@/services/api';
 import type { LearningPlatform } from '@/types';
 import { cn } from '@/lib/utils';
 
 // ─── Mock fallback ────────────────────────────────────────────────────────────
 
 const MOCK_PLATFORMS: LearningPlatform[] = [
-  { id: '1', name: 'Udemy', baseUrl: 'https://udemy.com', isActive: true, isSearchEnabled: true, createdAt: '2024-01-01T00:00:00Z' },
-  { id: '2', name: 'LinkedIn Learning', baseUrl: 'https://linkedin.com/learning', isActive: true, isSearchEnabled: true, createdAt: '2024-01-01T00:00:00Z' },
-  { id: '3', name: 'Coursera', baseUrl: 'https://coursera.org', isActive: false, isSearchEnabled: false, createdAt: '2024-02-01T00:00:00Z' },
-  { id: '4', name: 'Pluralsight', baseUrl: 'https://pluralsight.com', isActive: true, isSearchEnabled: false, createdAt: '2024-03-01T00:00:00Z' },
+  { id: '1', name: 'Udemy', type: 'udemy', apiEndpoint: 'https://www.udemy.com/api-2.0', apiKeyRequired: true, isActive: true, isSearchEnabled: true, totalCourses: 312 },
+  { id: '2', name: 'LinkedIn Learning', type: 'linkedin', apiEndpoint: 'https://learn.microsoft.com/api', apiKeyRequired: false, isActive: true, isSearchEnabled: true, totalCourses: 128 },
+  { id: '3', name: 'Coursera', type: 'coursera', apiEndpoint: 'https://api.coursera.org/api', apiKeyRequired: true, isActive: false, isSearchEnabled: false, totalCourses: 0 },
+  { id: '4', name: 'Pluralsight', type: 'custom', apiEndpoint: undefined, apiKeyRequired: false, isActive: true, isSearchEnabled: false, totalCourses: 54 },
 ];
 
 // ─── Platform form modal ──────────────────────────────────────────────────────
@@ -26,8 +27,9 @@ interface ConfigEntry {
 
 interface PlatformFormData {
   name: string;
-  baseUrl: string;
-  logoUrl: string;
+  type: string;
+  apiEndpoint: string;
+  apiKeyRequired: boolean;
   apiKey: string;
   isActive: boolean;
   isSearchEnabled: boolean;
@@ -36,8 +38,9 @@ interface PlatformFormData {
 
 const EMPTY_FORM: PlatformFormData = {
   name: '',
-  baseUrl: '',
-  logoUrl: '',
+  type: '',
+  apiEndpoint: '',
+  apiKeyRequired: false,
   apiKey: '',
   isActive: true,
   isSearchEnabled: false,
@@ -73,9 +76,10 @@ function PlatformModal({
     platform
       ? {
         name: platform.name,
-        baseUrl: platform.baseUrl ?? '',
-        logoUrl: platform.logoUrl ?? '',
-        apiKey: platform.apiKey ?? '',
+        type: platform.type ?? '',
+        apiEndpoint: platform.apiEndpoint ?? '',
+        apiKeyRequired: platform.apiKeyRequired ?? false,
+        apiKey: '',
         isActive: platform.isActive,
         isSearchEnabled: platform.isSearchEnabled,
         configEntries: configToEntries(platform.config),
@@ -98,6 +102,7 @@ function PlatformModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) { toast.error('O nome é obrigatório.'); return; }
+    if (!form.type.trim()) { toast.error('O tipo é obrigatório.'); return; }
     onSave(form);
   }
 
@@ -129,22 +134,22 @@ function PlatformModal({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL base</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tipo *</label>
               <input
-                type="url"
-                value={form.baseUrl}
-                onChange={(e) => setForm((f) => ({ ...f, baseUrl: e.target.value }))}
-                placeholder="https://..."
+                type="text"
+                value={form.type}
+                onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+                placeholder="ex. udemy | coursera | linkedin | custom"
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL do logo</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">API Endpoint</label>
               <input
                 type="url"
-                value={form.logoUrl}
-                onChange={(e) => setForm((f) => ({ ...f, logoUrl: e.target.value }))}
+                value={form.apiEndpoint}
+                onChange={(e) => setForm((f) => ({ ...f, apiEndpoint: e.target.value }))}
                 placeholder="https://..."
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
@@ -173,6 +178,14 @@ function PlatformModal({
                 </button>
               </div>
               <p className="text-[11px] text-muted-foreground">Necessária para plataformas com pesquisa via API (ex. Udemy, Coursera).</p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Requer API Key</p>
+                <p className="text-xs text-muted-foreground">A plataforma exige autenticação via API key</p>
+              </div>
+              <ToggleSwitch checked={form.apiKeyRequired} onChange={(v) => setForm((f) => ({ ...f, apiKeyRequired: v }))} />
             </div>
 
             <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
@@ -339,13 +352,13 @@ export function PlatformsTab() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: Partial<LearningPlatform>) => platformsApi.create(data),
+    mutationFn: (data: CreateAdminPlatformPayload) => platformsApi.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success('Plataforma criada.'); setModalOpen(false); },
     onError: () => toast.error('Erro ao criar plataforma.'),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<LearningPlatform> }) => platformsApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateAdminPlatformPayload }) => platformsApi.update(id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success('Plataforma atualizada.'); setEditing(null); setModalOpen(false); },
     onError: () => toast.error('Erro ao atualizar plataforma.'),
   });
@@ -357,19 +370,31 @@ export function PlatformsTab() {
   });
 
   function handleSave(data: PlatformFormData) {
-    const configObj = entriesToConfig(data.configEntries);
-    const payload: Partial<LearningPlatform> = {
-      name: data.name,
-      baseUrl: data.baseUrl || undefined,
-      logoUrl: data.logoUrl || undefined,
-      apiKey: data.apiKey || undefined,
-      isActive: data.isActive,
-      isSearchEnabled: data.isSearchEnabled,
-      ...(Object.keys(configObj).length > 0 ? { config: configObj } : {}),
-    };
+    const configEntries = entriesToConfig(data.configEntries);
+    const configJson = Object.keys(configEntries).length > 0 ? JSON.stringify(configEntries) : undefined;
     if (editing) {
+      const payload: UpdateAdminPlatformPayload = {
+        name: data.name,
+        type: data.type || undefined,
+        apiEndpoint: data.apiEndpoint || undefined,
+        apiKeyRequired: data.apiKeyRequired,
+        apiKey: data.apiKey || undefined,
+        isActive: data.isActive,
+        isSearchEnabled: data.isSearchEnabled,
+        config: configJson,
+      };
       updateMutation.mutate({ id: editing.id, data: payload });
     } else {
+      const payload: CreateAdminPlatformPayload = {
+        name: data.name,
+        type: data.type,
+        apiEndpoint: data.apiEndpoint || undefined,
+        apiKeyRequired: data.apiKeyRequired,
+        apiKey: data.apiKey || undefined,
+        enabled: data.isActive,
+        searchEnabled: data.isSearchEnabled,
+        config: configJson,
+      };
       createMutation.mutate(payload);
     }
   }
@@ -419,8 +444,9 @@ export function PlatformsTab() {
             <thead>
               <tr className="border-b border-border/40 bg-muted/20">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.name')}</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.url')}</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.apiKey')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Endpoint</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cursos</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.active')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.search')}</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.actions')}</th>
@@ -430,7 +456,7 @@ export function PlatformsTab() {
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i} className="border-b border-border">
-                    {Array.from({ length: 6 }).map((_, j) => (
+                    {Array.from({ length: 7 }).map((_, j) => (
                       <td key={j} className="px-4 py-3">
                         <div className="h-4 animate-pulse rounded bg-muted w-3/4" />
                       </td>
@@ -439,7 +465,7 @@ export function PlatformsTab() {
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     {t('admin.platforms.noResults')}
                   </td>
                 </tr>
@@ -448,32 +474,24 @@ export function PlatformsTab() {
                   <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {p.logoUrl ? (
-                          <img src={p.logoUrl} alt={p.name} className="h-7 w-7 rounded-lg object-contain border border-border bg-white" />
-                        ) : (
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-softinsa-blue/10 text-softinsa-blue">
-                            <Globe className="h-4 w-4" />
-                          </div>
-                        )}
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-softinsa-blue/10 text-softinsa-blue">
+                          <Globe className="h-4 w-4" />
+                        </div>
                         <span className="font-medium text-foreground">{p.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {p.baseUrl ? (
-                        <a href={p.baseUrl} target="_blank" rel="noopener noreferrer" className="hover:text-softinsa-blue hover:underline transition-colors">
-                          {p.baseUrl}
-                        </a>
+                    <td className="px-4 py-3">
+                      {p.type ? (
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono font-medium text-muted-foreground">{p.type}</span>
+                      ) : <span className="text-xs text-muted-foreground/40">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-[180px]">
+                      {p.apiEndpoint ? (
+                        <span className="truncate block" title={p.apiEndpoint}>{p.apiEndpoint}</span>
                       ) : '—'}
                     </td>
-                    <td className="px-4 py-3">
-                      {p.apiKey ? (
-                        <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                          <KeyRound className="h-3 w-3 shrink-0" />
-                          {'•'.repeat(8)}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground/40">—</span>
-                      )}
+                    <td className="px-4 py-3 text-right font-mono text-sm text-foreground">
+                      {p.totalCourses ?? '—'}
                     </td>
                     <td className="px-4 py-3">
                       {p.isActive

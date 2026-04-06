@@ -4,7 +4,6 @@ import {
   BookOpen,
   CheckCircle2,
   TrendingUp,
-  Bookmark,
   ChevronRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +17,7 @@ import { ProgressCard, ProgressCardSkeleton } from '../components/ProgressCard';
 import { QuickActions } from '../components/QuickActions';
 import { AlertBanner } from '../components/AlertBanner';
 import { PendingFeedbackModal } from '../components/PendingFeedbackModal';
+import { MiniCalendar } from '../components/MiniCalendar';
 
 import type { TrainingStats, TrainingRecord } from '@/types';
 
@@ -223,18 +223,8 @@ export default function DashboardPage() {
           {/* Quick Actions at the top for accessibility */}
           <QuickActions />
 
-          {/* Mini-seção de Cursos Guardados ou Novidades */}
-          <div className="space-y-4">
-            <SectionHeader title={t('dashboard.saved')} />
-            <div className="rounded-[2.5rem] border border-border/40 bg-muted/10 p-2">
-              <div className="h-40 flex flex-col items-center justify-center text-center p-6 grayscale opacity-40">
-                <Bookmark className="h-8 w-8 mb-2" />
-                <p className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                  {t('dashboard.savedEmpty', 'Sem itens guardados')}
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Mini Calendar com Lembretes */}
+          <MiniCalendar />
         </div>
 
       </div>

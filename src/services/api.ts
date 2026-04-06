@@ -7,7 +7,6 @@
  */
 
 import { api } from '../lib/axios';
-import { storage } from '../lib/storage';
 import type {
   User,
   UpdateProfileDto,
@@ -27,9 +26,17 @@ import type {
   TrainingResource,
   UserSettings,
   UpdateUserSettingsDto,
-  RagResponse,
+  RagResponse as _RagResponse, // kept for chat response compatibility
+  RecommendationResponse,
+  WelcomeResponse,
   AiChatResponse,
   AiConversation,
+  MentionableCourse,
+  CoursePlanResponse,
+  SlManagerOverview,
+  SlManagerUser,
+  SlManagerUserDetail,
+  SlManagerAlerts,
 } from '../types';
 
 type RawCourseResult = Partial<CourseSearchResult> & {
@@ -154,10 +161,10 @@ function normalizeConversation(conversation: RawConversation): AiConversation {
 
 export const profileApi = {
   getMe: () =>
-    api.get<User>('/users/me'),
+    api.get<User>('/auth/me'),
 
   update: (dto: UpdateProfileDto) =>
-    api.patch<User>('/users/me', dto),
+    api.patch<User>('/auth/me', dto),
 };
 
 // ─── Admin — Users ────────────────────────────────────────────────────────────
@@ -181,14 +188,36 @@ export const adminApi = {
 
 // ─── Admin — Platforms ────────────────────────────────────────────────────────
 
+export interface CreateAdminPlatformPayload {
+  name: string;
+  type: string;
+  apiEndpoint?: string;
+  apiKeyRequired?: boolean;
+  apiKey?: string;
+  enabled?: boolean;
+  searchEnabled?: boolean;
+  config?: string; // JSON string
+}
+
+export interface UpdateAdminPlatformPayload {
+  name?: string;
+  type?: string;
+  apiEndpoint?: string;
+  apiKeyRequired?: boolean;
+  isActive?: boolean;
+  isSearchEnabled?: boolean;
+  apiKey?: string;
+  config?: string; // JSON string
+}
+
 export const platformsApi = {
   getAll: () =>
     api.get<LearningPlatform[]>('/admin/platforms'),
 
-  create: (data: Partial<LearningPlatform>) =>
+  create: (data: CreateAdminPlatformPayload) =>
     api.post<LearningPlatform>('/admin/platforms', data),
 
-  update: (id: string, data: Partial<LearningPlatform>) =>
+  update: (id: string, data: UpdateAdminPlatformPayload) =>
     api.patch<LearningPlatform>(`/admin/platforms/${id}`, data),
 
   delete: (id: string) =>
@@ -337,27 +366,22 @@ export const searchApi = {
 
 // ─── AI / Recommendations ─────────────────────────────────────────────────────
 
-/**
- * Recommendations: POST /ai/recommendations
- * Response shape (Zod-validated, always 3 fields + metadata):
- *   { improvement, interests, missing_skills, metadata: { sourcesCount, qualityScore, timestamp } }
- */
 export const recommendationsApi = {
-  /** Personalised recommendations for the logged-in user */
-  getForMe: () => {
-    const token = storage.getToken();
-    return api.post<RagResponse>('/ai/recommendations', {}, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-  },
+  /**
+   * Personalised recommendations for the logged-in user.
+   * POST /ai/recommendations
+   * Response: { courses[], hasContextualCourses, summary, metadata }
+   */
+  getForMe: () =>
+    api.post<RecommendationResponse>('/ai/recommendations', {}),
 
-  /** Welcome/greeting message on first AI assistant load */
-  getWelcome: () => {
-    const token = storage.getToken();
-    return api.post<RagResponse>('/ai/recommendations/welcome', {}, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-  },
+  /**
+   * Welcome/greeting message on first AI assistant load.
+   * GET /ai/recommendations/welcome  (falls back to POST)
+   * Response: { welcome: string }
+   */
+  getWelcome: () =>
+    api.get<WelcomeResponse>('/ai/recommendations/welcome'),
 };
 
 // ─── AI / Chat ────────────────────────────────────────────────────────────────
@@ -365,11 +389,11 @@ export const recommendationsApi = {
 export const chatApi = {
   /**
    * Synchronous chat — POST /ai/chat
-   * Body: { prompt, conversationId? }
+   * Body: { prompt, conversationId?, mentionedTrainingIds? }
    * Response: { query, answer, conversationId, qualityScore, sources }
    */
-  send: (prompt: string, conversationId?: string) =>
-    api.post<AiChatResponse>('/ai/chat', { prompt, conversationId }),
+  send: (prompt: string, conversationId?: string, mentionedTrainingIds?: string[]) =>
+    api.post<AiChatResponse>('/ai/chat', { prompt, conversationId, mentionedTrainingIds }),
 
   /**
    * List all stored chat sessions for the current user — GET /ai/conversations
@@ -385,6 +409,26 @@ export const chatApi = {
    */
   deleteConversation: (id: string) =>
     api.delete(`/ai/conversations/${id}`),
+
+  /**
+   * Load all messages of a conversation — GET /ai/conversations/:id/messages
+   * Response: { conversationId, title, messages: { id, role, content, createdAt }[] }
+   */
+  getConversationMessages: (id: string) =>
+    api.get<{ conversationId: string; title?: string; messages: { id: string; role: string; content: string; createdAt: string }[] }>(`/ai/conversations/${id}/messages`),
+
+  /**
+   * List courses the user can @mention in chat — GET /ai/chat/mentionable-courses
+   */
+  getMentionableCourses: () =>
+    api.get<MentionableCourse[]>('/ai/chat/mentionable-courses'),
+
+  /**
+   * Generate a structured course plan — POST /ai/chat/course-plan
+   * Body: { trainingId, focus? }
+   */
+  generateCoursePlan: (trainingId: string, focus?: string) =>
+    api.post<CoursePlanResponse>('/ai/chat/course-plan', { trainingId, focus }),
 };
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
@@ -395,5 +439,21 @@ export const settingsApi = {
 
   update: (dto: UpdateUserSettingsDto) =>
     api.patch<UserSettings>('/settings', dto),
+};
+
+// ─── SL Manager ───────────────────────────────────────────────────────────────
+
+export const slManagerApi = {
+  getOverview: () =>
+    api.get<SlManagerOverview>('/sl-manager/overview'),
+
+  getUsers: () =>
+    api.get<SlManagerUser[]>('/sl-manager/users'),
+
+  getUserDetail: (id: string) =>
+    api.get<SlManagerUserDetail>(`/sl-manager/users/${id}`),
+
+  getAlerts: () =>
+    api.get<SlManagerAlerts>('/sl-manager/alerts'),
 };
 
