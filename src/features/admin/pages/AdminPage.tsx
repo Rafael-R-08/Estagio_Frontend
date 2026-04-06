@@ -34,7 +34,7 @@ export default function AdminPage() {
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex items-center gap-4 px-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-blue-600 text-white shadow-sm shadow-blue-600/20">
           <ShieldCheck className="h-6 w-6" />
         </div>
         <div>

@@ -7,7 +7,6 @@ import {
   Shield,
   Monitor,
   Save,
-  Download,
   Smartphone,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,23 +21,11 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_SETTINGS: UserSettings = {
-  preferredPlatforms: [],
-  contentTypes: [],
-  preferredDuration: null,
-  courseLanguage: null,
-  freeContentOnly: false,
-  aiResponseDetail: null,
-  aiResponseLanguage: null,
-  aiExplainReasoning: false,
-  aiRecommendationMode: null,
-  emailNotifications: true,
-  weeklyDigest: true,
-  recommendations: true,
-  newCourses: true,
-  learningProgress: true,
-  certExpiring: true,
-  adminCanSeeRecs: true,
-  aiCanUseHistory: true,
+  notifyWeeklyRecs: true,
+  notifyCertExpiry: true,
+  notifyProgress: true,
+  notifyByEmail: true,
+  notifyInApp: true,
 };
 
 // ─── Appearance stored in localStorage ────────────────────────────────────────
@@ -55,6 +42,28 @@ function loadAppearance() {
     density: (localStorage.getItem('app_density') as Density) ?? 'comfortable',
     uiLang: (localStorage.getItem('lh_lang') as UiLang) ?? 'pt',
   };
+}
+
+// ─── AI prefs stored in localStorage (not persisted to backend) ───────────────
+
+interface LocalAiPrefs {
+  aiResponseDetail: string | null;
+  aiResponseLanguage: string | null;
+  aiExplainReasoning: boolean;
+  aiRecommendationMode: string | null;
+}
+
+const AI_PREFS_KEY = 'lh_ai_prefs';
+
+function loadAiPrefs(): LocalAiPrefs {
+  try {
+    const raw = localStorage.getItem(AI_PREFS_KEY);
+    return raw
+      ? (JSON.parse(raw) as LocalAiPrefs)
+      : { aiResponseDetail: null, aiResponseLanguage: null, aiExplainReasoning: false, aiRecommendationMode: null };
+  } catch {
+    return { aiResponseDetail: null, aiResponseLanguage: null, aiExplainReasoning: false, aiRecommendationMode: null };
+  }
 }
 
 // ─── Nav sections ─────────────────────────────────────────────────────────────
@@ -176,7 +185,7 @@ function SectionPanel({ title, icon: Icon, children }: {
   return (
     <div className="animate-in fade-in duration-500">
       <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-xl">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-blue-600 text-white shadow-xl shadow-blue-600/20">
           <Icon className="h-5 w-5" />
         </div>
         <h2 className="text-xl font-black tracking-tight text-foreground">{title}</h2>
@@ -230,6 +239,15 @@ export default function SettingsPage() {
   const { t } = useTranslation();
 
   const [appearance, setAppearance] = useState(loadAppearance);
+  const [aiPrefs, setAiPrefs] = useState<LocalAiPrefs>(loadAiPrefs);
+
+  const setAiPref = <K extends keyof LocalAiPrefs>(key: K, value: LocalAiPrefs[K]) => {
+    setAiPrefs((prev) => {
+      const next = { ...prev, [key]: value };
+      localStorage.setItem(AI_PREFS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
   const setApp = <K extends keyof ReturnType<typeof loadAppearance>>(key: K, value: string) => {
     if (key === 'theme') {
       applyTheme(value as Theme);
@@ -265,7 +283,6 @@ export default function SettingsPage() {
 
   function handleSave() {
     if (!isDirty) return;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, userId: _uid, ...dto } = current as UserSettings & { id?: string; userId?: string };
     saveMutation.mutate(dto);
   }
@@ -295,7 +312,7 @@ export default function SettingsPage() {
             className={cn(
               'flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all active:scale-95',
               isDirty
-                ? 'bg-foreground text-background shadow-2xl hover:bg-foreground/90'
+                ? 'bg-blue-600 text-white shadow-2xl hover:bg-blue-700 shadow-blue-600/20'
                 : 'bg-muted/40 border border-border/60 text-muted-foreground/40 cursor-not-allowed',
             )}
           >
@@ -316,7 +333,7 @@ export default function SettingsPage() {
                   className={cn(
                     'flex-shrink-0 snap-start flex items-center gap-3 rounded-full px-5 py-3 text-sm font-bold text-left transition-all whitespace-nowrap md:w-full',
                     activeSection === id
-                      ? 'bg-foreground text-background shadow-xl'
+                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
                       : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                   )}
                 >
@@ -335,24 +352,24 @@ export default function SettingsPage() {
                 <SectionItem>
                   <SettingRow label={t('settings.ai.responseDetail')} description={t('settings.ai.responseDetailDesc')}>
                     <SelectField
-                      value={current.aiResponseDetail}
+                      value={aiPrefs.aiResponseDetail}
                       options={[
                         { value: 'concise', label: t('settings.ai.concise') },
                         { value: 'detailed', label: t('settings.ai.detailed') },
                       ]}
-                      onChange={(v) => set('aiResponseDetail', v)}
+                      onChange={(v) => setAiPref('aiResponseDetail', v)}
                     />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow label={t('settings.ai.responseLanguage')}>
                     <SelectField
-                      value={current.aiResponseLanguage}
+                      value={aiPrefs.aiResponseLanguage}
                       options={[
                         { value: 'pt', label: t('settings.ai.portuguese') },
                         { value: 'en', label: t('settings.ai.english') },
                       ]}
-                      onChange={(v) => set('aiResponseLanguage', v)}
+                      onChange={(v) => setAiPref('aiResponseLanguage', v)}
                     />
                   </SettingRow>
                 </SectionItem>
@@ -361,19 +378,19 @@ export default function SettingsPage() {
                     label={t('settings.ai.explainReasoning')}
                     description={t('settings.ai.explainReasoningDesc')}
                   >
-                    <Toggle checked={current.aiExplainReasoning} onChange={(v) => set('aiExplainReasoning', v)} />
+                    <Toggle checked={aiPrefs.aiExplainReasoning} onChange={(v) => setAiPref('aiExplainReasoning', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <div className="py-4">
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-3">{t('settings.ai.recommendationMode')}</p>
                     <RadioGroup
-                      value={current.aiRecommendationMode}
+                      value={aiPrefs.aiRecommendationMode}
                       options={[
                         { value: 'conservative', label: t('settings.ai.conservative'), description: t('settings.ai.conservativeDesc') },
                         { value: 'exploratory', label: t('settings.ai.exploratory'), description: t('settings.ai.exploratoryDesc') },
                       ]}
-                      onChange={(v) => set('aiRecommendationMode', v)}
+                      onChange={(v) => setAiPref('aiRecommendationMode', v)}
                     />
                   </div>
                 </SectionItem>
@@ -389,49 +406,41 @@ export default function SettingsPage() {
                     label="Notificações por Email"
                     description="Receber alertas importantes e recomendações no teu email institucional."
                   >
-                    <Toggle checked={current.emailNotifications} onChange={(v) => set('emailNotifications', v)} />
+                    <Toggle checked={current.notifyByEmail} onChange={(v) => set('notifyByEmail', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Digest Semanal"
-                    description="Resumo semanal das tuas atividades e progresso."
+                    label="Notificações In-App"
+                    description="Receber alertas diretamente na plataforma."
                   >
-                    <Toggle checked={current.weeklyDigest} onChange={(v) => set('weeklyDigest', v)} />
+                    <Toggle checked={current.notifyInApp} onChange={(v) => set('notifyInApp', v)} />
                   </SettingRow>
                 </SectionItem>
 
                 <SubLabel>Conteúdo e Alertas</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label="Novas Recomendações"
-                    description="Alertar quando a IA gerar novas sugestões personalizadas."
+                    label="Recomendações Semanais"
+                    description="Resumo semanal com novas sugestões personalizadas pela IA."
                   >
-                    <Toggle checked={current.recommendations} onChange={(v) => set('recommendations', v)} />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <SettingRow
-                    label="Novas Formações"
-                    description="Alertar sobre novos cursos adicionados ao catálogo que combinam com o teu perfil."
-                  >
-                    <Toggle checked={current.newCourses} onChange={(v) => set('newCourses', v)} />
+                    <Toggle checked={current.notifyWeeklyRecs} onChange={(v) => set('notifyWeeklyRecs', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
                     label="Expiração de Certificados"
-                    description="Alertar 30 dias antes de um certificado expirar."
+                    description="Alertar 30 e 7 dias antes de um certificado expirar."
                   >
-                    <Toggle checked={current.certExpiring} onChange={(v) => set('certExpiring', v)} />
+                    <Toggle checked={current.notifyCertExpiry} onChange={(v) => set('notifyCertExpiry', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
                     label="Progresso de Aprendizagem"
-                    description="Alertar sobre objetivos semanais e conquistas."
+                    description="Alertar quando uma formação estiver parada há mais de 7 dias."
                   >
-                    <Toggle checked={current.learningProgress} onChange={(v) => set('learningProgress', v)} />
+                    <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
                   </SettingRow>
                 </SectionItem>
               </SectionPanel>
@@ -442,22 +451,6 @@ export default function SettingsPage() {
               <SectionPanel title={t('settings.privacy.title')} icon={Shield}>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.privacy.adminCanSeeRecs')}
-                    description={t('settings.privacy.adminCanSeeRecsDesc')}
-                  >
-                    <Toggle checked={current.adminCanSeeRecs} onChange={(v) => set('adminCanSeeRecs', v)} />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <SettingRow
-                    label={t('settings.privacy.aiCanUseHistory')}
-                    description={t('settings.privacy.aiCanUseHistoryDesc')}
-                  >
-                    <Toggle checked={current.aiCanUseHistory} onChange={(v) => set('aiCanUseHistory', v)} />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <SettingRow
                     label={t('settings.privacy.downloadData')}
                     description={t('settings.privacy.downloadDataDesc')}
                   >
@@ -466,7 +459,6 @@ export default function SettingsPage() {
                       onClick={() => toast.info(t('common.featureInDev'))}
                       className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
                     >
-                      <Download className="h-3.5 w-3.5" />
                       {t('common.export')}
                     </button>
                   </SettingRow>

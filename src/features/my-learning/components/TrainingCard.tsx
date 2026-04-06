@@ -367,7 +367,7 @@ export function TrainingCard({
                 className={cn(
                   "px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                   training.progressLevel === s.id
-                    ? "bg-foreground text-background shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >

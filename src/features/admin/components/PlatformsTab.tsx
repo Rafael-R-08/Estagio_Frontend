@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff, Settings2, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { platformsApi } from '@/services/api';
@@ -332,7 +331,6 @@ function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; nam
 
 export function PlatformsTab() {
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -421,15 +419,8 @@ export function PlatformsTab() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate('?tab=softinsa')}
-            className="flex items-center gap-2 rounded-full border border-border/60 bg-background px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-foreground hover:text-background transition-colors shadow-sm"
-          >
-            <BookOpen className="h-4 w-4" />
-            Softinsa Learning
-          </button>
-          <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-background hover:opacity-90 transition-all shadow-md shadow-foreground/5 active:scale-95"
+            className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95"
           >
             <Plus className="h-4 w-4" />
             {t('admin.platforms.add')}

@@ -8,6 +8,7 @@ import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { storage } from '../../../lib/storage';
 import OnboardingModal from '../components/OnboardingModal';
+import logoIcon from '../../../assets/logo2.icon.png';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -72,9 +73,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
       >
         {/* Header */}
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-[10px] font-bold tracking-[0.1em] text-muted-foreground uppercase opacity-80">
-            LearningHub
-          </div>
+          <img src={logoIcon} alt="Softinsa Learning Hub" className="h-14 w-14 object-contain" />
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
             Entrar no <span className="text-blue-600 dark:text-blue-400">LearningHub</span>.
           </h1>
@@ -154,7 +153,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-12 w-full flex items-center justify-center gap-2 rounded-full bg-foreground text-background text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-foreground/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-12 w-full flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white text-sm font-semibold transition-all hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -33,7 +33,7 @@ function KpiCard({ icon: Icon, label, value, color }: {
 function SectionHeader({ icon: Icon, title, count }: { icon: React.ElementType; title: string; count?: number }) {
   return (
     <div className="flex items-center gap-3 border-b border-border/40 px-5 py-4 bg-background/20">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[0.7rem] bg-foreground text-background shadow-sm">
+      <div className="flex h-8 w-8 items-center justify-center rounded-[0.7rem] bg-blue-600 text-white shadow-sm shadow-blue-600/20">
         <Icon className="h-3.5 w-3.5" />
       </div>
       <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">{title}</h3>
@@ -152,7 +152,7 @@ export default function SlManagerUserDetailPage() {
               )}
             >
               {t.label}
-              <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', tab === t.id ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground')}>
+              <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', tab === t.id ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground')}>
                 {t.count}
               </span>
             </button>

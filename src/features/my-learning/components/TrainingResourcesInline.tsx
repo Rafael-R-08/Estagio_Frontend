@@ -318,7 +318,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
                   </label>
                   <div className="flex items-center gap-2">
                     <button type="button" onClick={resetForm} className="text-[10px] font-bold px-4 py-2 hover:bg-muted rounded-lg">Cancelar</button>
-                    <button disabled={!formTitle.trim() || isSubmitting} className="text-[10px] font-bold bg-foreground text-background px-5 py-2 rounded-lg shadow-sm disabled:opacity-50">
+                    <button disabled={!formTitle.trim() || isSubmitting} className="text-[10px] font-bold bg-blue-600 text-white px-5 py-2 rounded-lg shadow-sm shadow-blue-600/20 disabled:opacity-50">
                       {isSubmitting ? 'A guardar...' : 'Guardar'}
                     </button>
                   </div>

@@ -27,7 +27,7 @@ function UserAvatar({ name }: { name: string }) {
     .map((w) => w[0].toUpperCase())
     .join('');
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[2rem] bg-foreground text-3xl font-bold text-background shadow-2xl ring-4 ring-foreground/10">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[2rem] bg-blue-600 text-3xl font-bold text-white shadow-2xl ring-4 ring-blue-600/20">
       {initials || <UserIcon className="h-10 w-10" />}
     </div>
   );
@@ -126,7 +126,7 @@ function ProfileSidebar({
             className={cn(
               'mt-6 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-bold transition active:scale-95',
               isEditing
-                ? 'bg-foreground text-background shadow-xl'
+                ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
                 : 'border border-border/60 bg-background/40 text-foreground hover:bg-background/80',
             )}
           >
@@ -335,7 +335,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
       <div className="flex flex-col gap-5 lg:col-span-2">
         {/* Save bar */}
         {dirty && (
-          <div className="flex items-center justify-between rounded-full border border-foreground/10 bg-foreground px-6 py-3 text-background shadow-2xl animate-in fade-in slide-in-from-top-4 relative z-50">
+          <div className="flex items-center justify-between rounded-full border border-blue-600/20 bg-blue-600 px-6 py-3 text-white shadow-2xl animate-in fade-in slide-in-from-top-4 relative z-50">
             <p className="text-sm font-black tracking-tight">Tens alterações por guardar.</p>
             <button
               onClick={() => saveMutation.mutate()}

@@ -54,7 +54,7 @@ export function QuickActions() {
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
 
       <div className="mb-8 flex items-center gap-4 relative z-10">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background shadow-lg shadow-foreground/10">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
           <Sparkles className="h-5 w-5" />
         </div>
         <div className="space-y-0.5">

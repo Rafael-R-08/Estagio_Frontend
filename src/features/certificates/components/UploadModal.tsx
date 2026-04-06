@@ -298,7 +298,7 @@ export function UploadModal({ trainings, certificates, replaceTarget, onClose, o
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-8 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
               <Upload className="h-5 w-5" />
             </div>
             <div>
@@ -409,7 +409,7 @@ export function UploadModal({ trainings, certificates, replaceTarget, onClose, o
             <div className="flex flex-col items-center justify-center gap-6 py-10">
               <div className="relative">
                 <div className="absolute inset-0 animate-ping rounded-full bg-foreground opacity-10" />
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground text-background">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white">
                   {state === 'uploading' ? <Loader2 className="h-8 w-8 animate-spin" /> : <Sparkles className="h-8 w-8 animate-pulse text-primary" />}
                 </div>
               </div>
@@ -475,7 +475,7 @@ export function UploadModal({ trainings, certificates, replaceTarget, onClose, o
                 <button
                   onClick={handleSubmit}
                   disabled={!trainingId || uploadMutation.isPending}
-                  className="flex items-center gap-2 rounded-full bg-foreground px-8 py-3 text-sm font-black text-background shadow-xl transition hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-full bg-blue-600 px-8 py-3 text-sm font-black text-white shadow-xl transition hover:bg-blue-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {uploadMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   {t('certificates.uploadBtn')}
@@ -484,7 +484,7 @@ export function UploadModal({ trainings, certificates, replaceTarget, onClose, o
             </>
           )}
           {state === 'completed' && (
-            <button onClick={onSuccess} className="rounded-full bg-foreground px-8 py-3 text-sm font-black text-background shadow-xl transition hover:opacity-90 active:scale-95">
+            <button onClick={onSuccess} className="rounded-full bg-blue-600 px-8 py-3 text-sm font-black text-white shadow-xl transition hover:bg-blue-700 active:scale-95">
               {t('common.close') || 'Close'}
             </button>
           )}

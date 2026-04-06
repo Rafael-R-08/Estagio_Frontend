@@ -80,7 +80,7 @@ export function SuggestionsPanel({
                 onClick={() => onSelect(s.query)}
                 className="group flex items-center gap-4 rounded-[1.5rem] border border-border/60 bg-background/40 p-3 text-left transition-all hover:bg-background/80 hover:shadow-xl active:scale-[0.98]"
               >
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-foreground text-background shadow-lg transition-transform group-hover:scale-110`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-blue-600 text-white shadow-lg shadow-blue-600/20 transition-transform group-hover:scale-110`}>
                   <Icon className={`h-5 w-5`} />
                 </div>
                 <span className="text-xs font-black tracking-tight text-foreground leading-tight">{s.label}</span>
@@ -101,7 +101,7 @@ export function SuggestionsPanel({
               <button
                 key={skill}
                 onClick={() => onSelect(`Recomenda cursos avançados de ${skill}`)}
-                className="rounded-full bg-foreground px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-background shadow-sm transition hover:opacity-80 active:scale-95"
+                className="rounded-full bg-blue-600 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
               >
                 {skill}
               </button>

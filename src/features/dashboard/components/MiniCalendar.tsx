@@ -11,9 +11,11 @@ import {
   parseISO,
 } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Bell, BellOff, Plus, Trash2, CalendarDays, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarDays, X, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
-import { useReminders } from '../hooks/useReminders';
+import { calendarApi } from '@/services/api';
+import type { CalendarEvent } from '@/types';
 
 // ─── Weekday labels (Monday-first) ───────────────────────────────────────────
 
@@ -30,14 +32,22 @@ export function MiniCalendar() {
   const [newTime, setNewTime] = useState('09:00');
   const [showForm, setShowForm] = useState(false);
 
-  const {
-    notifPermission,
-    requestPermission,
-    addReminder,
-    removeReminder,
-    getRemindersForDate,
-    datesWithReminders,
-  } = useReminders();
+  const qc = useQueryClient();
+
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ['calendar-events'],
+    queryFn: () => calendarApi.getAll().then((r) => r.data),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (dto: Parameters<typeof calendarApi.create>[0]) => calendarApi.create(dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['calendar-events'] }),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => calendarApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['calendar-events'] }),
+  });
 
   // Days in current month
   const days = useMemo(() => {
@@ -50,7 +60,19 @@ export function MiniCalendar() {
   // Leading empty cells so the grid starts on Monday
   const leadingBlanks = (getDay(startOfMonth(currentMonth)) + 6) % 7;
 
-  const selectedReminders = getRemindersForDate(selectedDate);
+  // Group events by date (YYYY-MM-DD)
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    for (const ev of events) {
+      const dateKey = ev.eventDate.slice(0, 10);
+      if (!map.has(dateKey)) map.set(dateKey, []);
+      map.get(dateKey)!.push(ev);
+    }
+    return map;
+  }, [events]);
+
+  const datesWithEvents = useMemo(() => new Set(eventsByDate.keys()), [eventsByDate]);
+  const selectedEvents = eventsByDate.get(selectedDate) ?? [];
 
   const handleDateSelect = (iso: string) => {
     setSelectedDate(iso);
@@ -62,14 +84,13 @@ export function MiniCalendar() {
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    addReminder(selectedDate, newTime, newTitle.trim());
+    // Combine selected date + time into ISO datetime
+    const eventDate = new Date(`${selectedDate}T${newTime}:00`);
+    createMutation.mutate({ title: newTitle.trim(), eventDate: eventDate.toISOString() });
     setNewTitle('');
     setNewTime('09:00');
     setShowForm(false);
   };
-
-  const notifBlocked = notifPermission === 'denied';
-  const notifGranted = notifPermission === 'granted';
 
   return (
     <div className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-xl p-6 shadow-xl shadow-foreground/5 relative overflow-hidden">
@@ -78,7 +99,7 @@ export function MiniCalendar() {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="relative z-10 flex items-center gap-3 mb-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-foreground text-background shadow-lg shadow-foreground/10 shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 shrink-0">
           <CalendarDays className="h-4 w-4" />
         </div>
         <div className="space-y-0.5 flex-1">
@@ -87,25 +108,7 @@ export function MiniCalendar() {
           </p>
           <p className="text-sm font-bold text-foreground leading-none">Calendário</p>
         </div>
-
-        {/* Notification toggle */}
-        <button
-          onClick={notifGranted || notifBlocked ? undefined : requestPermission}
-          title={
-            notifGranted
-              ? 'Notificações ativas'
-              : notifBlocked
-              ? 'Notificações bloqueadas pelo browser'
-              : 'Ativar notificações'
-          }
-          className="transition-opacity"
-        >
-          {notifGranted ? (
-            <Bell className="h-4 w-4 text-emerald-500" />
-          ) : (
-            <BellOff className="h-4 w-4 text-muted-foreground/40" />
-          )}
-        </button>
+        {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/40" />}
       </div>
 
       {/* ── Month navigation ─────────────────────────────────────────────── */}
@@ -145,7 +148,7 @@ export function MiniCalendar() {
         ))}
         {days.map((day) => {
           const iso = format(day, 'yyyy-MM-dd');
-          const hasReminder = datesWithReminders.has(iso);
+          const hasEvent = datesWithEvents.has(iso);
           const isSelected = iso === selectedDate;
           const today = isToday(day);
 
@@ -155,14 +158,14 @@ export function MiniCalendar() {
               onClick={() => handleDateSelect(iso)}
               className={cn(
                 'relative mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-medium transition-all',
-                isSelected && !today && 'bg-foreground text-background',
+                isSelected && !today && 'bg-blue-600 text-white',
                 today && !isSelected && 'ring-1 ring-primary text-primary font-bold',
                 today && isSelected && 'bg-primary text-white',
                 !isSelected && !today && 'hover:bg-muted/50 text-foreground/70',
               )}
             >
               {format(day, 'd')}
-              {hasReminder && (
+              {hasEvent && (
                 <span
                   className={cn(
                     'absolute bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full',
@@ -181,25 +184,26 @@ export function MiniCalendar() {
           {format(parseISO(selectedDate), "d 'de' MMMM", { locale: pt })}
         </p>
 
-        {/* Reminders list */}
-        {selectedReminders.length === 0 && !showForm ? (
+        {/* Events list */}
+        {selectedEvents.length === 0 && !showForm ? (
           <p className="text-[11px] text-muted-foreground/40 text-center py-1">
             Sem lembretes para este dia
           </p>
         ) : (
           <ul className="space-y-1.5">
-            {selectedReminders.map((r) => (
+            {selectedEvents.map((ev) => (
               <li
-                key={r.id}
+                key={ev.id}
                 className="flex items-center gap-2 rounded-xl bg-muted/20 border border-border/30 px-3 py-2"
               >
                 <span className="text-[10px] font-bold text-muted-foreground w-10 shrink-0 tabular-nums">
-                  {r.time}
+                  {format(parseISO(ev.eventDate), 'HH:mm')}
                 </span>
-                <span className="text-xs text-foreground flex-1 truncate">{r.title}</span>
+                <span className="text-xs text-foreground flex-1 truncate">{ev.title}</span>
                 <button
-                  onClick={() => removeReminder(r.id)}
-                  className="text-muted-foreground/30 hover:text-destructive transition-colors shrink-0"
+                  onClick={() => removeMutation.mutate(ev.id)}
+                  disabled={removeMutation.isPending}
+                  className="text-muted-foreground/30 hover:text-destructive transition-colors shrink-0 disabled:opacity-30"
                   aria-label="Remover lembrete"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -241,28 +245,13 @@ export function MiniCalendar() {
               </button>
               <button
                 type="submit"
-                disabled={!newTitle.trim()}
-                className="flex items-center gap-1 rounded-xl bg-foreground px-3 py-2 text-[11px] font-bold text-background transition hover:bg-foreground/80 disabled:opacity-30 disabled:cursor-not-allowed"
+                disabled={!newTitle.trim() || createMutation.isPending}
+                className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Guardar
               </button>
             </div>
-            {/* Notification permission hint — shown inside form */}
-            {!notifGranted && !notifBlocked && (
-              <button
-                type="button"
-                onClick={requestPermission}
-                className="w-full text-center text-[10px] text-muted-foreground/50 hover:text-primary transition-colors underline underline-offset-2"
-              >
-                Ativar notificações de lembrete
-              </button>
-            )}
-            {notifBlocked && (
-              <p className="text-center text-[10px] text-muted-foreground/40">
-                Notificações bloqueadas — ative nas definições do browser
-              </p>
-            )}
           </form>
         ) : (
           <button

@@ -111,7 +111,7 @@ export function ChatBubble({ message }: { message: AiMessage }) {
   // ── Assistant bubble ─────────────────────────────────────────────────────
   return (
     <div className="flex items-end gap-3 pl-2 animate-in fade-in slide-in-from-left-4 duration-300">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-lg group">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1.2rem] bg-blue-600 text-white shadow-lg shadow-blue-600/20 group">
         <Bot className={cn("h-5 w-5 transition-transform duration-500", message.isStreaming && "scale-110 animate-pulse")} />
       </div>
       <div className="max-w-[88%] sm:max-w-[80%]">

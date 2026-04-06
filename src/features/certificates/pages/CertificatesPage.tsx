@@ -124,7 +124,7 @@ export default function CertificatesPage() {
             setReplaceTarget(null);
             setUploadOpen(true);
           }}
-          className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background shadow-2xl transition active:scale-95"
+          className="shrink-0 flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-2xl transition active:scale-95 hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           {t('certificates.uploadBtn')}
@@ -156,7 +156,7 @@ export default function CertificatesPage() {
                   key={f.id}
                   onClick={() => setStatusFilter(f.id)}
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 ${isActive
-                      ? 'bg-foreground text-background shadow-xl'
+                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
                       : 'bg-background/40 border border-border/60 text-muted-foreground hover:bg-background/80'
                     }`}
                 >

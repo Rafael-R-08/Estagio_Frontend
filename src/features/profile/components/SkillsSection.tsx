@@ -109,7 +109,7 @@ export function SkillsSection({
                   className={cn(
                     "flex-1 px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all",
                     skill.level === l.value
-                      ? "bg-foreground text-background shadow-lg"
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
                       : "text-muted-foreground/60 hover:bg-muted/50"
                   )}
                 >
@@ -138,7 +138,7 @@ export function SkillsSection({
           type="button"
           onClick={addSkill}
           disabled={!newSkillName.trim()}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background transition hover:opacity-90 disabled:opacity-30 disabled:grayscale"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-30 disabled:grayscale"
         >
           <Plus className="h-5 w-5" />
         </button>

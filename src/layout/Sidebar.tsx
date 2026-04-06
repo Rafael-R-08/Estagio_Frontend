@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import logoIcon from '../assets/logo2.icon.png';
 import {
   LayoutDashboard,
   Search,
@@ -62,14 +63,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       )}
     >
       {/* Logo Area */}
-      <div className="flex h-16 items-center px-6 border-b border-border/60">
+      <div className={cn('flex h-16 items-center border-b border-border/60', collapsed ? 'justify-center px-0' : 'gap-2.5 px-4')}>
+        <img src={logoIcon} alt="Softinsa Learning Hub" className="h-8 w-8 shrink-0 object-contain" />
         {!collapsed && (
-          <span className="text-sm font-bold tracking-tight text-foreground/90">
-            LearningHub
+          <span className="text-sm font-bold tracking-tight text-foreground/90 truncate">
+            Softinsa LH
           </span>
-        )}
-        {collapsed && (
-          <div className="mx-auto h-1 w-4 rounded-full bg-foreground/20" />
         )}
       </div>
 
@@ -94,7 +93,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                       isActive
-                        ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                         : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                       collapsed && 'justify-center px-2',
                     )}
@@ -141,7 +140,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       className={cn(
                         'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                         isThisActive
-                          ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                           : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                         collapsed && 'justify-center px-2',
                       )}
@@ -185,7 +184,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   className={cn(
                     'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                     pathname.startsWith('/sl-manager')
-                      ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                       : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                     collapsed && 'justify-center px-2',
                   )}
@@ -217,7 +216,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
                       isActive
-                        ? 'bg-foreground text-background shadow-md shadow-foreground/5'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                         : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                       collapsed && 'justify-center px-2',
                     )}
@@ -254,7 +253,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )}
         >
           {/* Avatar */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-sm font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white text-sm font-semibold">
             {user?.name?.charAt(0).toUpperCase() ?? 'U'}
           </div>
           {!collapsed && (

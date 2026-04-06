@@ -88,7 +88,7 @@ export default function SlManagerPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4 px-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-foreground text-background shadow-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-blue-600 text-white shadow-sm shadow-blue-600/20">
           <Users className="h-6 w-6" />
         </div>
         <div>
@@ -224,7 +224,7 @@ export default function SlManagerPage() {
       {/* Team table */}
       <div className="overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm">
         <div className="flex items-center gap-3 border-b border-border/60 px-6 py-4 bg-background/20">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[0.8rem] bg-foreground text-background shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[0.8rem] bg-blue-600 text-white shadow-sm shadow-blue-600/20">
             <Users className="h-4 w-4" />
           </div>
           <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -317,7 +317,7 @@ export default function SlManagerPage() {
                     <td className="px-5 py-4 text-center">
                       <Link
                         to={`/sl-manager/users/${u.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-background hover:opacity-80 transition-all"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-blue-700 transition-all"
                       >
                         Detalhes
                         <TrendingUp className="h-3 w-3" />

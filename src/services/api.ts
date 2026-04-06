@@ -37,6 +37,10 @@ import type {
   SlManagerUser,
   SlManagerUserDetail,
   SlManagerAlerts,
+  NotificationsResponse,
+  CalendarEvent,
+  CreateCalendarEventDto,
+  UpdateCalendarEventDto,
 } from '../types';
 
 type RawCourseResult = Partial<CourseSearchResult> & {
@@ -439,6 +443,38 @@ export const settingsApi = {
 
   update: (dto: UpdateUserSettingsDto) =>
     api.patch<UserSettings>('/settings', dto),
+};
+
+// ─── Notifications ─────────────────────────────────────────────────────────────
+
+export const notificationsApi = {
+  getAll: (params?: { unreadOnly?: boolean; limit?: number; offset?: number }) =>
+    api.get<NotificationsResponse>('/notifications', { params }),
+
+  markAsRead: (id: string) =>
+    api.patch<{ id: string; isRead: boolean }>(`/notifications/${id}/read`),
+
+  markAllAsRead: () =>
+    api.patch<{ count: number }>('/notifications/read-all'),
+};
+
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+
+export const calendarApi = {
+  getAll: () =>
+    api.get<CalendarEvent[]>('/calendar'),
+
+  getOne: (id: string) =>
+    api.get<CalendarEvent>(`/calendar/${id}`),
+
+  create: (dto: CreateCalendarEventDto) =>
+    api.post<CalendarEvent>('/calendar', dto),
+
+  update: (id: string, dto: UpdateCalendarEventDto) =>
+    api.patch<CalendarEvent>(`/calendar/${id}`, dto),
+
+  remove: (id: string) =>
+    api.delete<{ message: string }>(`/calendar/${id}`),
 };
 
 // ─── SL Manager ───────────────────────────────────────────────────────────────

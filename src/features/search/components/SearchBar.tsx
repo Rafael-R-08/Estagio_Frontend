@@ -104,7 +104,7 @@ export function SearchBar({
         className={cn(
           'mr-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all',
           localValue.trim()
-            ? 'bg-foreground text-background hover:opacity-90 active:scale-95 shadow-md shadow-foreground/10'
+            ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-md shadow-blue-600/20'
             : 'cursor-default bg-muted text-muted-foreground',
         )}
         disabled={!localValue.trim()}

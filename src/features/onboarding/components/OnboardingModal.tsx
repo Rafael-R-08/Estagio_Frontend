@@ -488,7 +488,7 @@ export function OnboardingModal() {
                   <Button
                     key="next-button"
                     type="button"
-                    className="rounded-xl px-8 bg-foreground text-background hover:opacity-90 transition-all active:scale-95 text-xs font-bold"
+                    className="rounded-xl px-8 bg-blue-600 text-white hover:bg-blue-700 transition-all active:scale-95 text-xs font-bold"
                     onClick={nextStep}
                   >
                     Seguinte

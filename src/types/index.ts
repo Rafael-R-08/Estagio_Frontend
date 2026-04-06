@@ -76,32 +76,73 @@ export interface UserPreferences {
 export interface UserSettings {
   id?: string;
   userId?: string;
-  // Preferências de aprendizagem
-  preferredPlatforms: string[];
-  contentTypes: string[];
-  preferredDuration: string | null;
-  courseLanguage: string | null;
-  freeContentOnly: boolean;
-  // Preferências da IA
-  aiResponseDetail: string | null;
-  aiResponseLanguage: string | null;
-  aiExplainReasoning: boolean;
-  aiRecommendationMode: string | null;
-  // Notificações
-  emailNotifications: boolean;
-  weeklyDigest: boolean;
-  recommendations: boolean;
-  newCourses: boolean;
-  learningProgress: boolean;
-  certExpiring: boolean;
-  // Privacidade
-  adminCanSeeRecs: boolean;
-  aiCanUseHistory: boolean;
-  // Idioma da interface
+  // Notificações (campos persistidos no backend)
+  notifyWeeklyRecs: boolean;
+  notifyCertExpiry: boolean;
+  notifyProgress: boolean;
+  notifyByEmail: boolean;
+  notifyInApp: boolean;
+  // Idioma da interface (persistido no backend)
   uiLanguage?: string;
 }
 
 export type UpdateUserSettingsDto = Partial<Omit<UserSettings, 'id' | 'userId'>>;
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export type NotificationType =
+  | 'TRAINING_COMPLETED'
+  | 'CERTIFICATE_PROCESSED'
+  | 'CERTIFICATE_EXPIRING'
+  | 'WEEKLY_RECOMMENDATION'
+  | 'PASSWORD_RESET'
+  | 'EMAIL_VERIFICATION'
+  | 'WELCOME'
+  | 'GENERAL'
+  | 'CALENDAR_REMINDER';
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  isRead: boolean;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  items: AppNotification[];
+  total: number;
+  unreadCount: number;
+}
+
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+
+export interface CalendarEvent {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  eventDate: string; // ISO 8601 datetime
+  reminderMinutesBefore: number;
+  reminderFireAt: string;
+  dayBeforeNotified: boolean;
+  dayOfNotified: boolean;
+  finalReminderNotified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCalendarEventDto {
+  title: string;
+  description?: string;
+  eventDate: string; // ISO 8601 datetime
+  reminderMinutesBefore?: number; // 15–1440, default 30
+}
+
+export type UpdateCalendarEventDto = Partial<CreateCalendarEventDto>;
 
 // ─── Course / Search ──────────────────────────────────────────────────────────
 

@@ -71,7 +71,7 @@ function ActionBtn({ icon: Icon, label, onClick, active, activeClass }: ActionBt
       className={cn(
         'flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.05em] transition-all duration-300 active:scale-95',
         active
-          ? cn('border-transparent shadow-sm', activeClass ?? 'bg-foreground text-background')
+          ? cn('border-transparent shadow-sm', activeClass ?? 'bg-blue-600 text-white')
           : 'border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground hover:shadow-md hover:-translate-y-0.5',
       )}
     >

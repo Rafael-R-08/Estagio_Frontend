@@ -64,7 +64,7 @@ export function CertificateCard({ cert, onClick }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-foreground text-background shadow-xl group-hover:scale-110 transition-transform">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-xl shadow-blue-600/20 group-hover:scale-110 transition-transform">
             <Award className="h-6 w-6" />
           </div>
           <div className="min-w-0">

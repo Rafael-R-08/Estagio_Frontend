@@ -428,7 +428,7 @@ export default function AiAssistantPage() {
       <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-card/40 px-6 py-5 backdrop-blur-2xl">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[1.1rem] bg-foreground text-background shadow-xl">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[1.1rem] bg-blue-600 text-white shadow-xl shadow-blue-600/20">
               <Bot className="h-6 w-6" />
             </div>
             {isTyping && (

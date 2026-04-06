@@ -71,7 +71,7 @@ function NavSegment({
       <span className={cn(
         "flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-black tabular-nums transition-all duration-500",
         active
-          ? "bg-foreground text-background"
+          ? "bg-blue-600 text-white"
           : "bg-muted text-muted-foreground group-hover:bg-muted-foreground/20 group-hover:text-foreground"
       )}>
         {value}
@@ -241,7 +241,7 @@ export default function MyLearningPage() {
         </div>
         <button
           onClick={() => navigate('/search')}
-          className="shrink-0 flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-foreground/5"
+          className="shrink-0 flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20"
         >
           <Plus className="h-4 w-4" />
           Procurar Novas Formações
@@ -373,7 +373,7 @@ export default function MyLearningPage() {
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                       sortBy === opt.id
-                        ? "bg-foreground text-background shadow-sm"
+                        ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -460,7 +460,7 @@ export default function MyLearningPage() {
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                         sortBy === opt.id
-                          ? "bg-foreground text-background shadow-sm"
+                          ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
                           : "text-muted-foreground hover:text-foreground"
                       )}
                     >

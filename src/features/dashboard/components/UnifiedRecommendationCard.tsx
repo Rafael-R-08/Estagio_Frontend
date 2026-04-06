@@ -211,7 +211,7 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
       {/* ── Header ── */}
       <div className="relative z-10 flex items-center justify-between border-b border-border/40 bg-background/20 px-6 py-5 sm:px-8">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-lg transition-transform duration-500 group-hover:scale-110">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/20 transition-transform duration-500 group-hover:scale-110">
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
