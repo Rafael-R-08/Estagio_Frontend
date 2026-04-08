@@ -101,6 +101,7 @@ function normalizeCourseResult(course: RawCourseResult): CourseSearchResult {
     tags,
     platformId: typeof course.platformId === 'string' ? course.platformId : fallbackPlatformId,
     platformName: typeof course.platformName === 'string' ? course.platformName : fallbackPlatformName,
+    isFree: typeof course.isFree === 'boolean' ? course.isFree : undefined,
     price: typeof course.price === 'string' ? course.price : undefined,
     relevance: typeof course.relevance === 'number' ? course.relevance : undefined,
     similarityScore:
@@ -115,6 +116,9 @@ function normalizeCourseResult(course: RawCourseResult): CourseSearchResult {
         : typeof course.similarity === 'number'
           ? course.similarity
           : undefined,
+    internalRating: typeof course.internalRating === 'number' ? course.internalRating : undefined,
+    internalRelevance: typeof course.internalRelevance === 'number' ? course.internalRelevance : undefined,
+    completedCount: typeof course.completedCount === 'number' ? course.completedCount : undefined,
   };
 }
 
@@ -332,7 +336,8 @@ export const searchApi = {
     minRelevance?: number,
     level?: string,
     language?: string,
-    page: number = 1
+    page: number = 1,
+    minRating?: number
   ) =>
     api
       .get<SearchResponse | Record<string, unknown>>('/search', {
@@ -346,6 +351,7 @@ export const searchApi = {
           minRelevance: normalizeRelevance(minRelevance),
           level,
           language,
+          minRating,
         },
       })
       .then((res) => ({

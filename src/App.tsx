@@ -23,6 +23,7 @@ const MyLearningPage = lazy(() => import('./features/my-learning/pages/MyLearnin
 const CertificatesPage = lazy(() => import('./features/certificates/pages/CertificatesPage'));
 const AiAssistantPage = lazy(() => import('./features/ai-assistant/pages/AiAssistantPage'));
 const ProfilePage = lazy(() => import('./features/profile/pages/ProfilePage'));
+const PortfolioPage = lazy(() => import('./features/profile/pages/PortfolioPage'));
 const SettingsPage = lazy(() => import('./features/settings/pages/SettingsPage'));
 const AdminPage = lazy(() => import('./features/admin/pages/AdminPage'));
 const SlManagerPage = lazy(() => import('./features/sl-manager/pages/SlManagerPage'));
@@ -61,6 +62,7 @@ function App() {
                   <Route path="/certificates" element={<CertificatesPage />} />
                   <Route path="/ai" element={<AiAssistantPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/portfolio" element={<PortfolioPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                 </Route>
               </Route>

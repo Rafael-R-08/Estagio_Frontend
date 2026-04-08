@@ -67,7 +67,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <img src={logoIcon} alt="Softinsa Learning Hub" className="h-8 w-8 shrink-0 object-contain" />
         {!collapsed && (
           <span className="text-sm font-bold tracking-tight text-foreground/90 truncate">
-            Softinsa LH
+            Softinsa Learning Hub
           </span>
         )}
       </div>

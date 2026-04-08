@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   ChevronRight,
   BarChart3,
+  Users,
 } from 'lucide-react';
 
 import { searchApi, trainingApi } from '@/services/api';
@@ -323,17 +324,43 @@ export default function CourseDetailPage() {
               value={course.rating ? `${course.rating.toFixed(1)} / 5.0` : 'N/A'}
               colorClass="text-amber-500"
             />
+            {course.internalRating !== undefined && (
+              <StatCard 
+                icon={Star} 
+                label="Avaliação Interna" 
+                value={`${course.internalRating.toFixed(1)} / 5.0`}
+                colorClass="text-orange-500"
+              />
+            )}
+            {!!course.completedCount && (
+              <StatCard 
+                icon={Users} 
+                label="Concluído por" 
+                value={`${course.completedCount} coleg${course.completedCount === 1 ? 'a' : 'as'}`}
+                colorClass="text-violet-500"
+              />
+            )}
             <StatCard 
               icon={BarChart3} 
               label="Relevância" 
-              value={course.similarityScore ? `${Math.round(course.similarityScore * 100)}%` : 'N/A'}
+              value={(course.relevanceScore || course.similarityScore) ? `${Math.round((course.relevanceScore || course.similarityScore || 0) * 100)}%` : 'N/A'}
               colorClass="text-blue-500"
             />
             <StatCard 
               icon={DollarSign} 
               label="Investimento" 
-              value={course.price || 'Free'}
-              colorClass={course.price?.toLowerCase().includes('free') ? 'text-emerald-500' : ''}
+              value={
+                course.isFree === true
+                  ? 'Gratuito'
+                  : course.isFree === false
+                    ? (course.price || 'Pago')
+                    : (course.price || '—')
+              }
+              colorClass={
+                course.isFree === true || course.price?.toLowerCase().includes('free')
+                  ? 'text-emerald-500'
+                  : ''
+              }
             />
           </div>
 

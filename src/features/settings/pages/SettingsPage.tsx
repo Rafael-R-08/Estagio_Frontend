@@ -8,6 +8,8 @@ import {
   Monitor,
   Save,
   Smartphone,
+  Download,
+  Share,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { settingsApi } from '@/services/api';
@@ -214,7 +216,11 @@ function SubLabel({ children }: { children: React.ReactNode }) {
 export default function SettingsPage() {
   const qc = useQueryClient();
   const [activeSection, setActiveSection] = useState<SectionId>('ai');
-  const { isInstallable, promptInstall } = usePWAInstall();
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
+
+  const isIOS = typeof navigator !== 'undefined' &&
+    (/iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
   const { data: serverSettings, isLoading } = useQuery({
     queryKey: ['settings'],
@@ -505,27 +511,57 @@ export default function SettingsPage() {
             {activeSection === 'app' && (
               <SectionPanel title="Aplicação" icon={Smartphone}>
                 <SectionItem>
-                  <SettingRow
-                    label="Instalar Aplicação"
-                    description={isInstallable
-                      ? "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa."
-                      : "A aplicação já está instalada ou o teu browser não suporta esta funcionalidade."}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => promptInstall()}
-                      disabled={!isInstallable}
-                      className={cn(
-                        "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                        isInstallable
-                          ? "border-softinsa-blue/20 bg-softinsa-blue/10 text-softinsa-blue hover:bg-softinsa-blue/20 dark:border-softinsa-blue/30 dark:bg-softinsa-blue/20 dark:text-blue-400 dark:hover:bg-softinsa-blue/30"
-                          : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
-                      )}
+                  {isInstalled ? (
+                    <SettingRow
+                      label="Aplicação Instalada"
+                      description="A LearningHub já está instalada no teu dispositivo."
                     >
-                      <Download className="h-3.5 w-3.5" />
-                      Instalar
-                    </button>
-                  </SettingRow>
+                      <span className="flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        ✓ Instalada
+                      </span>
+                    </SettingRow>
+                  ) : isIOS ? (
+                    <div className="py-4">
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1">Instalar no iPhone / iPad</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">O Safari não suporta instalação automática. Segue estes passos:</p>
+                      <ol className="space-y-3">
+                        <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+                          <span>Toca em <Share className="inline h-4 w-4 text-primary mx-0.5" /> <strong>Partilhar</strong> na barra do Safari</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+                          <span>Seleciona <strong>"Adicionar ao ecrã principal"</strong></span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+                          <span>Toca em <strong>Adicionar</strong></span>
+                        </li>
+                      </ol>
+                    </div>
+                  ) : (
+                    <SettingRow
+                      label="Instalar Aplicação"
+                      description={isInstallable
+                        ? "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa."
+                        : "Abre esta página no Chrome para Android ou Edge para instalar a app."}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => promptInstall()}
+                        disabled={!isInstallable}
+                        className={cn(
+                          "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                          isInstallable
+                            ? "border-softinsa-blue/20 bg-softinsa-blue/10 text-softinsa-blue hover:bg-softinsa-blue/20 dark:border-softinsa-blue/30 dark:bg-softinsa-blue/20 dark:text-blue-400 dark:hover:bg-softinsa-blue/30"
+                            : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
+                        )}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        Instalar
+                      </button>
+                    </SettingRow>
+                  )}
                 </SectionItem>
               </SectionPanel>
             )}

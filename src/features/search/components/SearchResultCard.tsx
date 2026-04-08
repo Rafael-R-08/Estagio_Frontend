@@ -10,6 +10,7 @@ import {
   BarChart3,
   User,
   Globe,
+  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -187,28 +188,53 @@ export function SearchResultCard({
             {formatDuration(course.durationHours)}
           </div>
         )}
+        {/* Avaliação externa (rating da plataforma de origem) */}
         {course.rating !== undefined && (
-          <div className="flex items-center gap-1 rounded-md bg-amber-50/50 px-2 py-0.5 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 font-bold border border-amber-200/30">
+          <div className="flex items-center gap-1 rounded-md bg-amber-50/50 px-2 py-0.5 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 font-bold border border-amber-200/30" title="Avaliação da plataforma">
             <Star className="h-3.5 w-3.5 fill-current" />
             {course.rating.toFixed(1)}
           </div>
         )}
+        {/* Avaliação interna Softinsa */}
+        {course.internalRating !== undefined && (
+          <div className="flex items-center gap-1 rounded-md bg-orange-50/50 px-2 py-0.5 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 font-bold border border-orange-200/30" title="Avaliação interna Softinsa">
+            <Star className="h-3.5 w-3.5 fill-current" />
+            {course.internalRating.toFixed(1)}
+            <span className="text-[9px] font-black uppercase tracking-wider opacity-70">int</span>
+          </div>
+        )}
+        {/* Número de colegas que completaram */}
+        {!!course.completedCount && (
+          <div className="flex items-center gap-1 rounded-md bg-muted/50 px-2 py-0.5 text-muted-foreground" title="Concluído por colegas Softinsa">
+            <Users className="h-3 w-3" />
+            {course.completedCount}
+          </div>
+        )}
+        {/* Relevância semântica */}
         {(course.relevanceScore !== undefined || course.similarityScore !== undefined || course.relevance !== undefined) && (
-          <div className="flex items-center gap-1 rounded-md bg-blue-50/50 px-2 py-0.5 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-bold border border-blue-200/30">
+          <div className="flex items-center gap-1 rounded-md bg-blue-50/50 px-2 py-0.5 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-bold border border-blue-200/30" title="Relevância semântica">
             <BarChart3 className="h-3.5 w-3.5" />
             {Math.round(((course.relevanceScore || course.similarityScore || course.relevance || 0)) * 100)}%
           </div>
         )}
+        {/* Preço — usa isFree boolean (backend) com fallback para price string */}
         <div className="ml-auto">
-          <span className={cn(
-            "rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-widest border shadow-sm",
-            course.price && course.price.toLowerCase().includes('free')
-              ? "bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800"
-              : "bg-muted/80 border-border text-muted-foreground"
-          )}>
-            <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
-            {course.price || 'Free'}
-          </span>
+          {course.isFree === true || (course.price && course.price.toLowerCase().includes('free')) ? (
+            <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm">
+              <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
+              Free
+            </span>
+          ) : course.isFree === false ? (
+            <span className="rounded-md bg-muted/80 border border-border text-muted-foreground px-2.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm">
+              <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
+              {course.price || 'Pago'}
+            </span>
+          ) : (
+            <span className="rounded-md bg-muted/50 border border-border/60 text-muted-foreground/60 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest">
+              <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
+              {course.price || '—'}
+            </span>
+          )}
         </div>
       </div>
 

@@ -93,22 +93,14 @@ export function MiniCalendar() {
   };
 
   return (
-    <div className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-xl p-6 shadow-xl shadow-foreground/5 relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-
+    <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm p-5">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex items-center gap-3 mb-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 shrink-0">
-          <CalendarDays className="h-4 w-4" />
-        </div>
-        <div className="space-y-0.5 flex-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-            Lembretes
-          </p>
-          <p className="text-sm font-bold text-foreground leading-none">Calendário</p>
-        </div>
-        {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/40" />}
+      <div className="flex items-center gap-2 mb-4">
+        <CalendarDays className="h-3.5 w-3.5 text-muted-foreground/50" />
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+          Calendário
+        </p>
+        {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/30 ml-auto" />}
       </div>
 
       {/* ── Month navigation ─────────────────────────────────────────────── */}

@@ -53,6 +53,7 @@ export function SearchBar({
   const handleClear = () => {
     setLocalValue('');
     onChange('');
+    onSearch('');
     inputRef.current?.focus();
   };
 

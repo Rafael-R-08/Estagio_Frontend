@@ -108,20 +108,55 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
       </div>
 
       {/* Ongoing details */}
-      {variant === 'progress' && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="font-semibold text-muted-foreground uppercase tracking-tight">Progresso</span>
-            <span className="font-bold text-primary">{record.progressLevel || 'Iniciado'}</span>
+      {variant === 'progress' && (() => {
+        const level = record.progressLevel?.toLowerCase();
+        const stages = [
+          { id: 'inicio', label: 'Início' },
+          { id: 'meio', label: 'Meio' },
+          { id: 'finalizar', label: 'Finalizar' },
+        ];
+        const percentage =
+          level === 'início' || level === 'inicio' ? 25 :
+          level === 'meio' ? 55 :
+          level === 'finalizar' ? 90 : 0;
+        const activeLabel =
+          level === 'início' || level === 'inicio' ? 'Início' :
+          level === 'meio' ? 'Meio' :
+          level === 'finalizar' ? 'Finalizar' : 'Não iniciado';
+
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="font-semibold text-muted-foreground uppercase tracking-tight">Progresso</span>
+              <span className="font-bold text-primary">{activeLabel}</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <div className="flex gap-1">
+              {stages.map((s) => (
+                <span
+                  key={s.id}
+                  className={cn(
+                    'rounded-md px-2.5 py-1 text-[10px] font-bold',
+                    record.progressLevel === s.id || record.progressLevel?.toLowerCase() === s.label.toLowerCase()
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-muted/50 text-muted-foreground'
+                  )}
+                >
+                  {s.label}
+                </span>
+              ))}
+            </div>
+            {record.notes && (
+              <p className="text-[11px] text-muted-foreground line-clamp-2 italic">"{record.notes}"</p>
+            )}
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-1/3 rounded-full bg-primary opacity-60 origin-left animate-pulse" />
-          </div>
-          {record.notes && (
-            <p className="text-[11px] text-muted-foreground line-clamp-2 italic">"{record.notes}"</p>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Completed details */}
       {variant === 'completed' && (

@@ -1,6 +1,8 @@
-import { Search, Sparkles, LayoutGrid, Upload, Map } from 'lucide-react';
+import { Search, Sparkles, BookOpen, Upload, Map, Users, BarChart3, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import type { Role } from '@/types';
 
 // ─── Action definition ────────────────────────────────────────────────────────
 
@@ -9,15 +11,15 @@ interface Action {
   label: string;
   description: string;
   href: string;
-  color: string;  // tailwind bg + text color pair
+  color: string;
 }
 
-const ACTIONS: Action[] = [
+const USER_ACTIONS: Action[] = [
   {
-    icon: LayoutGrid,
-    label: 'Gerir Plataformas',
-    description: 'Ativa ou configura plataformas',
-    href: '/platforms',
+    icon: BookOpen,
+    label: 'As minhas Formações',
+    description: 'Gere o teu percurso de aprendizagem',
+    href: '/my-learning',
     color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
   },
   {
@@ -43,44 +45,107 @@ const ACTIONS: Action[] = [
   },
 ];
 
+const SL_MANAGER_ACTIONS: Action[] = [
+  {
+    icon: Users,
+    label: 'A minha Equipa',
+    description: 'Progresso e atividade do team',
+    href: '/sl-manager',
+    color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
+  },
+  {
+    icon: Upload,
+    label: 'Carregar Certificado',
+    description: 'Importa um certificado com IA',
+    href: '/certificates',
+    color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+  },
+  {
+    icon: Map,
+    label: 'Plano de Aprendizagem',
+    description: 'Constrói o teu percurso',
+    href: '/ai',
+    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  },
+  {
+    icon: Search,
+    label: 'Explorar Cursos',
+    description: 'Pesquisa em todas as plataformas',
+    href: '/search',
+    color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+  },
+];
+
+const ADMIN_ACTIONS: Action[] = [
+  {
+    icon: ShieldCheck,
+    label: 'Painel Admin',
+    description: 'Utilizadores, analytics e plataformas',
+    href: '/admin',
+    color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
+  },
+  {
+    icon: BarChart3,
+    label: 'Analytics',
+    description: 'Relatórios e métricas da plataforma',
+    href: '/admin',
+    color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
+  },
+  {
+    icon: Map,
+    label: 'Plano de Aprendizagem',
+    description: 'Constrói o teu percurso',
+    href: '/ai',
+    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  },
+  {
+    icon: Search,
+    label: 'Explorar Cursos',
+    description: 'Pesquisa em todas as plataformas',
+    href: '/search',
+    color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+  },
+];
+
+function getActions(role?: Role): Action[] {
+  if (role === 'ADMIN') return ADMIN_ACTIONS;
+  if (role === 'SERVICE_LINE_MANAGER') return SL_MANAGER_ACTIONS;
+  return USER_ACTIONS;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function QuickActions() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const actions = getActions(user?.role);
 
   return (
-    <div className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-xl p-8 shadow-xl shadow-foreground/5 relative overflow-hidden group">
-      {/* Decorative background element */}
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
-
-      <div className="mb-8 flex items-center gap-4 relative z-10">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div className="space-y-0.5">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Ações Rápidas</h2>
-          <p className="text-lg font-black tracking-tight text-foreground">Gestão Direta</p>
-        </div>
+    <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm p-5">
+      {/* Header */}
+      <div className="mb-4 flex items-center gap-2">
+        <Sparkles className="h-3.5 w-3.5 text-muted-foreground/50" />
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Ações Rápidas</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 relative z-10">
-        {ACTIONS.map((action) => {
+      <div className="grid grid-cols-2 gap-2.5 relative z-10">
+        {actions.map((action) => {
           const Icon = action.icon;
           return (
             <button
               key={action.href}
               onClick={() => navigate(action.href)}
               className={cn(
-                'group/btn flex flex-col gap-4 rounded-3xl border border-border/60 bg-background/40 p-5',
-                'text-left transition-all duration-300 hover:border-primary/30 hover:bg-background/60 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 active:scale-[0.98]',
+                'group/btn flex flex-col gap-3 rounded-xl border border-border/50 bg-background/50 p-4',
+                'text-left transition-all duration-200 hover:border-border hover:bg-background/80 hover:shadow-sm active:scale-[0.98]',
               )}
             >
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:rotate-3 shadow-sm', action.color)}>
-                <Icon className="h-5 w-5" />
+              <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-200 group-hover/btn:scale-105', action.color)}>
+                <Icon className="h-4 w-4" />
               </div>
-              <div className="space-y-1">
-                <p className="text-[13px] font-bold text-foreground leading-tight tracking-tight">{action.label}</p>
-                <p className="text-[11px] font-medium text-muted-foreground/80 leading-relaxed line-clamp-1 group-hover/btn:text-muted-foreground transition-colors">{action.description}</p>
+              <div className="space-y-0.5">
+                <p className="text-[12px] font-bold text-foreground leading-tight">{action.label}</p>
+                <p className="text-[10px] text-muted-foreground/70 leading-relaxed line-clamp-1">{action.description}</p>
               </div>
             </button>
           );

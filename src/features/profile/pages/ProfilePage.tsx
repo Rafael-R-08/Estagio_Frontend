@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   Save, User as UserIcon, Edit2,
-  Download, RefreshCw, Briefcase, Link2,
+  Download, Briefcase, Link2, LayoutTemplate, ClipboardCopy, Award,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
@@ -264,6 +265,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   const { setUser: setAuthUser } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -351,64 +353,95 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         {/* Learning Impact */}
         <LearningImpactCard stats={stats} timeline={timeline} />
 
-        {/* Integrações & Ações */}
+        {/* Portfólio & Partilha */}
         <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl overflow-hidden">
           <div className="border-b border-border/40 px-8 py-6 bg-muted/10">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Conectividade</h2>
-            <p className="font-black text-foreground tracking-tight">Integrações & Ações</p>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Portfólio</h2>
+            <p className="font-black text-foreground tracking-tight">Portfólio & Partilha</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-8">
+
+          {/* Featured — portfolio card */}
+          <div className="px-8 pt-6 pb-2">
+            <div className="flex items-center gap-5 rounded-2xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 dark:from-emerald-900/10 dark:to-teal-900/10 dark:border-emerald-800/30 px-6 py-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <Award className="h-6 w-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-black text-foreground tracking-tight">Portfólio de Certificações</p>
+                <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                  Vista organizada de todas as tuas certificações, competências e conquistas de aprendizagem.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate('/portfolio')}
+                  className="flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:opacity-90 active:scale-95 shadow-lg shadow-emerald-600/20"
+                >
+                  <LayoutTemplate className="h-3.5 w-3.5" />
+                  Ver Portfólio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = `${window.location.origin}/portfolio`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('Link do portfólio copiado!');
+                  }}
+                  className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/60 dark:bg-emerald-900/20 dark:border-emerald-800/40 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition hover:bg-emerald-50 dark:hover:bg-emerald-900/30 active:scale-95"
+                >
+                  <Link2 className="h-3.5 w-3.5" />
+                  Copiar link
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary actions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-8 pt-4">
             <button
               type="button"
+              onClick={() => navigate('/portfolio?print=1')}
               className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-                <RefreshCw className="h-5 w-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">LinkedIn Learning</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Sincronizar progresso</p>
-              </div>
-            </button>
-            <button
-              type="button"
-              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
-            >
-              <div className="p-2 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
-                <RefreshCw className="h-5 w-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">Credly</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Badges digitais</p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
-            >
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
                 <Download className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">Exportar CV PDF</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Formato oficial Softinsa</p>
+                <span className="text-[13px] font-bold text-foreground">Exportar PDF</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Portfólio em formato PDF</p>
               </div>
             </button>
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success('Link de perfil copiado!');
+                const skillsText = (initialValues.skills ?? [])
+                  .map((s) => `${s.skillName}${s.level ? ` (${s.level})` : ''}`)
+                  .join(', ');
+                const resumo = [
+                  `📊 Portfólio de Aprendizagem — ${initialValues.name ?? ''}`,
+                  `──────────────────────────────`,
+                  `📈 ${stats?.completed ?? 0} cursos concluídos | ${stats?.totalHours ?? 0}h de formação`,
+                  skillsText ? `🏅 Competências: ${skillsText}` : null,
+                  (initialValues.interests ?? []).length > 0
+                    ? `💡 Interesses: ${(initialValues.interests ?? []).join(', ')}`
+                    : null,
+                  ``,
+                  `Gerado por LearningHub Softinsa`,
+                ]
+                  .filter(Boolean)
+                  .join('\n');
+                navigator.clipboard.writeText(resumo);
+                toast.success('Resumo copiado para a área de transferência!');
               }}
               className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
               <div className="p-2 rounded-xl bg-violet-500/10 text-violet-500 group-hover:scale-110 transition-transform">
-                <Link2 className="h-5 w-5" />
+                <ClipboardCopy className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">Partilhar perfil</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Link interno direto</p>
+                <span className="text-[13px] font-bold text-foreground">Copiar Resumo</span>
+                <p className="text-[10px] font-medium text-muted-foreground">Texto formatado para CV / LinkedIn</p>
               </div>
             </button>
           </div>

@@ -172,16 +172,26 @@ export interface CourseSearchResult {
   url: string;
   instructor?: string;
   language?: string;
+  /** Rating externo da plataforma de origem (ex: 4.5 no Udemy) */
   rating?: number;
   durationHours?: number;
   level?: 'beginner' | 'intermediate' | 'advanced';
   tags: string[];
   platformId: string;
   platformName: string;
+  /** True = gratuito, false = pago, undefined = desconhecido */
+  isFree?: boolean;
+  /** Campo legado — preferir isFree quando disponível */
   price?: string;
   relevance?: number;
   similarityScore?: number;
   relevanceScore?: number;
+  /** Média do rating interno dado pelos utilizadores Softinsa após conclusão */
+  internalRating?: number;
+  /** Média da relevância interna dada pelos utilizadores Softinsa após conclusão */
+  internalRelevance?: number;
+  /** Número de vezes que foi concluído na Softinsa */
+  completedCount?: number;
 }
 
 export interface CourseDetail extends CourseSearchResult {

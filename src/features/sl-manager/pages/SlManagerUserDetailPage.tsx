@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft, BookOpen, Award, CheckCircle2, Clock, Star,
-  AlertTriangle, Zap, User, ShieldCheck, Brain,
+  AlertTriangle, Zap, ShieldCheck, Brain,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';

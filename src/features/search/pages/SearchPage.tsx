@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, AlertCircle, LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, AlertCircle, LayoutGrid, List, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
 
@@ -73,6 +73,7 @@ export default function SearchPage() {
     level: undefined,
     isFree: undefined,
     minInternalRating: undefined,
+    minExternalRating: undefined,
     minRelevance: undefined,
     language: undefined
   });
@@ -110,6 +111,7 @@ export default function SearchPage() {
       filters.platforms,
       filters.isFree,
       filters.minInternalRating,
+      filters.minExternalRating,
       filters.minRelevance,
       filters.level,
       filters.language
@@ -125,10 +127,11 @@ export default function SearchPage() {
           filters.minRelevance,
           filters.level,
           filters.language,
-          page
+          page,
+          filters.minExternalRating
         )
         .then((r) => r.data),
-    enabled: searchQuery.trim().length >= 2,
+    enabled: true,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -185,7 +188,7 @@ export default function SearchPage() {
 
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="px-2">
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('search.title')}</h1>
@@ -195,23 +198,34 @@ export default function SearchPage() {
       </div>
 
       {/* ── Search bar ────────────────────────────────────────────────── */}
-      <div className="relative group">
-        <SearchBar
-          value={inputValue}
-          onChange={setInputValue}
-          onSearch={handleSearch}
-          isLoading={isFetching}
-          className="w-full"
-        />
-        {searchResponse?.semanticRanking && (
-          <p className="absolute -bottom-6 left-2 text-[10px] text-primary font-black uppercase tracking-widest opacity-80 animate-pulse">
-            ✦ Resultados ordenados por relevância semântica
+      <SearchBar
+        value={inputValue}
+        onChange={setInputValue}
+        onSearch={handleSearch}
+        isLoading={isFetching}
+        className="w-full"
+      />
+
+      {/* ── Browse banner (sem query ativa) ───────────────────────────── */}
+      {!searchQuery && !isFetching && (searchResponse?.total ?? 0) > 0 && (
+        <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+          <p className="text-sm text-foreground">
+            <span className="font-bold">{searchResponse!.total.toLocaleString('pt-PT')}+</span>{' '}
+            formações disponíveis — pesquisa para encontrar o que precisas
           </p>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ── Semantic ranking badge (só com query activa) ──────────────── */}
+      {searchQuery && searchResponse?.semanticRanking && (
+        <p className="text-[10px] text-primary font-black uppercase tracking-widest opacity-80 animate-pulse px-1">
+          ✦ Resultados ordenados por relevância semântica
+        </p>
+      )}
 
       {/* ── Filters Bar ────────────────────────────────────────────────── */}
-      <div className="pt-4 border-t border-border/40">
+      <div className="border-t border-border/40 pt-3">
         <FilterSidebar
           platforms={platforms}
           filters={filters}
@@ -276,7 +290,8 @@ export default function SearchPage() {
             <ErrorState onRetry={() => refetch()} />
           )}
 
-          {/* Empty state */}
+          {/* Empty state — only when there is an active query with no results,
+               or when the initial browse load returned nothing */}
           {!isFetching && !isError && filteredResults.length === 0 && (
             <EmptyState query={searchQuery} />
           )}

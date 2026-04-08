@@ -31,7 +31,7 @@ export function BottomNav() {
   const { t } = useTranslation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t bg-background/80 px-2 pb-safe backdrop-blur-md lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t bg-background/80 px-2 backdrop-blur-md lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {navItems.map((item) => {
         const isActive = location.pathname.startsWith(item.to);
         const Icon = item.icon;
