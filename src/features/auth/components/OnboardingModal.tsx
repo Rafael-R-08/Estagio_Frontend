@@ -1,36 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, Bot, Award, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { storage } from '../../../lib/storage';
 
 // ─── Slide definitions ────────────────────────────────────────────────────────
 
-const SLIDES = [
-  {
-    icon: Search,
-    color: 'bg-blue-100 text-softinsa-blue',
-    title: 'Descoberta de Cursos',
-    description:
-      'Pesquisa e encontra cursos em múltiplas plataformas de uma só vez — Microsoft Learn, Udemy, IBM Skills Build, Trailhead e muito mais. Tudo centralizado num único lugar.',
-    highlight: 'Múltiplas plataformas, uma pesquisa.',
-  },
-  {
-    icon: Bot,
-    color: 'bg-purple-100 text-purple-600',
-    title: 'Assistente de IA',
-    description:
-      'O teu assistente inteligente analisa o teu perfil, experiência e objetivos para te sugerir os cursos mais relevantes. Faz perguntas em linguagem natural e obtém respostas instantâneas.',
-    highlight: 'Recomendações personalizadas por IA.',
-  },
-  {
-    icon: Award,
-    color: 'bg-amber-100 text-amber-600',
-    title: 'Gestão de Certificados',
-    description:
-      'Regista os cursos que completaste, guarda os teus certificados e acompanha o teu progresso de aprendizagem ao longo do tempo. Partilha as tuas conquistas com a equipa.',
-    highlight: 'O teu percurso de aprendizagem, sempre visível.',
-  },
+const SLIDE_META = [
+  { icon: Search, color: 'bg-blue-100 text-softinsa-blue', key: 'discovery' },
+  { icon: Bot, color: 'bg-purple-100 text-purple-600', key: 'ai' },
+  { icon: Award, color: 'bg-amber-100 text-amber-600', key: 'certificates' },
 ] as const;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -43,13 +23,22 @@ interface OnboardingModalProps {
 
 export default function OnboardingModal({ open }: OnboardingModalProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [slide, setSlide] = useState(0);
+
+  const slides = SLIDE_META.map((m) => ({
+    icon: m.icon,
+    color: m.color,
+    title: t(`onboarding.slides.${m.key}.title`),
+    description: t(`onboarding.slides.${m.key}.description`),
+    highlight: t(`onboarding.slides.${m.key}.highlight`),
+  }));
 
   if (!open) return null;
 
-  const current = SLIDES[slide];
+  const current = slides[slide];
   const Icon = current.icon;
-  const isLast = slide === SLIDES.length - 1;
+  const isLast = slide === slides.length - 1;
 
   const finish = () => {
     storage.setOnboardingSeen();
@@ -62,12 +51,12 @@ export default function OnboardingModal({ open }: OnboardingModalProps) {
         className="relative w-full max-w-md rounded-2xl bg-background shadow-2xl overflow-hidden"
         role="dialog"
         aria-modal="true"
-        aria-label="Bem-vindo ao Softinsa Learning Hub"
+        aria-label={t('onboarding.ariaLabel')}
       >
         {/* Skip button */}
         <button
           onClick={finish}
-          aria-label="Saltar introdução"
+          aria-label={t('onboarding.skipAria')}
           className="absolute right-4 top-4 z-10 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
@@ -75,7 +64,7 @@ export default function OnboardingModal({ open }: OnboardingModalProps) {
 
         {/* Slide progress bar */}
         <div className="flex gap-1.5 px-6 pt-6 pb-0">
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <div
               key={i}
               className={cn(
@@ -100,7 +89,7 @@ export default function OnboardingModal({ open }: OnboardingModalProps) {
 
           {/* Step indicator */}
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Passo {slide + 1} de {SLIDES.length}
+            {t('onboarding.stepIndicator', { current: slide + 1, total: slides.length })}
           </p>
 
           {/* Title */}
@@ -131,16 +120,16 @@ export default function OnboardingModal({ open }: OnboardingModalProps) {
             )}
           >
             <ChevronLeft className="h-4 w-4" />
-            Anterior
+            {t('onboarding.prev')}
           </button>
 
           {/* Dots */}
           <div className="flex gap-1.5">
-            {SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setSlide(i)}
-                aria-label={`Ir para slide ${i + 1}`}
+                aria-label={t('onboarding.dotAria', { n: i + 1 })}
                 className={cn(
                   'h-2 w-2 rounded-full transition-all duration-300',
                   i === slide ? 'bg-primary w-5' : 'bg-muted-foreground/30',
@@ -155,14 +144,14 @@ export default function OnboardingModal({ open }: OnboardingModalProps) {
               onClick={finish}
               className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Começar
+              {t('onboarding.start')}
             </button>
           ) : (
             <button
               onClick={() => setSlide((s) => s + 1)}
               className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
             >
-              Próximo
+              {t('onboarding.next')}
               <ChevronRight className="h-4 w-4" />
             </button>
           )}

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Layers, Wrench } from 'lucide-react';
@@ -14,24 +14,10 @@ import { MiniCalendar } from '../components/MiniCalendar';
 import { RecentActivity } from '../components/RecentActivity';
 import { cn } from '@/lib/utils';
 
-import type { TrainingRecord, ExperienceLevel, Role } from '@/types';
+import type { TrainingRecord, ExperienceLevel } from '@/types';
 import { SERVICE_LINE_LABELS } from '@/types';
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
-
-const ROLE_LABELS: Record<Role, string> = {
-  USER: 'Colaborador',
-  ADMIN: 'Administrador',
-  SERVICE_LINE_MANAGER: 'SL Manager',
-};
-
-const LEVEL_LABELS: Record<ExperienceLevel, string> = {
-  junior: 'Júnior',
-  intermedio: 'Intermédio',
-  senior: 'Sénior',
-  especialista: 'Especialista',
-  lider: 'Líder',
-};
 
 const LEVEL_ORDER: ExperienceLevel[] = ['junior', 'intermedio', 'senior', 'especialista', 'lider'];
 
@@ -60,7 +46,6 @@ export default function DashboardPage() {
     data: recs,
     isLoading: recsLoading,
     isError: recsError,
-    refetch: recsRefetch,
   } = useQuery({
     queryKey: ['recommendations'],
     queryFn: () => recommendationsApi.getForMe().then((r) => r.data),
@@ -81,7 +66,14 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const handleRecsRefresh = async () => {
+    const res = await recommendationsApi.deleteCache();
+    queryClient.setQueryData(['recommendations'], res.data);
+  };
+
+  const { t, i18n } = useTranslation();
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -90,7 +82,7 @@ export default function DashboardPage() {
     return t('dashboard.greetingEvening');
   })();
 
-  const today = new Date().toLocaleDateString('pt-PT', {
+  const today = new Date().toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -122,7 +114,7 @@ export default function DashboardPage() {
             {user?.role && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/60 px-3 py-1 text-[11px] font-semibold text-muted-foreground backdrop-blur-sm">
                 <Briefcase className="h-3 w-3 text-primary/60" />
-                {ROLE_LABELS[user.role]}
+                {t(`dashboard.roles.${user.role}`)}
               </span>
             )}
             {user?.serviceLine && (
@@ -153,7 +145,7 @@ export default function DashboardPage() {
                         i <= current ? 'text-primary' : 'text-muted-foreground/30'
                       )}
                     >
-                      {LEVEL_LABELS[lvl]}
+                      {t(`profile.levels.${lvl}`)}
                     </span>
                   );
                 })}
@@ -195,7 +187,7 @@ export default function DashboardPage() {
               data={recs}
               isLoading={recsLoading}
               isError={recsError}
-              onRetry={() => recsRefetch()}
+              onRetry={handleRecsRefresh}
             />
           </section>
 

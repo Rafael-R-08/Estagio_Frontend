@@ -2,6 +2,7 @@ import { useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Award, BookOpen, Clock, Download, User as UserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { profileApi, certificatesApi, trainingApi } from '@/services/api';
 import { toList } from '@/lib/api';
@@ -16,9 +17,9 @@ function certIsActive(cert: Certificate): boolean {
   return new Date(cert.expirationDate).getTime() > Date.now();
 }
 
-function formatDate(iso?: string): string {
+function formatDate(iso?: string, locale?: string): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString(locale ?? 'en-GB', { month: 'short', year: 'numeric' });
 }
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
@@ -44,9 +45,10 @@ function Avatar({ name, size = 'lg' }: { name: string; size?: 'sm' | 'lg' }) {
 
 // ─── CertBadge ────────────────────────────────────────────────────────────────
 
-function CertBadge({ cert }: { cert: Certificate }) {
+function CertBadge({ cert, locale }: { cert: Certificate; locale: string }) {
+  const { t } = useTranslation();
   const active = certIsActive(cert);
-  const name = cert.courseName || cert.training?.title || 'Certificação';
+  const name = cert.courseName || cert.training?.title || t('profile.portfolio.certsSection');
   const provider = cert.provider || '—';
   return (
     <div
@@ -74,14 +76,14 @@ function CertBadge({ cert }: { cert: Certificate }) {
         </div>
       </div>
       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>Concluído: {formatDate(cert.completionDate || cert.createdAt)}</span>
+        <span>{t('profile.portfolio.certCompleted', { date: formatDate(cert.completionDate || cert.createdAt, locale) })}</span>
         {cert.expirationDate && (
           <span className={cn(active ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500')}>
-            {active ? `Válido até ${formatDate(cert.expirationDate)}` : 'Expirado'}
+            {active ? t('profile.portfolio.certValidUntil', { date: formatDate(cert.expirationDate, locale) }) : t('profile.portfolio.certExpired')}
           </span>
         )}
         {!cert.expirationDate && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-medium">Permanente</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t('profile.portfolio.certPermanent')}</span>
         )}
       </div>
     </div>
@@ -94,6 +96,8 @@ export default function PortfolioPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user: authUser } = useAuth();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-GB';
 
   const { data: profile } = useQuery({
     queryKey: ['portfolio-profile'],
@@ -145,7 +149,7 @@ export default function PortfolioPage() {
     window.print();
   }
 
-  const generatedAt = new Date().toLocaleDateString('pt-PT', {
+  const generatedAt = new Date().toLocaleDateString(locale, {
     day: '2-digit', month: 'long', year: 'numeric',
   });
 
@@ -158,7 +162,7 @@ export default function PortfolioPage() {
           className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
         >
           <ArrowLeft className="h-4 w-4" />
-          Voltar ao Perfil
+          {t('profile.portfolio.backToProfile')}
         </button>
 
         <div className="flex items-center gap-2">
@@ -167,7 +171,7 @@ export default function PortfolioPage() {
             className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground transition hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20"
           >
             <Download className="h-4 w-4" />
-            Exportar PDF
+            {t('profile.portfolio.exportPDF')}
           </button>
         </div>
       </div>
@@ -181,7 +185,7 @@ export default function PortfolioPage() {
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-black tracking-tight text-foreground">{user?.name ?? '—'}</h1>
             <p className="text-sm font-medium text-primary mt-0.5">
-              {user?.userFunction || (user?.role === 'ADMIN' ? 'Administrador' : 'Colaborador')}
+              {user?.userFunction || (user?.role === 'ADMIN' ? t('profile.portfolio.role.admin') : t('profile.portfolio.role.collaborator'))}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               {user?.serviceLine && (
@@ -198,11 +202,11 @@ export default function PortfolioPage() {
           </div>
           <div className="text-right shrink-0 print:block hidden">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">
-              Gerado em
+              {t('profile.portfolio.generatedOn')}
             </p>
             <p className="text-[11px] font-medium text-muted-foreground">{generatedAt}</p>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50 mt-1">
-              LearningHub Softinsa
+              {t('nav.appName', 'LearningHub Softinsa')}
             </p>
           </div>
         </div>
@@ -215,7 +219,7 @@ export default function PortfolioPage() {
             </div>
             <p className="text-2xl font-black text-foreground">{stats?.totalHours ?? 0}h</p>
             <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              Horas de Formação
+              {t('profile.portfolio.totalHours')}
             </p>
           </div>
           <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 text-center">
@@ -224,7 +228,7 @@ export default function PortfolioPage() {
             </div>
             <p className="text-2xl font-black text-foreground">{stats?.completed ?? 0}</p>
             <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              Cursos Concluídos
+              {t('profile.portfolio.coursesCompleted')}
             </p>
           </div>
           <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 text-center">
@@ -233,7 +237,7 @@ export default function PortfolioPage() {
             </div>
             <p className="text-2xl font-black text-foreground">{activeCerts.length}</p>
             <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              Certificações Ativas
+              {t('profile.portfolio.activeCerts')}
             </p>
           </div>
         </div>
@@ -242,9 +246,9 @@ export default function PortfolioPage() {
         {skills.length > 0 && (
           <div className="mt-8">
             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-              Competências Técnicas
+              {t('profile.portfolio.skillsSection')}
             </h2>
-            <h3 className="font-black text-foreground tracking-tight mb-4">Skills</h3>
+            <h3 className="font-black text-foreground tracking-tight mb-4">{t('profile.portfolio.skillsTitle')}</h3>
             <div className="flex flex-wrap gap-2">
               {skills.map((s) => (
                 <div
@@ -267,9 +271,9 @@ export default function PortfolioPage() {
         {interests.length > 0 && (
           <div className="mt-6">
             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-              Áreas de Interesse
+              {t('profile.portfolio.interestsSection')}
             </h2>
-            <h3 className="font-black text-foreground tracking-tight mb-4">Interesses</h3>
+            <h3 className="font-black text-foreground tracking-tight mb-4">{t('profile.portfolio.interestsTitle')}</h3>
             <div className="flex flex-wrap gap-1.5">
               {interests.map((interest) => (
                 <span
@@ -286,26 +290,26 @@ export default function PortfolioPage() {
         {/* ── Active Certificates ── */}
         <div className="mt-8">
           <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-            Certificações
+            {t('profile.portfolio.certsSection')}
           </h2>
           <h3 className="font-black text-foreground tracking-tight mb-4">
-            Portfólio de Certificações
+            {t('profile.portfolio.certsTitle')}
             <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 align-middle">
-              {activeCerts.length} ativas
+              {t('profile.portfolio.certsActive', { count: activeCerts.length })}
             </span>
           </h3>
 
           {activeCerts.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border/50 bg-muted/20 py-10 text-center">
               <Award className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">Ainda sem certificações ativas</p>
+              <p className="text-sm text-muted-foreground">{t('profile.portfolio.certsEmpty')}</p>
             </div>
           )}
 
           {activeCerts.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeCerts.map((cert) => (
-                <CertBadge key={cert.id} cert={cert} />
+                <CertBadge key={cert.id} cert={cert} locale={locale} />
               ))}
             </div>
           )}
@@ -313,11 +317,11 @@ export default function PortfolioPage() {
           {expiredCerts.length > 0 && (
             <div className="mt-5">
               <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/50">
-                Expiradas ({expiredCerts.length})
+                {t('profile.portfolio.certsExpiredLabel', { count: expiredCerts.length })}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {expiredCerts.map((cert) => (
-                  <CertBadge key={cert.id} cert={cert} />
+                  <CertBadge key={cert.id} cert={cert} locale={locale} />
                 ))}
               </div>
             </div>
@@ -327,7 +331,7 @@ export default function PortfolioPage() {
         {/* ── Footer (print only) ── */}
         <div className="hidden print:block mt-12 border-t border-border/30 pt-6 text-center">
           <p className="text-[11px] text-muted-foreground">
-            Portfólio gerado automaticamente pelo <strong>LearningHub Softinsa</strong> em {generatedAt}
+            {t('profile.portfolio.footerText', { date: generatedAt })}
           </p>
         </div>
 

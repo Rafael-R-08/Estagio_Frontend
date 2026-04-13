@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   X, 
   CheckCircle2, 
@@ -68,6 +69,7 @@ function StarRating({
 }
 
 export function CompletionModal({ training, onClose, onConfirm, isSubmitting }: CompletionModalProps) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [relevance, setRelevance] = useState(0);
 
@@ -91,7 +93,7 @@ export function CompletionModal({ training, onClose, onConfirm, isSubmitting }: 
           </button>
           
           <div className="mt-4 space-y-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Parabéns pela Conclusão!</h2>
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">{t('myLearning.completionModal.title')}</h2>
             <p className="font-bold text-xl text-foreground tracking-tight leading-tight">{training.title}</p>
           </div>
         </div>
@@ -99,19 +101,19 @@ export function CompletionModal({ training, onClose, onConfirm, isSubmitting }: 
         {/* Content */}
         <div className="p-8 space-y-8">
           <p className="text-xs text-muted-foreground leading-relaxed font-medium text-center px-4">
-            Antes de guardarmos esta conquista, por favor avalia o curso para ajudar a IA a recomendar melhores conteúdos.
+            {t('myLearning.completionModal.description')}
           </p>
 
           <div className="space-y-8">
             <StarRating 
-              label="Avaliação Geral" 
+              label={t('myLearning.completionModal.ratingLabel')} 
               value={rating} 
               onChange={setRating} 
               icon={Star} 
             />
             
             <StarRating 
-              label="Relevância para a tua função" 
+              label={t('myLearning.completionModal.relevanceLabel')} 
               value={relevance} 
               onChange={setRelevance} 
               icon={Target} 
@@ -132,10 +134,10 @@ export function CompletionModal({ training, onClose, onConfirm, isSubmitting }: 
             )}
           >
             {isSubmitting ? (
-              <span className="animate-pulse">A Guardar Conquista...</span>
+              <span className="animate-pulse">{t('myLearning.completionModal.saving')}</span>
             ) : (
               <>
-                Confirmar Conclusão
+                {t('myLearning.completionModal.confirm')}
                 <CheckCircle2 className="h-4 w-4" />
               </>
             )}
@@ -145,7 +147,7 @@ export function CompletionModal({ training, onClose, onConfirm, isSubmitting }: 
             disabled={isSubmitting}
             className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
-            Cancelar
+            {t('myLearning.completionModal.cancel')}
           </button>
         </div>
       </div>

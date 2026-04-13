@@ -1,21 +1,17 @@
 import { SlidersHorizontal, RotateCcw, Star, ChevronDown, Check, Globe, DollarSign, BarChart3, Layers, CheckCheck } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
-// ─── Level badge config ───────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────────────────────────────
 
 export type LevelFilter = 'beginner' | 'intermediate' | 'advanced';
 
-const LEVELS: { value: LevelFilter; label: string }[] = [
-  { value: 'beginner',     label: 'Iniciante'  },
-  { value: 'intermediate', label: 'Intermédio' },
-  { value: 'advanced',     label: 'Avançado'   },
-];
-
-const LANGUAGES = [
-  { value: undefined as 'pt' | 'en' | undefined, label: 'Todos' },
-  { value: 'pt' as const, label: 'Português' },
-  { value: 'en' as const, label: 'Inglês' },
+const LEVEL_VALUES: LevelFilter[] = ['beginner', 'intermediate', 'advanced'];
+const LANGUAGE_OPTIONS = [
+  { value: undefined as 'pt' | 'en' | undefined, tKey: 'filter.languages.all' },
+  { value: 'pt' as const, tKey: 'filter.languages.pt' },
+  { value: 'en' as const, tKey: 'filter.languages.en' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -169,6 +165,7 @@ function StarPicker({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarProps) {
+  const { t } = useTranslation();
   const safePlatforms = Array.isArray(platforms) ? platforms : [];
 
   // Draft accumulates unpublished changes; only sent to parent on "Aplicar"
@@ -204,10 +201,10 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
     <div className="flex items-center gap-2 flex-wrap w-full py-1">
 
       {/* Plataformas */}
-      <FilterDropdown label="Plataformas" icon={Layers} active={draft.platforms.length > 0}>
+      <FilterDropdown label={t('filter.platforms')} icon={Layers} active={draft.platforms.length > 0}>
         <div className="space-y-1 p-1">
           {safePlatforms.length === 0 ? (
-            <p className="px-3 py-2 text-[10px] text-muted-foreground">Nenhuma plataforma encontrada</p>
+            <p className="px-3 py-2 text-[10px] text-muted-foreground">{t('filter.noPlatforms')}</p>
           ) : (
             safePlatforms.map((p) => (
               <button
@@ -227,37 +224,37 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
       </FilterDropdown>
 
       {/* Nível */}
-      <FilterDropdown label="Nível" icon={BarChart3} active={!!draft.level}>
+      <FilterDropdown label={t('filter.level')} icon={BarChart3} active={!!draft.level}>
         <div className="space-y-1 p-1">
-          {LEVELS.map((l) => (
+          {LEVEL_VALUES.map((v) => (
             <button
-              key={l.value}
-              onClick={() => update({ level: draft.level === l.value ? undefined : l.value })}
+              key={v}
+              onClick={() => update({ level: draft.level === v ? undefined : v })}
               className={cn(
                 'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition',
-                draft.level === l.value ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground',
+                draft.level === v ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground',
               )}
             >
-              {l.label}
-              {draft.level === l.value && <Check className="h-3.5 w-3.5" />}
+              {t(`filter.levels.${v}`)}
+              {draft.level === v && <Check className="h-3.5 w-3.5" />}
             </button>
           ))}
         </div>
       </FilterDropdown>
 
       {/* Idioma */}
-      <FilterDropdown label="Idioma" icon={Globe} active={!!draft.language}>
+      <FilterDropdown label={t('filter.language')} icon={Globe} active={!!draft.language}>
         <div className="space-y-1 p-1">
-          {LANGUAGES.map((lang) => (
+          {LANGUAGE_OPTIONS.map((lang) => (
             <button
-              key={lang.label}
+              key={lang.tKey}
               onClick={() => update({ language: lang.value })}
               className={cn(
                 'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs font-medium transition',
                 draft.language === lang.value ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground',
               )}
             >
-              {lang.label}
+              {t(lang.tKey)}
               {draft.language === lang.value && <Check className="h-3.5 w-3.5" />}
             </button>
           ))}
@@ -265,12 +262,12 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
       </FilterDropdown>
 
       {/* Preço */}
-      <FilterDropdown label="Preço" icon={DollarSign} active={draft.isFree !== undefined}>
+      <FilterDropdown label={t('filter.price')} icon={DollarSign} active={draft.isFree !== undefined}>
         <div className="space-y-1 p-1">
           {([
-            { label: 'Todos os Preços', value: undefined },
-            { label: 'Grátis', value: true },
-            { label: 'Pago', value: false },
+            { label: t('filter.allPrices'), value: undefined },
+            { label: t('filter.free'), value: true },
+            { label: t('filter.paid'), value: false },
           ] as { label: string; value: boolean | undefined }[]).map((opt, i) => (
             <button
               key={i}
@@ -288,10 +285,10 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
       </FilterDropdown>
 
       {/* Avaliação (externa — rating da plataforma de origem) */}
-      <FilterDropdown label="Avaliação" icon={Star} active={!!draft.minExternalRating}>
+      <FilterDropdown label={t('filter.rating')} icon={Star} active={!!draft.minExternalRating}>
         <div className="p-3 space-y-3">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-            Avaliação da plataforma
+            {t('filter.platformRating')}
           </p>
           <StarPicker
             value={draft.minExternalRating}
@@ -299,16 +296,16 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
             onChange={(v) => update({ minExternalRating: v })}
           />
           <p className="text-[10px] text-muted-foreground/50">
-            Rating atribuído pela plataforma original (ex: Udemy, Coursera…)
+            {t('filter.platformRatingDesc')}
           </p>
         </div>
       </FilterDropdown>
 
       {/* Avaliação Interna (dada pelos utilizadores da nossa plataforma) */}
-      <FilterDropdown label="Avaliação Interna" icon={Star} active={!!draft.minInternalRating}>
+      <FilterDropdown label={t('filter.internalRating')} icon={Star} active={!!draft.minInternalRating}>
         <div className="p-3 space-y-3">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-            Avaliação interna mínima
+            {t('filter.internalRatingMin')}
           </p>
           <StarPicker
             value={draft.minInternalRating}
@@ -316,16 +313,16 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
             onChange={(v) => update({ minInternalRating: v })}
           />
           <p className="text-[10px] text-muted-foreground/50">
-            Rating dado pelos utilizadores ao concluírem o curso nesta plataforma.
+            {t('filter.internalRatingDesc')}
           </p>
         </div>
       </FilterDropdown>
 
       {/* Relevância (atribuída pelos utilizadores) */}
-      <FilterDropdown label="Relevância" icon={SlidersHorizontal} active={!!draft.minRelevance}>
+      <FilterDropdown label={t('filter.relevance')} icon={SlidersHorizontal} active={!!draft.minRelevance}>
         <div className="p-3 space-y-3">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-            Relevância mínima
+            {t('filter.relevanceMin')}
           </p>
           <StarPicker
             value={draft.minRelevance}
@@ -333,7 +330,7 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
             onChange={(v) => update({ minRelevance: v })}
           />
           <p className="text-[10px] text-muted-foreground/50">
-            Utilidade do curso avaliada pelos utilizadores após conclusão.
+            {t('filter.relevanceDesc')}
           </p>
         </div>
       </FilterDropdown>
@@ -345,7 +342,7 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
           className="shrink-0 flex items-center gap-2 rounded-full border border-primary bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-primary-foreground shadow-md shadow-primary/20 transition-all hover:opacity-90 active:scale-95"
         >
           <CheckCheck className="h-3.5 w-3.5" />
-          Aplicar{draftCount > 0 ? ` (${draftCount})` : ''}
+          {t(draftCount > 0 ? 'filter.applyWithCount' : 'filter.apply', { count: draftCount })}
         </button>
       )}
 
@@ -361,7 +358,7 @@ export function FilterSidebar({ platforms, filters, onChange }: FilterSidebarPro
           )}
         >
           <RotateCcw className="h-3 w-3" />
-          Limpar{appliedCount > 0 ? ` (${appliedCount})` : ''}
+          {t(appliedCount > 0 ? 'filter.clearWithCount' : 'filter.clear', { count: appliedCount })}
         </button>
       )}
     </div>

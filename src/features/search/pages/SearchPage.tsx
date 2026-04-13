@@ -180,8 +180,8 @@ export default function SearchPage() {
         platformId: course.platformId,
       },
       {
-        onSuccess: () => toast.success(`"${course.title}" guardado!`),
-        onError: () => toast.error('Erro ao guardar curso.'),
+        onSuccess: () => toast.success(t('search.toastSaved', { title: course.title })),
+        onError: () => toast.error(t('search.toastSaveError')),
       },
     );
   };
@@ -211,8 +211,8 @@ export default function SearchPage() {
         <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
           <p className="text-sm text-foreground">
-            <span className="font-bold">{searchResponse!.total.toLocaleString('pt-PT')}+</span>{' '}
-            formações disponíveis — pesquisa para encontrar o que precisas
+            <span className="font-bold">{searchResponse!.total.toLocaleString()}</span>{'+ '}
+            {t('search.browseHint')}
           </p>
         </div>
       )}
@@ -220,7 +220,7 @@ export default function SearchPage() {
       {/* ── Semantic ranking badge (só com query activa) ──────────────── */}
       {searchQuery && searchResponse?.semanticRanking && (
         <p className="text-[10px] text-primary font-black uppercase tracking-widest opacity-80 animate-pulse px-1">
-          ✦ Resultados ordenados por relevância semântica
+          ✦ {t('search.semanticRanking')}
         </p>
       )}
 
@@ -243,9 +243,9 @@ export default function SearchPage() {
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 {isFetching
-                  ? 'A pesquisar…'
+                  ? t('search.searching')
                   : (searchResponse?.total ?? 0) > 0
-                    ? `${searchResponse?.total} resultado${searchResponse?.total !== 1 ? 's' : ''}`
+                    ? t('search.resultsCount', { count: searchResponse!.total })
                     : ''}
               </p>
               <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
@@ -265,7 +265,7 @@ export default function SearchPage() {
                     'rounded-md p-1.5 transition',
                     viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
                   )}
-                  aria-label="Lista"
+                  aria-label="List"
                 >
                   <List className="h-3.5 w-3.5" />
                 </button>
@@ -323,12 +323,12 @@ export default function SearchPage() {
                 className="flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-4 py-2 text-xs font-bold text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Anterior
+                {t('search.prevPage')}
               </button>
               
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black uppercase tracking-widest text-foreground">
-                  Página {page} de {searchResponse.totalPages}
+                  {t('search.pageOf', { page, total: searchResponse.totalPages })}
                 </span>
               </div>
 
@@ -337,7 +337,7 @@ export default function SearchPage() {
                 onClick={() => setPage(p => Math.min((searchResponse.totalPages ?? 1), p + 1))}
                 className="flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-4 py-2 text-xs font-bold text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Próximo
+                {t('search.nextPage')}
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>

@@ -13,6 +13,7 @@
     "users": "Users",
     "platforms": "Platforms",
     "analytics": "Analytics",
+    "audit": "Audit Log",
     "logout": "Logout",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
@@ -35,7 +36,8 @@
       "ai": "AI Assistant",
       "notifications": "Notifications",
       "privacy": "Privacy",
-      "appearance": "Appearance"
+      "appearance": "Appearance",
+      "app": "App"
     },
     "ai": {
       "title": "AI Preferences",
@@ -67,7 +69,11 @@
       "progress": "Course progress",
       "progressDesc": "Reminder when you have a course in progress for more than 7 days",
       "email": "Email notifications",
-      "inApp": "In-app notifications"
+      "inApp": "In-app notifications",
+      "emailDesc": "Receive important alerts and recommendations in your institutional email.",
+      "inAppDesc": "Receive alerts directly on the platform.",
+      "emailPrefsLabel": "Email Preferences",
+      "contentAlertsLabel": "Content and Alerts"
     },
     "privacy": {
       "title": "Privacy",
@@ -92,38 +98,6 @@
   "lang": {
     "pt": "Portuguese",
     "en": "English"
-  },
-  "dashboard": {
-    "greetingMorning": "Good morning",
-    "greetingAfternoon": "Good afternoon",
-    "greetingEvening": "Good evening",
-    "stats": {
-      "total": "Total trainings",
-      "ongoing": "In progress",
-      "completed": "Completed",
-      "hours": "Training hours"
-    },
-    "inProgress": "In Progress",
-    "saved": "Saved",
-    "viewAll": "View all",
-    "empty": {
-      "progress": "No training in progress. Start exploring courses!",
-      "saved": "No saved courses."
-    },
-    "recs": {
-      "career": {
-        "title": "Performance & Career Plan",
-        "sub": "Your current path at Softinsa"
-      },
-      "interests": {
-        "title": "New Horizons",
-        "sub": "Explore new technologies and sectors"
-      },
-      "skills": {
-        "title": "Profile / SL Gaps",
-        "sub": "Required skills for your current level"
-      }
-    }
   },
   "myLearning": {
     "title": "Progress Panel",
@@ -202,37 +176,6 @@
       "noCertsDesc": "Upload your first certificate to get started."
     }
   },
-  "profile": {
-    "editActive": "Edit mode active",
-    "editProfile": "Edit Profile",
-    "memberSince": "Member since",
-    "experienceLevel": "Experience level",
-    "jobTitle": "Job title",
-    "jobTitlePlaceholder": "e.g. Software Engineer",
-    "department": "Department",
-    "departmentPlaceholder": "e.g. Engineering",
-    "location": "Location",
-    "locationNotSet": "Not set",
-    "locationOffice": "Office",
-    "locationRemote": "Remote",
-    "locationHybrid": "Hybrid",
-    "admin": "Administrator",
-    "collaborator": "Collaborator",
-    "noSkills": "No skills added.",
-    "saveSuccess": "Profile saved.",
-    "saveError": "Error saving profile.",
-    "tabs": {
-      "overview": "Overview",
-      "activity": "Activity",
-      "certifications": "Certifications"
-    },
-    "recentActivity": "Recent Activity",
-    "noActivity": "No recent activity.",
-    "certifications": "Certifications",
-    "noCertifications": "No certifications registered.",
-    "downloadCv": "Download CV",
-    "shareProfile": "Share Profile"
-  },
   "search": {
     "title": "Course Search",
     "subtitle": "Find training across all platforms.",
@@ -250,6 +193,64 @@
       "title": "Search error",
       "desc": "Check the backend connection.",
       "retry": "Try again"
+    },
+    "clearAria": "Clear search",
+    "searchBtn": "Search",
+    "browseHint": "trainings available — search to find what you need",
+    "semanticRanking": "✦ Results sorted by semantic relevance",
+    "searching": "Searching…",
+    "resultsCount_one": "{{count}} result",
+    "resultsCount_other": "{{count}} results",
+    "listAria": "List",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "pageOf": "Page {{page}} of {{total}}",
+    "toastSaved": "\"{{title}}\" saved!",
+    "toastSaveError": "Failed to save course.",
+    "courseDetail": {
+      "back": "Back to search",
+      "notFoundTitle": "Course not found",
+      "notFoundDesc": "This course may not be available or there was an error loading it.",
+      "notFoundBtn": "Search other courses",
+      "statusCompleted": "Completed",
+      "statusSaved": "Saved",
+      "levelBeginner": "Beginner",
+      "levelIntermediate": "Intermediate",
+      "levelAdvanced": "Advanced",
+      "statDuration": "Duration",
+      "statRating": "Rating",
+      "statInternalRating": "Internal Rating",
+      "statCompletedBy": "Completed by",
+      "statCompletedByValue_one": "{{count}} colleague",
+      "statCompletedByValue_other": "{{count}} colleagues",
+      "statRelevance": "Relevance",
+      "statCost": "Cost",
+      "statCostFree": "Free",
+      "statCostPaid": "Paid",
+      "statCostVariable": "Variable",
+      "durationVariable": "Variable",
+      "aiSectionLabel": "Softinsa Algorithm",
+      "aiSectionSub": "High-Precision AI Analysis",
+      "aiSectionBody_1": "This course was prioritised on your dashboard with a",
+      "aiSectionBody_2": " match. We identified that content in",
+      "aiSectionBody_3": " is fundamental to your current development.",
+      "sidebarTitle": "Learning Management",
+      "actionSave": "Save Course",
+      "actionSaved": "Course Saved",
+      "actionComplete": "Mark as Completed",
+      "actionCompleted": "Course Completed",
+      "externalAccess": "External Access",
+      "externalAccessDesc": "You will be redirected to the provider's official platform to start the content.",
+      "startNow": "Start now",
+      "relatedTitle": "Similar Suggestions",
+      "relatedSub": "Based on this course's content",
+      "viewAllResults": "View all results",
+      "toastUpdated": "Status updated!",
+      "toastUpdateError": "Error updating.",
+      "toastSaved": "Saved!",
+      "toastSavedOngoing": "Added to plan!",
+      "toastSavedCompleted": "Marked as completed!",
+      "toastSaveError": "Error saving."
     }
   },
   "ai": {
@@ -263,6 +264,12 @@
     "loadingModel": "Loading the assistant…",
     "disclaimer": "The assistant can make mistakes. Verify important information.",
     "generating": "Thinking..."
+  },
+  "aiChat": {
+    "inputPlaceholder": "Type a message or use @ to mention a course…",
+    "mentionCourse": "Mention course",
+    "attachFileTitle": "Attach file",
+    "sendTitle": "Send message"
   },
   "header": {
     "aiActive": "AI Active",
@@ -278,11 +285,12 @@
   },
   "admin": {
     "title": "Admin Backoffice",
-    "subtitle": "Manage users, platforms and platform analytics.",
+    "subtitle": "Manage users, platforms, analytics and audit logs.",
     "tabs": {
       "users": "Users",
       "platforms": "Platforms",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "audit": "Audit Log"
     },
     "users": {
       "title": "Users",
@@ -307,7 +315,40 @@
       "confirmDeactivate": "Deactivate {{name}}'s account?",
       "confirmActivate": "Reactivate {{name}}'s account?",
       "confirm": "Confirm",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "exportCsv": "Export CSV",
+      "allRoles": "All roles",
+      "allStatuses": "All statuses",
+      "slManager": "Line Manager",
+      "user": "User",
+      "activeFilter": "Active",
+      "inactiveFilter": "Inactive",
+      "ownAccount": "Own account",
+      "makeAdmin": "Admin",
+      "makeSlManager": "Manager",
+      "makeSlManagerTitle": "Make Line Manager",
+      "removePermissions": "Remove Permissions",
+      "block": "Block",
+      "confirmMakeAdmin": "Promote {{name}} to Admin?",
+      "confirmMakeAdminDesc": "will have full access to the backoffice.",
+      "confirmMakeSlManager": "Make {{name}} Line Manager?",
+      "confirmMakeSlManagerDesc": "will have access to team management.",
+      "confirmDemoteDesc": "will become a regular user.",
+      "confirmDeactivateDesc": "will not be able to log in.",
+      "confirmActivateDesc": "will regain access to the platform.",
+      "paginationOf": "of {{n}} user",
+      "paginationOfPlural": "of {{n}} users",
+      "serviceLineLabel": "Service line",
+      "selectPlaceholder": "-- Select --",
+      "csvHeaders": {
+        "name": "Name",
+        "serviceLine": "Service Line",
+        "status": "Status",
+        "onboarding": "Onboarding",
+        "registered": "Registered",
+        "yes": "Yes",
+        "no": "No"
+      }
     },
     "platforms": {
       "title": "Platforms",
@@ -318,7 +359,10 @@
         "apiKey": "API Key",
         "active": "Active",
         "search": "Search",
-        "actions": "Actions"
+        "actions": "Actions",
+        "type": "Type",
+        "apiEndpoint": "API Endpoint",
+        "courses": "Courses"
       },
       "edit": "Edit",
       "delete": "Delete",
@@ -327,12 +371,26 @@
       "newTitle": "New platform",
       "fields": {
         "name": "Name",
+        "namePlaceholder": "e.g. Udemy",
+        "type": "Type",
+        "typePlaceholder": "e.g. udemy | coursera | linkedin | custom",
         "url": "Base URL",
         "urlPlaceholder": "https://...",
         "apiKey": "API Key",
         "apiKeyPlaceholder": "API key (optional)",
+        "apiKeyChangeHint": "Leave blank to keep unchanged",
+        "apiKeyNote": "Required for platforms with API-based search (e.g. Udemy, Coursera).",
+        "requiresApiKey": "Requires API Key",
+        "requiresApiKeyDesc": "The platform requires API key authentication",
         "active": "Platform active",
-        "search": "Search active"
+        "activeDesc": "Visible to users",
+        "search": "Search enabled",
+        "searchDesc": "Allows searching courses on this platform",
+        "config": "Config (credentials)",
+        "configAdd": "Add field",
+        "configEmpty": "No fields configured. Use for OAuth credentials (e.g. clientId, clientSecret).",
+        "configKeyPlaceholder": "key",
+        "configValuePlaceholder": "value"
       },
       "save": "Save changes",
       "create": "Create platform",
@@ -340,7 +398,17 @@
       "confirmDelete": "Delete \"{{name}}\"?",
       "confirmDeleteDesc": "This action cannot be undone.",
       "masked": "Set",
-      "notSet": "—"
+      "notSet": "—",
+      "toastCreated": "Platform created.",
+      "toastCreateError": "Error creating platform.",
+      "toastUpdated": "Platform updated.",
+      "toastUpdateError": "Error updating platform.",
+      "toastDeleted": "Platform deleted.",
+      "toastDeleteError": "Error deleting platform.",
+      "validationName": "Name is required.",
+      "validationType": "Type is required.",
+      "countSingle": "{{count}} platform",
+      "countPlural": "{{count}} platforms"
     },
     "analytics": {
       "title": "Analytics",
@@ -362,7 +430,910 @@
         "course": "Course",
         "date": "Date",
         "daysLeft": "Days"
+      },
+      "sections": {
+        "users": "Users",
+        "training": "Training",
+        "certificates": "Certificates",
+        "aiPlatforms": "AI & Platforms",
+        "charts": "Charts",
+        "alertsRecent": "Alerts & Recent Users"
+      },
+      "stats": {
+        "activeUsers": "Active users",
+        "totalUsers": "Total users",
+        "newThisMonth": "New this month",
+        "onboardingRate": "Onboarding rate",
+        "usersByServiceLine": "Users by Service Line",
+        "usersByLevel": "Users by Experience Level",
+        "completionRate": "Completion rate",
+        "totalTrainings": "Total trainings",
+        "ongoing": "In progress",
+        "totalCerts": "Total certificates",
+        "issuedThisMonth": "Issued this month",
+        "expiring30d": "Expiring (30d)",
+        "expiring6090d": "Expiring (31–60d)",
+        "aiConversations30d": "AI conversations (30d)",
+        "aiTotalMessages": "Total AI messages",
+        "indexedCourses": "Indexed courses",
+        "activePlatforms": "Active platforms",
+        "noData": "No data",
+        "completedByMonth": "Completed courses by month",
+        "completedBar": "Completed",
+        "usersBar": "Users",
+        "mostUsedPlatforms": "Most used platforms",
+        "searchesBar": "Searches"
+      },
+      "levels": {
+        "junior": "Junior",
+        "intermedio": "Mid-level",
+        "senior": "Senior",
+        "especialista": "Specialist",
+        "lider": "Leader"
+      },
+      "certTable": {
+        "title": "Certificates expiring soon",
+        "countSingle": "{{count}} certificate",
+        "countPlural": "{{count}} certificates",
+        "noResults": "No certificates expiring soon.",
+        "columns": {
+          "user": "User",
+          "course": "Course",
+          "expiresIn": "Expires in",
+          "urgency": "Urgency"
+        }
+      },
+      "recentUsersTable": {
+        "title": "Recent users",
+        "last": "last {{n}}",
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "role": "Role",
+          "serviceLine": "Service Line",
+          "registered": "Registered"
+        }
+      }
+    },
+    "audit": {
+      "title": "Audit Log",
+      "searchPlaceholder": "Search by actor, target or action...",
+      "refresh": "Refresh",
+      "demoWarning": "Showing example data — /admin/audit endpoint not available.",
+      "columns": {
+        "date": "Date",
+        "action": "Action",
+        "actor": "Actor",
+        "target": "Target",
+        "details": "Details"
+      },
+      "noResults": "No records found.",
+      "pagination": "{{from}}–{{to}} of {{total}} record",
+      "paginationPlural": "{{from}}–{{to}} of {{total}} records",
+      "actions": {
+        "ROLE_CHANGED": "Role changed",
+        "ROLE_UPDATED": "Role updated",
+        "USER_BLOCKED": "User blocked",
+        "USER_DEACTIVATED": "User deactivated",
+        "USER_ACTIVATED": "User activated",
+        "PLATFORM_CREATED": "Platform created",
+        "PLATFORM_UPDATED": "Platform updated",
+        "PLATFORM_DELETED": "Platform deleted"
       }
     }
+  },
+  "login": {
+    "title": "Sign in to",
+    "appName": "LearningHub",
+    "emailLabel": "Username",
+    "emailPlaceholder": "your.name@softinsa.pt",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot your password?",
+    "submit": "Sign in to the platform",
+    "or": "or",
+    "microsoftLogin": "Sign in with Microsoft",
+    "footer": "Use your internal Softinsa credentials",
+    "errorInvalidEmail": "Invalid email",
+    "errorMinPassword": "Minimum 6 characters",
+    "errorDefault": "Error signing in."
+  },
+  "onboarding": {
+    "ariaLabel": "Welcome to Softinsa Learning Hub",
+    "skipAria": "Skip introduction",
+    "stepIndicator": "Step {{current}} of {{total}}",
+    "prev": "Previous",
+    "next": "Next",
+    "start": "Get Started",
+    "dotAria": "Go to slide {{n}}",
+    "exitTourAria": "Exit Tutorial",
+    "skipTour": "Skip Tutorial",
+    "slides": {
+      "discovery": {
+        "title": "Course Discovery",
+        "description": "Search and find courses across multiple platforms at once.",
+        "highlight": "Multiple platforms, one search."
+      },
+      "ai": {
+        "title": "AI Assistant",
+        "description": "Your smart assistant analyzes your profile and recommends the ideal path.",
+        "highlight": "Personalized AI-powered recommendations."
+      },
+      "certificates": {
+        "title": "Certificate Management",
+        "description": "Track the courses you've completed and store your certificates.",
+        "highlight": "Your learning journey, always visible."
+      }
+    },
+    "tour": {
+      "dashboard": {
+        "title": "Your Dashboard",
+        "content": "Here you have a summary of all your progress, ongoing trainings and AI recommendations."
+      },
+      "search": {
+        "title": "Course Search",
+        "content": "Explore thousands of courses from various platforms with advanced filters."
+      },
+      "ai": {
+        "title": "AI Assistant",
+        "content": "Your intelligent co-pilot answers questions and suggests study plans."
+      },
+      "certificates": {
+        "title": "Your Certificates",
+        "content": "Manage all your achievements and certificates in one place."
+      },
+      "myLearning": {
+        "title": "Your Progress",
+        "content": "Track in real time the courses you are taking and the ones you've completed."
+      },
+      "profile": {
+        "title": "Your Profile",
+        "content": "Keep your technical profile up to date with current skills and experience."
+      },
+      "settings": {
+        "title": "Settings",
+        "content": "Customize your experience: language, notifications and AI preferences."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "content": "Stay informed when new mandatory courses or expiring certificates need your attention."
+      },
+      "next": "Next",
+      "finish": "Finish"
+    },
+    "modal": {
+      "step1Title": "Your Profile",
+      "step2Title": "Your Interests",
+      "step3Title": "Your Skills",
+      "step4Title": "Transparency & AI",
+      "step1Desc": "Customize your experience based on your area and level.",
+      "step2Desc": "What areas are you curious to explore at Softinsa?",
+      "step3Desc": "Identify your main competencies.",
+      "step4Desc": "How to enhance your learning journey.",
+      "functionLabel": "Role / Position",
+      "levelLabel": "Level",
+      "skillNameLabel": "Specialty / Competency",
+      "skillLevelLabel": "Your Level",
+      "skillLevelBeginner": "Beginner",
+      "skillLevelIntermediate": "Intermediate",
+      "skillLevelExpert": "Experienced",
+      "levelJunior": "Junior",
+      "levelIntermediate": "Intermediate",
+      "levelSenior": "Senior",
+      "levelSpecialist": "Specialist",
+      "levelLeader": "Leader",
+      "addInterestPlaceholder": "Add another interest (e.g. Blockchain, Go, UX...)",
+      "addButton": "Add",
+      "popularLabel": "Popular Suggestions",
+      "addSkill": "Add another skill",
+      "transparencyLabel": "Transparency Commitment",
+      "copilotTitle": "Your AI Co-pilot",
+      "copilotDesc": "Your profile data is used exclusively to generate personalized recommendations.",
+      "visibilityTitle": "Visibility and Career",
+      "visibilityDesc": "Service Line managers track your progress to identify training opportunities.",
+      "consentLabel": "Consent and Use",
+      "consentText": "By finishing, you confirm your awareness of the use of this data by the platform to optimize and support your professional development at Softinsa.",
+      "saving": "Saving...",
+      "functionRequired": "Please indicate your role",
+      "toastSuccess": "Onboarding complete! Your personalized hub is ready.",
+      "toastError": "Error saving data. Please try again."
+    }
+  },
+  "certDetail": {
+    "title": "Certificate Detail",
+    "download": "Download",
+    "open": "Open",
+    "replace": "Replace",
+    "reExtractLoading": "Re-extracting...",
+    "reExtract": "Re-extract AI",
+    "delete": "Delete",
+    "confirmDelete": "Delete this certificate? This action cannot be undone.",
+    "sectionTraining": "Training",
+    "sectionMetadata": "Metadata",
+    "fieldCourseName": "Course name",
+    "fieldProvider": "Platform / Provider",
+    "fieldDate": "Completion date",
+    "fieldExpiry": "Expiry date",
+    "fieldHours": "Training hours",
+    "saveLoading": "Saving…",
+    "save": "Save changes",
+    "toastSaved": "Metadata updated.",
+    "toastSaveError": "Error saving changes.",
+    "toastReExtracted": "Metadata re-extracted with AI.",
+    "toastReExtractError": "Error re-extracting metadata.",
+    "toastDeleted": "Certificate deleted.",
+    "toastDeleteError": "Error deleting certificate.",
+    "altImage": "Certificate"
+  },
+  "certCard": {
+    "statusActive": "Active",
+    "statusExpiring": "Expiring",
+    "statusExpired": "Expired"
+  },
+  "certUpload": {
+    "errorInvalidFormat": "Invalid format. Use PDF, PNG, JPG, WEBP, BMP, TIFF or TXT.",
+    "errorTooLarge": "File too large (max 10MB).",
+    "errorAlreadyExists": "This course already has an active certificate. Remove or replace it first."
+  },
+  "dashboard": {
+    "roles": {
+      "USER": "Collaborator",
+      "ADMIN": "Administrator",
+      "SERVICE_LINE_MANAGER": "SL Manager"
+    },
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "stats": {
+      "total": "Total trainings",
+      "ongoing": "In progress",
+      "completed": "Completed",
+      "hours": "Training hours"
+    },
+    "inProgress": "In Progress",
+    "saved": "Saved",
+    "viewAll": "View all",
+    "empty": {
+      "progress": "No training in progress. Start exploring courses!",
+      "saved": "No saved courses."
+    },
+    "recs": {
+      "label": "Personalised Insights",
+      "unifiedTitle": "Personalised Recommendations",
+      "empty": "No recommendations have been generated for your profile yet.",
+      "error": {
+        "title": "Recommendations failed"
+      },
+      "career": {
+        "title": "Performance & Career Plan",
+        "sub": "Your current path at Softinsa"
+      },
+      "interests": {
+        "title": "New Horizons",
+        "sub": "Explore new technologies and sectors"
+      },
+      "skills": {
+        "title": "Profile / SL Gaps",
+        "sub": "Required skills for your current level"
+      }
+    },
+    "alertBanner": {
+      "viewCert": "View certificate",
+      "searchCourses": "Search courses",
+      "dismissAria": "Dismiss alert",
+      "title": "Alerts & Renewals ({{count}})",
+      "renewTitle": "Update: {{courseName}}"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "prevMonthAria": "Previous month",
+      "nextMonthAria": "Next month",
+      "noReminders": "No reminders for this day",
+      "removeReminderAria": "Remove reminder",
+      "reminderTitlePlaceholder": "Reminder title…",
+      "saveButton": "Save",
+      "addButton": "New reminder",
+      "cancelAria": "Cancel",
+      "selectedDateFormat": "MMMM d",
+      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    },
+    "pendingFeedback": {
+      "title": "Pending Feedback",
+      "description": "We noticed you recently accessed these trainings. Please confirm your status to keep your history up to date:",
+      "started": "I started doing it",
+      "alreadyDone": "I had already done it",
+      "afterSuggestion": "I did it after suggestion",
+      "toastSuccess": "Feedback recorded successfully!",
+      "toastError": "Error recording feedback."
+    },
+    "progressCard": {
+      "statusOngoing": "In progress",
+      "statusCompleted": "Completed",
+      "statusPriority": "Priority",
+      "statusSaved": "Saved",
+      "statusAccessed": "Accessed",
+      "statusCancelled": "Cancelled",
+      "unknownPlatform": "Unknown platform",
+      "completedOn": "Completed on {{date}}",
+      "startedOn": "Started on {{date}}",
+      "savedOn": "Saved on {{date}}",
+      "stageStart": "Start",
+      "stageMid": "Middle",
+      "stageFinish": "Finish",
+      "progress": "Progress",
+      "priority": "Prio: {{order}}",
+      "rating": "Rating",
+      "relevance": "Relevance",
+      "notStarted": "Not started",
+      "documents": "Documents",
+      "continue": "Continue",
+      "viewCourse": "View course",
+      "uploadSuccess": "Document uploaded successfully!",
+      "uploadError": "Error uploading document."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "myLearning": "My Trainings",
+      "myLearningDesc": "Manage your learning path",
+      "uploadCert": "Upload Certificate",
+      "uploadCertDesc": "Import a certificate with AI",
+      "learningPlan": "Learning Plan",
+      "learningPlanDesc": "Build your learning path",
+      "exploreCourses": "Explore Courses",
+      "exploreCoursesDesc": "Search across all platforms",
+      "myTeam": "My Team",
+      "myTeamDesc": "Team progress and activity",
+      "adminPanel": "Admin Panel",
+      "adminPanelDesc": "Users, analytics and platforms",
+      "analytics": "Analytics",
+      "analyticsDesc": "Reports and platform metrics"
+    },
+    "recentActivity": {
+      "title": "Last Activity",
+      "subtitle": "Recent Movements",
+      "empty": "No activity recorded yet",
+      "exploreCourses": "Explore courses →",
+      "actionCompleted": "Completed",
+      "actionOngoing": "In progress",
+      "actionPriority": "Priority",
+      "actionSaved": "Saved",
+      "actionAccessed": "Accessed",
+      "actionCancelled": "Cancelled",
+      "justNow": "just now",
+      "minutesAgo": "{{n}}min ago",
+      "hoursAgo": "{{n}}h ago",
+      "yesterday": "yesterday",
+      "daysAgo": "{{n}} days ago",
+      "viewAll": "View all →"
+    },
+    "recommendations": {
+      "completeProfile": "Complete your profile to receive personalized suggestions.",
+      "refreshAria": "Refresh recommendations",
+      "coursesCount_one": "· {{count}} course",
+      "coursesCount_other": "· {{count}} courses",
+      "categories": {
+        "improvement": {
+          "label": "Performance & Career",
+          "shortLabel": "Performance"
+        },
+        "interests": {
+          "label": "New Horizons",
+          "shortLabel": "Horizons"
+        },
+        "missing_skills": {
+          "label": "Skill Gaps",
+          "shortLabel": "Skills"
+        }
+      },
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "profileLabel": "Profile: {{n}}%",
+      "sourcesLabel": "{{n}} RAG sources"
+    },
+    "mentionCourse": "Mention course",
+    "attachFileTitle": "Attach file (coming soon)",
+    "inputPlaceholder": "Ask the AI assistant something… use @ to mention a course",
+    "sendTitle": "Send (Enter)",
+    "panel": {
+      "title": "AI Suggestions",
+      "focusSkills": "Focus on your Skills",
+      "focusSkillQuery": "Recommend advanced courses on {{skill}}",
+      "newConversation": "New Conversation",
+      "history": "Conversation History",
+      "noTitle": "Untitled",
+      "deleteConversationAria": "Delete conversation",
+      "recent": "Recent",
+      "clear": "Clear",
+      "emptyHint": "Customise your profile to get AI suggestions.",
+      "suggestions": [
+        {"label": "Recommended courses", "query": "Recommend courses for my profile and current tech stack"},
+        {"label": "Missing certifications", "query": "What important certifications should I get for my area?"},
+        {"label": "Learning platforms", "query": "What learning platforms do you recommend for my level?"},
+        {"label": "Career plan", "query": "Create a structured learning plan for the next 3 months"}
+      ]
+    }
+  },
+  "filter": {
+    "platforms": "Platforms",
+    "noPlatforms": "No platforms found",
+    "level": "Level",
+    "language": "Language",
+    "price": "Price",
+    "allPrices": "All Prices",
+    "free": "Free",
+    "paid": "Paid",
+    "rating": "Rating",
+    "platformRating": "Platform rating",
+    "platformRatingDesc": "Rating given by the original platform (e.g. Udemy, Coursera…)",
+    "internalRating": "Internal Rating",
+    "internalRatingMin": "Minimum internal rating",
+    "internalRatingDesc": "Rating given by users when completing the course on this platform.",
+    "relevance": "Relevance",
+    "relevanceMin": "Minimum relevance",
+    "relevanceDesc": "Course usefulness rated by users after completion.",
+    "apply": "Apply",
+    "applyWithCount": "Apply ({{count}})",
+    "clear": "Clear",
+    "clearWithCount": "Clear ({{count}})",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "languages": {
+      "all": "All",
+      "pt": "Portuguese",
+      "en": "English"
+    }
+  },
+  "searchCard": {
+    "levelBeginner": "Beginner",
+    "levelIntermediate": "Intermediate",
+    "levelAdvanced": "Advanced",
+    "durationVariable": "Variable",
+    "attended": "Attended",
+    "platformRatingAria": "Platform rating",
+    "internalRatingAria": "Softinsa internal rating",
+    "save": "Save",
+    "saved": "Saved",
+    "viewCourse": "View course"
+  },
+  "myLearning": {
+    "title": "Progress Panel",
+    "subtitle": "Track your learning progress.",
+    "hello": "Hello",
+    "discover": "Discover training",
+    "tabs": {
+      "ongoing": "In Progress",
+      "completed": "Completed",
+      "later": "Saved",
+      "priority": "Plans"
+    },
+    "stats": {
+      "ongoing": "In Progress",
+      "completed": "Completed",
+      "later": "Saved",
+      "priority": "Plans"
+    },
+    "empty": {
+      "ongoingTitle": "No courses in progress",
+      "ongoingDesc": "Start a saved course or search for training on the platform.",
+      "completedTitle": "No completed courses",
+      "completedDesc": "Completed courses will appear here with their date and certificate.",
+      "laterTitle": "No saved courses",
+      "laterDesc": "Save courses from search to consult later.",
+      "priorityTitle": "Empty training plan",
+      "priorityDesc": "Mark courses as priority to structure your learning plan."
+    },
+    "statusMoved": {
+      "ongoing": "moved to In Progress.",
+      "completed": "marked as completed.",
+      "priority": "added to plan.",
+      "later": "saved for later."
+    },
+    "coursePrefix": "Course",
+    "errorUpdate": "Error updating record.",
+    "errorDelete": "Error deleting record.",
+    "deleted": "Course removed.",
+    "greetingSubtitle": "Here's your centralized progress.",
+    "discoverBtn": "Find New Trainings",
+    "navTab": {
+      "ongoing": "Started",
+      "completed": "Completed",
+      "later": "Saved",
+      "cancelled": "Cancelled"
+    },
+    "sectionOngoing": "Workspace in Progress",
+    "sectionCompleted": "Achievement Timeline",
+    "sort": {
+      "newest": "Most Recent",
+      "oldest": "Oldest",
+      "stage": "Current Stage",
+      "date": "Date",
+      "rating": "Rating",
+      "relevance": "Relevance"
+    },
+    "searchPlaceholder": "Search...",
+    "emptyHereTitle": "Nothing here yet...",
+    "emptyHereDesc": "Explore the catalogue or add a training manually.",
+    "discoverCourses": "Discover Courses",
+    "noResultsTitle": "No results found",
+    "noResultsDesc": "We couldn't find trainings matching \"{{term}}\" in this tab.",
+    "clearSearch": "Clear search",
+    "statusToast": {
+      "ongoing": "In Progress",
+      "completed": "Completed Successfully!",
+      "cancelled": "Course Cancelled",
+      "later": "Saved for later",
+      "default": "Status updated"
+    },
+    "trainingCard": {
+      "statusOngoing": "In Progress",
+      "statusCompleted": "Completed",
+      "statusPriority": "Priority",
+      "statusSaved": "Saved",
+      "statusAccessed": "Accessed",
+      "statusCancelled": "Cancelled",
+      "stageStart": "Start",
+      "stageMid": "Middle",
+      "stageFinish": "Finish",
+      "finishedToday": "Finished today",
+      "focusDays_one": "{{count}} focus day",
+      "focusDays_other": "{{count}} focus days",
+      "cancel": "Cancel",
+      "removePriority": "Remove Priority",
+      "priority": "Priority",
+      "remove": "Remove",
+      "reactivate": "Reactivate",
+      "certificate": "Certificate",
+      "startedOn": "Started {{date}}",
+      "completedOn": "Completed {{date}}",
+      "actions": "Actions",
+      "currentStage": "Current Stage",
+      "collapse": "Collapse",
+      "resources": "Resources",
+      "open": "Open",
+      "start": "Start",
+      "complete": "Complete"
+    },
+    "completionModal": {
+      "title": "Congratulations on Completing!",
+      "description": "Before we save this achievement, please rate the course to help the AI recommend better content.",
+      "ratingLabel": "Overall Rating",
+      "relevanceLabel": "Relevance to your role",
+      "saving": "Saving Achievement...",
+      "confirm": "Confirm Completion",
+      "cancel": "Cancel"
+    },
+    "completedTimeline": {
+      "certificate": "Certificate",
+      "emptyTitle": "No completed courses yet",
+      "emptyDesc": "When you complete a course, it will appear here on the timeline."
+    },
+    "planCard": {
+      "priority": "Priority",
+      "estimatedHours": "{{n}}h estimated",
+      "addedOn": "Added {{date}}",
+      "start": "Start",
+      "view": "View"
+    },
+    "resources": {
+      "documentsTitle": "Course Documents",
+      "documentsSubtitle": "Official material and attachments ({{count}})",
+      "remove": "Remove",
+      "uploading": "Uploading...",
+      "addDocument": "Add Document",
+      "notesTitle": "Notes & Resources",
+      "newNote": "New",
+      "noteTitlePlaceholder": "Resource title...",
+      "noteContentPlaceholder": "Write your notes here...",
+      "toastResourceAdded": "Resource added",
+      "toastResourceUpdated": "Resource updated",
+      "toastFileAddError": "Error adding file",
+      "toastFileRemoveError": "Error removing file",
+      "toastResourceRemoved": "Resource removed",
+      "toastMaterialAdded": "Material added",
+      "toastMaterialUploadError": "Error uploading file",
+      "toastMaterialDeleteError": "Error deleting file",
+      "unexpectedError": "An unexpected error occurred",
+      "cancelNote": "Cancel",
+      "saveNote": "Save",
+      "savingNote": "Saving...",
+      "filesSelected": "{{count}} selected",
+      "attachFiles": "Attach",
+      "emptyNotes": "No resources created",
+      "collapseButton": "Collapse Resources"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "editActive": "Edit mode active",
+    "editProfile": "Edit Profile",
+    "memberSince": "Member since",
+    "experienceLevel": "Experience level",
+    "jobTitle": "Job title",
+    "jobTitlePlaceholder": "e.g. Software Engineer",
+    "department": "Department",
+    "departmentPlaceholder": "e.g. Engineering",
+    "location": "Location",
+    "locationNotSet": "Not set",
+    "locationOffice": "Office",
+    "locationRemote": "Remote",
+    "locationHybrid": "Hybrid",
+    "admin": "Administrator",
+    "collaborator": "Collaborator",
+    "noSkills": "No skills added.",
+    "noInterests": "No interests added.",
+    "saveSuccess": "Profile saved.",
+    "saveError": "Error saving profile.",
+    "unsavedChanges": "You have unsaved changes",
+    "saving": "Saving...",
+    "saveProfile": "Save Profile",
+    "subtitle": "Manage your profile, skills and learning portfolio.",
+    "learningInterestsLabel": "Learning Interests",
+    "learningInterestsDesc": "Topics and technologies you want to explore.",
+    "learningInterestsPlaceholder": "e.g. Kubernetes, Machine Learning...",
+    "technicalSkillsLabel": "Technical Skills",
+    "technicalSkillsDesc": "Manage your technical skills and proficiency levels.",
+    "portfolioSection": "Portfolio & Sharing",
+    "portfolioTitle": "Your learning portfolio",
+    "portfolioCardTitle": "Learning Portfolio",
+    "portfolioCardDesc": "Visualize your journey, skills and certifications in a shareable format.",
+    "viewPortfolio": "View Portfolio",
+    "copyLink": "Copy Link",
+    "copyLinkSuccess": "Link copied!",
+    "exportPDF": "Export PDF",
+    "exportPDFDesc": "Generate a PDF of your learning portfolio.",
+    "copySummary": "Copy Summary",
+    "copySummaryDesc": "Copy a text summary of your portfolio to share.",
+    "copySummarySuccess": "Summary copied to clipboard!",
+    "portfolio": {
+      "backToProfile": "Back to Profile",
+      "exportPDF": "Export PDF",
+      "totalHours": "Training Hours",
+      "coursesCompleted": "Courses Completed",
+      "activeCerts": "Active Certifications",
+      "skillsSection": "Technical Skills",
+      "skillsTitle": "Skills",
+      "interestsSection": "Areas of Interest",
+      "interestsTitle": "Interests",
+      "certsSection": "Certifications",
+      "certsTitle": "Certification Portfolio",
+      "certsActive_one": "{{count}} active",
+      "certsActive_other": "{{count}} active",
+      "certsEmpty": "No active certifications yet",
+      "certsExpiredLabel": "Expired ({{count}})",
+      "certCompleted": "Completed: {{date}}",
+      "certValidUntil": "Valid until {{date}}",
+      "certExpired": "Expired",
+      "certPermanent": "Permanent",
+      "generatedOn": "Generated on",
+      "footerText": "Portfolio automatically generated by LearningHub Softinsa on {{date}}",
+      "role": {
+        "admin": "Administrator",
+        "collaborator": "Collaborator"
+      }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "activity": "Activity",
+      "certifications": "Certifications"
+    },
+    "recentActivity": "Recent Activity",
+    "noActivity": "No recent activity.",
+    "certifications": "Certifications",
+    "noCertifications": "No certifications registered.",
+    "downloadCv": "Download CV",
+    "shareProfile": "Share Profile",
+    "serviceLine": "Service Line",
+    "notDefined": "Not defined",
+    "memberId": "Member since {{date}}",
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "levels": {
+      "junior": "Junior",
+      "intermedio": "Mid-level",
+      "senior": "Senior",
+      "especialista": "Specialist",
+      "lider": "Leader"
+    },
+    "levelSubtitles": {
+      "junior": "Junior Professional",
+      "intermedio": "Mid-level Professional",
+      "senior": "Senior Professional",
+      "especialista": "Technical Specialist",
+      "lider": "Team Lead / Manager"
+    },
+    "skillsSection": {
+      "empty": "No skills defined.",
+      "description": "Manage your technical skills and proficiency levels.",
+      "placeholder": "e.g. Spring Boot, Figma...",
+      "levelBeginner": "Beginner",
+      "levelIntermediate": "Intermediate",
+      "levelExperienced": "Experienced"
+    },
+    "impact": {
+      "section": "Impact & Progress",
+      "title": "Learning Impact",
+      "totalHours": "Total Hours",
+      "coursesCompleted": "Courses Completed",
+      "streak": "Streak (Days)",
+      "hoursPerMonth": "Hours per month (6 months)",
+      "you": "You",
+      "companyAvg": "Company avg",
+      "companyComparison": "Company comparison",
+      "companyNote": "* Average based on aggregated and anonymous data."
+    },
+    "tagInput": {
+      "placeholder": "Add...",
+      "hint": "Enter or comma to add \u00b7 Backspace to remove the last"
+    }
+  },
+  "slManager": {
+    "title": "My Team",
+    "subtitle": "Manage the progress and certifications of your Service Line members.",
+    "kpi": {
+      "activeMembers": "Active members",
+      "completedTrainings": "Completed trainings",
+      "completedSub": "+{{n}} last 30d",
+      "ongoing": "In progress",
+      "ongoingSub": "{{avg}} avg/member",
+      "totalSub": "{{n}} total"
+    },
+    "table": {
+      "title": "Service Line Members",
+      "colMember": "Colleague",
+      "colRole": "Role / Level",
+      "colTrainings": "Trainings",
+      "colCerts": "Certificates",
+      "colLastActivity": "Last activity",
+      "colActions": "Actions",
+      "empty": "No members in your team yet.",
+      "ongoing": "{{n}} in progress",
+      "expiring": "{{n}} expiring",
+      "details": "Details",
+      "memberCount_one": "{{count}} member",
+      "memberCount_other": "{{count}} members"
+    },
+    "detail": {
+      "backLink": "Back to team",
+      "loadError": "Could not load colleague details.",
+      "inactive": "Inactive",
+      "tabs": {
+        "completed": "Completed",
+        "ongoing": "In progress",
+        "certificates": "Certificates"
+      },
+      "kpi": {
+        "completed": "Completed",
+        "ongoing": "In progress",
+        "hours": "Learning hours",
+        "activeCerts": "Active certs.",
+        "expiring90d": "Expiring (90d)"
+      },
+      "sections": {
+        "skills": "Skills",
+        "interests": "Declared interests"
+      },
+      "alerts": {
+        "expiredCerts_one": "{{count}} expired certificate — renewal needed.",
+        "expiredCerts_other": "{{count}} expired certificates — renewal needed.",
+        "expiring30d_one": "{{count}} certificate expiring in the next 30 days.",
+        "expiring30d_other": "{{count}} certificates expiring in the next 30 days.",
+        "expiring90d_one": "{{count}} certificate expiring in the next 90 days.",
+        "expiring90d_other": "{{count}} certificates expiring in the next 90 days.",
+        "noTrainings": "No trainings registered yet."
+      },
+      "expiry": {
+        "expired": "Expired",
+        "noExpiry": "No expiry"
+      },
+      "completed": {
+        "empty": "No completed trainings."
+      },
+      "ongoing": {
+        "empty": "No ongoing trainings.",
+        "startedOn": "Started {{date}}",
+        "status": "In progress"
+      },
+      "certificates": {
+        "empty": "No certificates registered.",
+        "issuedOn": "Issued {{date}}",
+        "expiresOn": "Expires {{date}}",
+        "noName": "Unnamed"
+      }
+    }
+  },
+  "header": {
+    "aiActive": "AI Active",
+    "tips": [
+      "Complete a course today and keep your streak active.",
+      "Are your certificates expiring? Check in Certificates.",
+      "Use the AI Assistant to request personalized recommendations.",
+      "Add skills to your profile for better suggestions.",
+      "Short 1h courses are ideal for daily learning.",
+      "Search by topic and filter by platform for better results.",
+      "Mark trainings as Priority to find them quickly."
+    ],
+    "notifications": {
+      "title": "Notifications",
+      "markAllReadAria": "Mark all as read",
+      "deleteAllAria": "Delete all",
+      "empty": "No notifications",
+      "markAllRead": "Mark all as read",
+      "deleteAria": "Delete notification"
+    }
+  },
+  "landing": {
+    "badge": "Softinsa internal platform · IBM Company",
+    "heroLine1": "The intelligent",
+    "heroLine2": "training platform",
+    "heroDesc": "Aggregates external trainings, recommends paths with AI, manages your progress and centralises certificates.",
+    "cta": "Sign in",
+    "statAI": "AI",
+    "stat1": "Platforms",
+    "stat2": "Recommendations",
+    "stat3": "iOS · Android",
+    "platformsLabel": "Integrated platforms",
+    "platformsTitle": "Simplified training search.",
+    "featuresLabel": "Features",
+    "featuresTitle": "Everything you need to grow",
+    "feat1Title": "AI Recommendations",
+    "feat1Desc": "Receive personalised training suggestions based on your profile, service line and skill gaps.",
+    "feat2Title": "Certificate Management",
+    "feat2Desc": "Upload and track your certifications with automatic expiry alerts.",
+    "feat3Title": "AI Assistant",
+    "feat3Desc": "Ask the assistant questions and get immediate guidance on which trainings to take next.",
+    "slLabel": "Service Lines",
+    "slTitle": "Organised around Softinsa's structure.",
+    "slDesc": "Recommendations automatically adapt to each employee's service line.",
+    "mobileLabel": "Mobile",
+    "mobileTitle1": "Always with you.",
+    "mobileTitle2": "On any device.",
+    "mobileDesc": "Access your learning journey, check recommendations and manage certificates from your smartphone — with the same experience as the web version.",
+    "iosDesc": "Add to home screen",
+    "androidDesc": "Install as native app",
+    "desktopDesc": "Chrome, Edge, Safari",
+    "ctaTitle1": "Your next step",
+    "ctaTitle2": "starts here.",
+    "ctaDesc": "Access your profile, discover relevant trainings and keep your journey always up to date — all in one platform.",
+    "ctaButton": "Let's start",
+    "footerTagline": "Softinsa's central knowledge platform, accelerating skills development.",
+    "footerPlatform": "Platform",
+    "footerResources": "Resources",
+    "footerLegal": "Legal",
+    "footerSolutions": "Solutions",
+    "footerCurriculum": "Curriculum",
+    "footerAI": "AI Engine",
+    "footerSupport": "Support",
+    "footerContact": "Contact",
+    "footerCareers": "Careers",
+    "footerPrivacy": "Privacy",
+    "footerTerms": "Terms of Use",
+    "footerCopyright": "© 2026 Softinsa · LearningHub",
+    "footerRights": "Portugal · All rights reserved"
+  },
+  "settings2": {
+    "appSection": "Application",
+    "notDefinedOption": "Not set",
+    "toastSaved": "Settings saved.",
+    "toastError": "Error saving settings.",
+    "installed": "App Installed",
+    "installedDesc": "LearningHub is already installed on your device.",
+    "installedBadge": "✓ Installed",
+    "iosTitle": "Install on iPhone / iPad",
+    "iosDesc": "Safari does not support automatic installation. Follow these steps:",
+    "iosStep1a": "Tap",
+    "iosStep1b": "Share",
+    "iosStep1c": "in the Safari bar",
+    "iosStep2a": "Select",
+    "iosStep2b": "Add to Home Screen",
+    "iosStep3a": "Tap",
+    "iosStep3b": "Add",
+    "install": "Install App",
+    "installDesc": "Install LearningHub on your device for faster access and a native experience.",
+    "installDescNotAvail": "Open this page in Chrome for Android or Edge to install the app.",
+    "installButton": "Install"
   }
 }

@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
@@ -106,15 +105,6 @@ export default function LoginPage() {
 
               {/* Password */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between px-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60" htmlFor="password">Senha</label>
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-[10px] font-semibold text-muted-foreground/60 hover:text-foreground transition-colors"
-                  >
-                    Esqueceste a palavra-passe?
-                  </Link>
-                </div>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                   <input

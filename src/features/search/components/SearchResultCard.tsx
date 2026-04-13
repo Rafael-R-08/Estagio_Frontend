@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { trainingApi } from '@/services/api';
 import type { CourseSearchResult } from '@/types';
@@ -24,9 +25,6 @@ const LEVEL_STYLES: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200/50',
   intermediate: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200/50',
   advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400 border-violet-200/50',
-};
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
 };
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -98,13 +96,14 @@ export function SearchResultCard({
   savedExternalIds = new Set(),
 }: SearchResultCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [localSaved, setLocalSaved] = useState(savedExternalIds.has(course.externalId));
 
   const levelStyle = course.level ? LEVEL_STYLES[course.level] : undefined;
-  const levelLabel = course.level ? LEVEL_LABELS[course.level] : undefined;
+  const levelLabel = course.level ? t(`searchCard.level${course.level.charAt(0).toUpperCase() + course.level.slice(1)}`) : undefined;
 
   const formatDuration = (h?: number) => {
-    if (!h) return 'Variável';
+    if (!h) return t('searchCard.durationVariable');
     const hrs = Math.floor(h);
     const mins = Math.round((h - hrs) * 60);
     if (hrs === 0) return `${mins}m`;
@@ -142,7 +141,7 @@ export function SearchResultCard({
       {alreadyAttended && (
         <div className="absolute right-5 top-5 flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
           <CheckCircle2 className="h-4 w-4" />
-          Frequentado
+          {t('searchCard.attended')}
         </div>
       )}
 
@@ -190,14 +189,14 @@ export function SearchResultCard({
         )}
         {/* Avaliação externa (rating da plataforma de origem) */}
         {course.rating !== undefined && (
-          <div className="flex items-center gap-1 rounded-md bg-amber-50/50 px-2 py-0.5 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 font-bold border border-amber-200/30" title="Avaliação da plataforma">
+          <div className="flex items-center gap-1 rounded-md bg-amber-50/50 px-2 py-0.5 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 font-bold border border-amber-200/30" title={t('searchCard.platformRatingAria')}>
             <Star className="h-3.5 w-3.5 fill-current" />
             {course.rating.toFixed(1)}
           </div>
         )}
         {/* Avaliação interna Softinsa */}
         {course.internalRating !== undefined && (
-          <div className="flex items-center gap-1 rounded-md bg-orange-50/50 px-2 py-0.5 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 font-bold border border-orange-200/30" title="Avaliação interna Softinsa">
+          <div className="flex items-center gap-1 rounded-md bg-orange-50/50 px-2 py-0.5 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 font-bold border border-orange-200/30" title={t('searchCard.internalRatingAria')}>
             <Star className="h-3.5 w-3.5 fill-current" />
             {course.internalRating.toFixed(1)}
             <span className="text-[9px] font-black uppercase tracking-wider opacity-70">int</span>
@@ -227,7 +226,7 @@ export function SearchResultCard({
           ) : course.isFree === false ? (
             <span className="rounded-md bg-muted/80 border border-border text-muted-foreground px-2.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm">
               <DollarSign className="inline h-2.5 w-2.5 mr-0.5 mb-0.5" />
-              {course.price || 'Pago'}
+              {course.price || t('filter.paid')}
             </span>
           ) : (
             <span className="rounded-md bg-muted/50 border border-border/60 text-muted-foreground/60 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest">
@@ -270,7 +269,7 @@ export function SearchResultCard({
         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <ActionBtn
             icon={Bookmark}
-            label={localSaved ? 'Guardado' : 'Guardar'}
+            label={localSaved ? t('searchCard.saved') : t('searchCard.save')}
             onClick={handleSave}
             active={localSaved}
             activeClass="bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/20"
@@ -284,7 +283,7 @@ export function SearchResultCard({
           onClick={handleViewCourse}
           className="flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-xl shadow-foreground/10"
         >
-          Ver curso
+          {t('searchCard.viewCourse')}
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>

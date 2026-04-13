@@ -87,20 +87,21 @@ function NavSegment({
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ onDiscover }: { onDiscover: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
         <Plus className="h-8 w-8 text-muted-foreground/40" />
       </div>
       <div>
-        <p className="text-sm font-medium text-foreground">Ainda não tens nada aqui...</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">Explora o catálogo ou adiciona uma formação manualmente.</p>
+        <p className="text-sm font-medium text-foreground">{t('myLearning.emptyHereTitle')}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{t('myLearning.emptyHereDesc')}</p>
       </div>
       <button
         onClick={onDiscover}
         className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
       >
-        Descobrir Cursos
+        {t('myLearning.discoverCourses')}
       </button>
     </div>
   );
@@ -155,8 +156,15 @@ export default function MyLearningPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, ...dto }: { id: string } & any) =>
       trainingApi.update(id, dto),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      // When a training is marked completed, backend fires the notification async —
+      // schedule a refetch after 3s to pick it up without waiting the full polling cycle
+      if (variables.status === 'completed') {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }, 3000);
+      }
     },
     onError: () => toast.error(t('myLearning.errorUpdate')),
   });
@@ -174,13 +182,7 @@ export default function MyLearningPage() {
   const handleStatusChange = (id: string, status: TrainingStatus, extra?: any) => {
     updateMutation.mutate({ id, status, ...extra }, {
       onSuccess: () => {
-        const labels: Record<string, string> = {
-          ongoing: 'Em Progresso',
-          completed: 'Concluído com Sucesso!',
-          cancelled: 'Curso Cancelado',
-          later: 'Guardado para depois'
-        };
-        toast.success(labels[status] || 'Estado atualizado');
+        toast.success(t(`myLearning.statusToast.${status}`, t('myLearning.statusToast.default')));
       },
     });
   };
@@ -233,10 +235,10 @@ export default function MyLearningPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between gap-4 px-2">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">Painel de Progresso</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('myLearning.title')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Olá, <span className="font-bold text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
-            Aqui tens o teu progresso centralizado.
+            {t('myLearning.hello')}, <span className="font-bold text-foreground">{(user?.name ?? 'Utilizador').split(' ')[0]}</span>.
+            {' '}{t('myLearning.greetingSubtitle')}
           </p>
         </div>
         <button
@@ -244,7 +246,7 @@ export default function MyLearningPage() {
           className="shrink-0 flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20"
         >
           <Plus className="h-4 w-4" />
-          Procurar Novas Formações
+          {t('myLearning.discoverBtn')}
         </button>
       </div>
 
@@ -252,7 +254,7 @@ export default function MyLearningPage() {
       <div className="rounded-[2.2rem] bg-muted/30 backdrop-blur-xl border border-border/40 p-1.5 shadow-sm">
         <div className="flex items-center gap-1">
           <NavSegment
-            label="Iniciados"
+            label={t('myLearning.navTab.ongoing')}
             value={counts.ongoing}
             activeColor="bg-blue-500/10 text-blue-600 dark:text-blue-400"
             icon={PlayCircle}
@@ -260,7 +262,7 @@ export default function MyLearningPage() {
             onClick={() => handleTabChange('ongoing')}
           />
           <NavSegment
-            label="Concluídos"
+            label={t('myLearning.navTab.completed')}
             value={counts.completed}
             activeColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
             icon={CheckCircle2}
@@ -268,7 +270,7 @@ export default function MyLearningPage() {
             onClick={() => handleTabChange('completed')}
           />
           <NavSegment
-            label="Guardados"
+            label={t('myLearning.navTab.later')}
             value={counts.later}
             activeColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
             icon={Bookmark}
@@ -276,7 +278,7 @@ export default function MyLearningPage() {
             onClick={() => handleTabChange('later')}
           />
           <NavSegment
-            label="Cancelados"
+            label={t('myLearning.navTab.cancelled')}
             value={counts.cancelled}
             activeColor="bg-red-500/10 text-red-600 dark:text-red-400"
             icon={XCircle}
@@ -299,15 +301,15 @@ export default function MyLearningPage() {
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted/30 mb-4 ring-1 ring-border/50">
                 <Search className="h-8 w-8 text-muted-foreground/40" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">Nenhum resultado encontrado</h3>
+              <h3 className="text-lg font-bold text-foreground">{t('myLearning.noResultsTitle')}</h3>
               <p className="mt-2 text-sm text-muted-foreground max-w-[280px]">
-                Não encontrámos formações que correspondam a "<span className="font-bold text-foreground">{searchTerm}</span>" nesta aba.
+                {t('myLearning.noResultsDesc', { term: searchTerm })}
               </p>
               <button
                 onClick={() => setSearchTerm('')}
                 className="mt-6 text-sm font-bold text-primary hover:underline underline-offset-4"
               >
-                Limpar pesquisa
+                {t('myLearning.clearSearch')}
               </button>
             </div>
           ) : (
@@ -323,7 +325,7 @@ export default function MyLearningPage() {
                     "text-xs font-bold uppercase tracking-wider text-muted-foreground transition-all duration-300",
                     isSearchVisible && "hidden sm:block opacity-40 shrink-0"
                   )}>
-                    Linha do Tempo de Conquistas
+                    {t('myLearning.sectionCompleted')}
                   </h2>
                 </div>
 
@@ -345,7 +347,7 @@ export default function MyLearningPage() {
                       <input
                         autoFocus
                         type="text"
-                        placeholder="Procurar..."
+                        placeholder={t('myLearning.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="h-9 w-full rounded-2xl border border-border/40 bg-muted/20 pl-9 pr-8 text-[11px] font-bold focus:bg-background focus:outline-none focus:ring-1 focus:ring-foreground/10 transition-all shadow-sm"
@@ -363,9 +365,9 @@ export default function MyLearningPage() {
 
               <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40 w-fit">
                 {[
-                  { id: 'date', label: 'Data', icon: Calendar },
-                  { id: 'rating', label: 'Avaliação', icon: Star },
-                  { id: 'relevance', label: 'Relevância', icon: Target },
+                  { id: 'date', label: t('myLearning.sort.date'), icon: Calendar },
+                  { id: 'rating', label: t('myLearning.sort.rating'), icon: Star },
+                  { id: 'relevance', label: t('myLearning.sort.relevance'), icon: Target },
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -410,7 +412,7 @@ export default function MyLearningPage() {
                       "text-xs font-bold uppercase tracking-wider text-muted-foreground transition-all duration-300",
                       isSearchVisible && "hidden sm:block opacity-40 shrink-0"
                     )}>
-                      Workspace em Progresso
+                      {t('myLearning.sectionOngoing')}
                     </h2>
                   </div>
 
@@ -432,7 +434,7 @@ export default function MyLearningPage() {
                         <input
                           autoFocus
                           type="text"
-                          placeholder="Procurar..."
+                          placeholder={t('myLearning.searchPlaceholder')}
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="h-9 w-full rounded-2xl border border-border/40 bg-muted/20 pl-9 pr-8 text-[11px] font-bold focus:bg-background focus:outline-none focus:ring-1 focus:ring-foreground/10 transition-all shadow-sm"
@@ -450,9 +452,9 @@ export default function MyLearningPage() {
 
                 <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40 w-fit">
                   {[
-                    { id: 'newest', label: 'Mais Recente', icon: Clock },
-                    { id: 'oldest', label: 'Mais Antigo', icon: ArrowDownUp },
-                    { id: 'stage', label: 'Etapa Atual', icon: Layers },
+                    { id: 'newest', label: t('myLearning.sort.newest'), icon: Clock },
+                    { id: 'oldest', label: t('myLearning.sort.oldest'), icon: ArrowDownUp },
+                    { id: 'stage', label: t('myLearning.sort.stage'), icon: Layers },
                   ].map((opt) => (
                     <button
                       key={opt.id}

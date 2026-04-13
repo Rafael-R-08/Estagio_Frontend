@@ -13,6 +13,7 @@
     "users": "Utilizadores",
     "platforms": "Plataformas",
     "analytics": "Analytics",
+    "audit": "Auditoria",
     "logout": "Terminar sessão",
     "expandSidebar": "Expandir sidebar",
     "collapseSidebar": "Colapsar sidebar",
@@ -35,7 +36,8 @@
       "ai": "Assistente IA",
       "notifications": "Notificações",
       "privacy": "Privacidade",
-      "appearance": "Aparência"
+      "appearance": "Aparência",
+      "app": "Aplicação"
     },
     "ai": {
       "title": "Preferências da IA",
@@ -67,7 +69,11 @@
       "progress": "Progresso de cursos",
       "progressDesc": "Lembrete quando tens um curso a meio há mais de 7 dias",
       "email": "Notificações por email",
-      "inApp": "Notificações in-app"
+      "inApp": "Notificações in-app",
+      "emailDesc": "Receber alertas importantes e recomendações no teu email institucional.",
+      "inAppDesc": "Receber alertas diretamente na plataforma.",
+      "emailPrefsLabel": "Preferências de Email",
+      "contentAlertsLabel": "Conteúdo e Alertas"
     },
     "privacy": {
       "title": "Privacidade",
@@ -91,38 +97,6 @@
   "lang": {
     "pt": "Português",
     "en": "Inglês"
-  },
-  "dashboard": {
-    "greetingMorning": "Bom dia",
-    "greetingAfternoon": "Boa tarde",
-    "greetingEvening": "Boa noite",
-    "stats": {
-      "total": "Total de formações",
-      "ongoing": "Em progresso",
-      "completed": "Concluídas",
-      "hours": "Horas de formação"
-    },
-    "inProgress": "Em Progresso",
-    "saved": "Guardados",
-    "viewAll": "Ver todos",
-    "empty": {
-      "progress": "Nenhuma formação em progresso. Começa a explorar cursos!",
-      "saved": "Nenhum curso guardado."
-    },
-    "recs": {
-      "career": {
-        "title": "Performance & Plano de Carreira",
-        "sub": "O teu percurso atual na Softinsa"
-      },
-      "interests": {
-        "title": "Novos Horizontes",
-        "sub": "Explora novas tecnologias e áreas"
-      },
-      "skills": {
-        "title": "Gaps de Perfil / SL",
-        "sub": "Skills necessárias para o teu nível"
-      }
-    }
   },
   "myLearning": {
     "title": "Painel de Progresso",
@@ -201,38 +175,6 @@
       "noCertsDesc": "Carrega o teu primeiro certificado para começar."
     }
   },
-  "profile": {
-    "title": "Perfil",
-    "editActive": "Modo edição activo",
-    "editProfile": "Editar Perfil",
-    "memberSince": "Membro desde",
-    "experienceLevel": "Nível de experiência",
-    "jobTitle": "Cargo",
-    "jobTitlePlaceholder": "Ex: Software Engineer",
-    "department": "Departamento",
-    "departmentPlaceholder": "Ex: Engenharia",
-    "location": "Localização",
-    "locationNotSet": "Não definido",
-    "locationOffice": "Escritório",
-    "locationRemote": "Remoto",
-    "locationHybrid": "Híbrido",
-    "admin": "Administrador",
-    "collaborator": "Colaborador",
-    "noSkills": "Nenhuma skill adicionada.",
-    "saveSuccess": "Perfil guardado.",
-    "saveError": "Erro ao guardar o perfil.",
-    "tabs": {
-      "overview": "Visão Geral",
-      "activity": "Atividade",
-      "certifications": "Certificações"
-    },
-    "recentActivity": "Atividade Recente",
-    "noActivity": "Nenhuma atividade recente.",
-    "certifications": "Certificações",
-    "noCertifications": "Nenhuma certificação registada.",
-    "downloadCv": "Download CV",
-    "shareProfile": "Partilhar Perfil"
-  },
   "search": {
     "title": "Pesquisa de Cursos",
     "subtitle": "Encontra formação em todas as plataformas.",
@@ -250,6 +192,65 @@
       "title": "Erro ao pesquisar",
       "desc": "Verifica a ligação ao backend.",
       "retry": "Tentar novamente"
+    },
+    "clearAria": "Limpar pesquisa",
+    "searchBtn": "Pesquisar",
+    "browseHint": "formações disponíveis — pesquisa para encontrar o que precisas",
+    "semanticRanking": "✦ Resultados ordenados por relevância semântica",
+    "searching": "A pesquisar…",
+    "resultsCount_one": "{{count}} resultado",
+    "resultsCount_other": "{{count}} resultados",
+    "listAria": "Lista",
+    "prevPage": "Anterior",
+    "nextPage": "Próximo",
+    "pageOf": "Página {{page}} de {{total}}",
+    "toastSaved": "\"{{title}}\" guardado!",
+    "toastSaveError": "Erro ao guardar curso.",
+    "courseDetail": {
+      "back": "Voltar à pesquisa",
+      "notFoundTitle": "Curso não encontrado",
+      "notFoundDesc": "Este curso pode não estar disponível ou houve um erro ao carregar.",
+      "notFoundBtn": "Pesquisar outros cursos",
+      "statusCompleted": "Concluído",
+      "statusSaved": "Guardado",
+      "levelBeginner": "Iniciante",
+      "levelIntermediate": "Intermédio",
+      "levelAdvanced": "Avançado",
+      "statDuration": "Duração",
+      "statRating": "Avaliação",
+      "statInternalRating": "Avaliação Interna",
+      "statCompletedBy": "Concluído por",
+      "statCompletedByValue_one": "{{count}} colega",
+      "statCompletedByValue_other": "{{count}} colegas",
+      "statRelevance": "Relevância",
+      "statCost": "Investimento",
+      "statCostFree": "Gratuito",
+      "statCostPaid": "Pago",
+      "statCostVariable": "Variável",
+      "durationVariable": "Variável",
+      "aiSectionLabel": "Algoritmo Softinsa",
+      "aiSectionSub": "Análise de IA de Alta Precisão",
+      "aiSectionBody_1": "Este curso foi priorizado no teu dashboard com uma aderência de",
+      "aiSectionBody_2": ". Identificámos que o conteúdo em",
+      "aiSectionBody_3": " é fundamental para o teu desenvolvimento atual.",
+      "aiSectionBody": "Este curso foi priorizado no teu dashboard com uma aderência de <strong>{{score}}%</strong>. Identificámos que o conteúdo em <strong>{{tags}}</strong> é fundamental para o teu desenvolvimento atual.",
+      "sidebarTitle": "Gestão de Aprendizagem",
+      "actionSave": "Guardar Curso",
+      "actionSaved": "Curso Guardado",
+      "actionComplete": "Marcar como Concluído",
+      "actionCompleted": "Curso Concluído",
+      "externalAccess": "Acesso Externo",
+      "externalAccessDesc": "Serás redirecionado para a plataforma oficial do fornecedor para iniciar o conteúdo.",
+      "startNow": "Começar agora",
+      "relatedTitle": "Sugestões Semelhantes",
+      "relatedSub": "Baseado no conteúdo deste curso",
+      "viewAllResults": "Ver todos os resultados",
+      "toastUpdated": "Estado atualizado!",
+      "toastUpdateError": "Erro ao atualizar.",
+      "toastSaved": "Guardado!",
+      "toastSavedOngoing": "Adicionado ao plano!",
+      "toastSavedCompleted": "Marcado como concluído!",
+      "toastSaveError": "Erro ao guardar."
     }
   },
   "ai": {
@@ -263,6 +264,12 @@
     "loadingModel": "A carregar o assistente…",
     "disclaimer": "O assistente pode cometer erros. Verifica informações importantes.",
     "generating": "A processar..."
+  },
+  "aiChat": {
+    "inputPlaceholder": "Escreve uma mensagem ou usa @ para mencionar um curso…",
+    "mentionCourse": "Mencionar curso",
+    "attachFileTitle": "Anexar ficheiro",
+    "sendTitle": "Enviar mensagem"
   },
   "header": {
     "aiActive": "IA Ativa",
@@ -278,11 +285,12 @@
   },
   "admin": {
     "title": "Backoffice Admin",
-    "subtitle": "Gestão de utilizadores, plataformas e analytics da plataforma.",
+    "subtitle": "Gestão de utilizadores, plataformas, analytics e auditoria da plataforma.",
     "tabs": {
       "users": "Utilizadores",
       "platforms": "Plataformas",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "audit": "Auditoria"
     },
     "users": {
       "title": "Utilizadores",
@@ -307,7 +315,40 @@
       "confirmDeactivate": "Desativar conta de {{name}}?",
       "confirmActivate": "Reativar conta de {{name}}?",
       "confirm": "Confirmar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "exportCsv": "Exportar CSV",
+      "allRoles": "Todos os roles",
+      "allStatuses": "Todos os estados",
+      "slManager": "Chefe de Linha",
+      "user": "Utilizador",
+      "activeFilter": "Ativos",
+      "inactiveFilter": "Inativos",
+      "ownAccount": "Conta própria",
+      "makeAdmin": "Admin",
+      "makeSlManager": "Chefe",
+      "makeSlManagerTitle": "Tornar Chefe de Linha",
+      "removePermissions": "Retirar Permissões",
+      "block": "Bloquear",
+      "confirmMakeAdmin": "Promover {{name}} a Admin?",
+      "confirmMakeAdminDesc": "terá acesso total ao backoffice.",
+      "confirmMakeSlManager": "Tornar {{name}} Chefe de Linha?",
+      "confirmMakeSlManagerDesc": "terá acesso à gestão da sua equipa.",
+      "confirmDemoteDesc": "passará a utilizador normal.",
+      "confirmDeactivateDesc": "não conseguirá iniciar sessão.",
+      "confirmActivateDesc": "voltará a ter acesso à plataforma.",
+      "paginationOf": "de {{n}} utilizador",
+      "paginationOfPlural": "de {{n}} utilizadores",
+      "serviceLineLabel": "Linha de serviço",
+      "selectPlaceholder": "-- Seleciona --",
+      "csvHeaders": {
+        "name": "Nome",
+        "serviceLine": "Linha de Serviço",
+        "status": "Estado",
+        "onboarding": "Onboarding",
+        "registered": "Registado",
+        "yes": "Sim",
+        "no": "Não"
+      }
     },
     "platforms": {
       "title": "Plataformas",
@@ -318,7 +359,10 @@
         "apiKey": "API Key",
         "active": "Ativa",
         "search": "Pesquisa",
-        "actions": "Ações"
+        "actions": "Ações",
+        "type": "Tipo",
+        "apiEndpoint": "API Endpoint",
+        "courses": "Cursos"
       },
       "edit": "Editar",
       "delete": "Eliminar",
@@ -327,12 +371,26 @@
       "newTitle": "Nova plataforma",
       "fields": {
         "name": "Nome",
+        "namePlaceholder": "ex. Udemy",
+        "type": "Tipo",
+        "typePlaceholder": "ex. udemy | coursera | linkedin | custom",
         "url": "URL Base",
         "urlPlaceholder": "https://...",
         "apiKey": "API Key",
         "apiKeyPlaceholder": "Chave de API (opcional)",
+        "apiKeyChangeHint": "Deixa em branco para não alterar",
+        "apiKeyNote": "Necessária para plataformas com pesquisa via API (ex. Udemy, Coursera).",
+        "requiresApiKey": "Requer API Key",
+        "requiresApiKeyDesc": "A plataforma exige autenticação via API key",
         "active": "Plataforma ativa",
-        "search": "Pesquisa ativa"
+        "activeDesc": "Visível para os utilizadores",
+        "search": "Pesquisa ativada",
+        "searchDesc": "Permite pesquisar cursos nesta plataforma",
+        "config": "Config (credenciais)",
+        "configAdd": "Adicionar campo",
+        "configEmpty": "Nenhum campo configurado. Usa para credenciais OAuth (ex. clientId, clientSecret).",
+        "configKeyPlaceholder": "chave",
+        "configValuePlaceholder": "valor"
       },
       "save": "Guardar alterações",
       "create": "Criar plataforma",
@@ -340,7 +398,17 @@
       "confirmDelete": "Eliminar \"{{name}}\"?",
       "confirmDeleteDesc": "Esta ação não pode ser desfeita.",
       "masked": "Definida",
-      "notSet": "—"
+      "notSet": "—",
+      "toastCreated": "Plataforma criada.",
+      "toastCreateError": "Erro ao criar plataforma.",
+      "toastUpdated": "Plataforma atualizada.",
+      "toastUpdateError": "Erro ao atualizar plataforma.",
+      "toastDeleted": "Plataforma eliminada.",
+      "toastDeleteError": "Erro ao eliminar plataforma.",
+      "validationName": "O nome é obrigatório.",
+      "validationType": "O tipo é obrigatório.",
+      "countSingle": "{{count}} plataforma",
+      "countPlural": "{{count}} plataformas"
     },
     "analytics": {
       "title": "Analytics",
@@ -362,7 +430,910 @@
         "course": "Curso",
         "date": "Data",
         "daysLeft": "Dias"
+      },
+      "sections": {
+        "users": "Utilizadores",
+        "training": "Formação",
+        "certificates": "Certificados",
+        "aiPlatforms": "IA & Plataformas",
+        "charts": "Gráficos",
+        "alertsRecent": "Alertas & Utilizadores Recentes"
+      },
+      "stats": {
+        "activeUsers": "Utilizadores ativos",
+        "totalUsers": "Total utilizadores",
+        "newThisMonth": "Novos este mês",
+        "onboardingRate": "Taxa de onboarding",
+        "usersByServiceLine": "Utilizadores por Linha de Serviço",
+        "usersByLevel": "Utilizadores por Nível de Experiência",
+        "completionRate": "Taxa de conclusão",
+        "totalTrainings": "Formações totais",
+        "ongoing": "Em progresso",
+        "totalCerts": "Total certificados",
+        "issuedThisMonth": "Emitidos este mês",
+        "expiring30d": "A expirar (30d)",
+        "expiring6090d": "A expirar (31–60d)",
+        "aiConversations30d": "Conversas IA (30d)",
+        "aiTotalMessages": "Total mensagens IA",
+        "indexedCourses": "Cursos indexados",
+        "activePlatforms": "Plataformas ativas",
+        "noData": "Sem dados",
+        "completedByMonth": "Cursos concluídos por mês",
+        "completedBar": "Concluídos",
+        "usersBar": "Utilizadores",
+        "mostUsedPlatforms": "Plataformas mais usadas",
+        "searchesBar": "Pesquisas"
+      },
+      "levels": {
+        "junior": "Júnior",
+        "intermedio": "Intermédio",
+        "senior": "Sénior",
+        "especialista": "Especialista",
+        "lider": "Líder"
+      },
+      "certTable": {
+        "title": "Certificados a expirar em breve",
+        "countSingle": "{{count}} certificado",
+        "countPlural": "{{count}} certificados",
+        "noResults": "Nenhum certificado a expirar brevemente.",
+        "columns": {
+          "user": "Utilizador",
+          "course": "Curso",
+          "expiresIn": "Expira em",
+          "urgency": "Urgência"
+        }
+      },
+      "recentUsersTable": {
+        "title": "Utilizadores recentes",
+        "last": "últimos {{n}}",
+        "columns": {
+          "name": "Nome",
+          "email": "Email",
+          "role": "Role",
+          "serviceLine": "Linha de Serviço",
+          "registered": "Registado"
+        }
+      }
+    },
+    "audit": {
+      "title": "Auditoria",
+      "searchPlaceholder": "Pesquisar por actor, alvo ou ação...",
+      "refresh": "Atualizar",
+      "demoWarning": "A mostrar dados de exemplo — endpoint /admin/audit não disponível.",
+      "columns": {
+        "date": "Data",
+        "action": "Ação",
+        "actor": "Actor",
+        "target": "Alvo",
+        "details": "Detalhes"
+      },
+      "noResults": "Nenhum registo encontrado.",
+      "pagination": "{{from}}–{{to}} de {{total}} registo",
+      "paginationPlural": "{{from}}–{{to}} de {{total}} registos",
+      "actions": {
+        "ROLE_CHANGED": "Role alterado",
+        "ROLE_UPDATED": "Role atualizado",
+        "USER_BLOCKED": "Utilizador bloqueado",
+        "USER_DEACTIVATED": "Utilizador desativado",
+        "USER_ACTIVATED": "Utilizador ativado",
+        "PLATFORM_CREATED": "Plataforma criada",
+        "PLATFORM_UPDATED": "Plataforma editada",
+        "PLATFORM_DELETED": "Plataforma eliminada"
       }
     }
+  },
+  "login": {
+    "title": "Entrar no",
+    "appName": "LearningHub",
+    "emailLabel": "Utilizador",
+    "emailPlaceholder": "teu.nome@softinsa.pt",
+    "passwordLabel": "Senha",
+    "forgotPassword": "Esqueceste a palavra-passe?",
+    "submit": "Entrar na plataforma",
+    "or": "ou",
+    "microsoftLogin": "Entrar com Microsoft",
+    "footer": "Usa as tuas credenciais internas Softinsa",
+    "errorInvalidEmail": "Email inválido",
+    "errorMinPassword": "Mínimo 6 caracteres",
+    "errorDefault": "Erro ao iniciar sessão."
+  },
+  "onboarding": {
+    "ariaLabel": "Bem-vindo ao Softinsa Learning Hub",
+    "skipAria": "Saltar introdução",
+    "stepIndicator": "Passo {{current}} de {{total}}",
+    "prev": "Anterior",
+    "next": "Próximo",
+    "start": "Começar",
+    "dotAria": "Ir para slide {{n}}",
+    "exitTourAria": "Sair do Tutorial",
+    "skipTour": "Saltar Tutorial",
+    "slides": {
+      "discovery": {
+        "title": "Descoberta de Cursos",
+        "description": "Pesquisa e encontra cursos em múltiplas plataformas de uma só vez.",
+        "highlight": "Múltiplas plataformas, uma pesquisa."
+      },
+      "ai": {
+        "title": "Assistente de IA",
+        "description": "O teu assistente inteligente analisa o teu perfil e recomenda o percurso ideal.",
+        "highlight": "Recomendações personalizadas por IA."
+      },
+      "certificates": {
+        "title": "Gestão de Certificados",
+        "description": "Regista os cursos que completaste e guarda os teus certificados.",
+        "highlight": "O teu percurso de aprendizagem, sempre visível."
+      }
+    },
+    "tour": {
+      "dashboard": {
+        "title": "A tua Dashboard",
+        "content": "Aqui tens um resumo de todo o teu progresso, formações em curso e recomendações de IA."
+      },
+      "search": {
+        "title": "Pesquisa de Cursos",
+        "content": "Explora milhares de cursos de várias plataformas com filtros avançados."
+      },
+      "ai": {
+        "title": "Assistente IA",
+        "content": "O teu co-piloto inteligente responde a perguntas e sugere planos de estudo."
+      },
+      "certificates": {
+        "title": "Os teus Certificados",
+        "content": "Gere todas as tuas conquistas e certificados num só lugar."
+      },
+      "myLearning": {
+        "title": "O teu Progresso",
+        "content": "Acompanha em tempo real os cursos que estás a fazer e os concluídos."
+      },
+      "profile": {
+        "title": "O teu Perfil",
+        "content": "Mantém o teu perfil técnico em dia com skills e experiência atualizadas."
+      },
+      "settings": {
+        "title": "Definições",
+        "content": "Personaliza a tua experiência: idioma, notificações e preferências de IA."
+      },
+      "notifications": {
+        "title": "Notificações",
+        "content": "Fica a saber quando novos cursos obrigatórios ou certificados a expirar precisam da tua atenção."
+      },
+      "next": "Seguinte",
+      "finish": "Finalizar"
+    },
+    "modal": {
+      "step1Title": "Definir o teu Perfil",
+      "step2Title": "Os teus Interesses",
+      "step3Title": "As tuas Skills",
+      "step4Title": "Transparência e IA",
+      "step1Desc": "Personaliza a tua experiência com base na tua área e nível.",
+      "step2Desc": "Que áreas tens curiosidade em explorar na Softinsa?",
+      "step3Desc": "Identifica as tuas competências principais.",
+      "step4Desc": "Como potenciar a tua jornada de aprendizagem.",
+      "functionLabel": "Função / Cargo",
+      "levelLabel": "Nível",
+      "skillNameLabel": "Especialidade / Competência",
+      "skillLevelLabel": "O teu Nível",
+      "skillLevelBeginner": "Iniciante",
+      "skillLevelIntermediate": "Intermédio",
+      "skillLevelExpert": "Experiente",
+      "levelJunior": "Junior",
+      "levelIntermediate": "Intermédio",
+      "levelSenior": "Sénior",
+      "levelSpecialist": "Especialista",
+      "levelLeader": "Líder",
+      "addInterestPlaceholder": "Adiciona outro interesse (ex: Blockchain, Go, UX...)",
+      "addButton": "Adicionar",
+      "popularLabel": "Sugestões Populares",
+      "addSkill": "Adicionar outra competência",
+      "transparencyLabel": "Compromisso de Transparência",
+      "copilotTitle": "O Teu Co-piloto de IA",
+      "copilotDesc": "Os teus dados de perfil são utilizados exclusivamente para gerar recomendações personalizadas.",
+      "visibilityTitle": "Visibilidade e Carreira",
+      "visibilityDesc": "Os responsáveis de Service Line acompanham o teu progresso para identificar oportunidades de formação.",
+      "consentLabel": "Consentimento e Utilização",
+      "consentText": "Ao finalizar, confirmas a tua ciência sobre a utilização destes dados pela plataforma para otimizar e apoiar a tua evolução profissional na Softinsa.",
+      "saving": "A Guardar...",
+      "functionRequired": "Por favor indica a tua função",
+      "toastSuccess": "Onboarding concluído! O teu hub personalizado está pronto.",
+      "toastError": "Erro ao guardar dados. Tenta novamente."
+    }
+  },
+  "certDetail": {
+    "title": "Detalhe do Certificado",
+    "download": "Descarregar",
+    "open": "Abrir",
+    "replace": "Substituir",
+    "reExtractLoading": "A re-extrair...",
+    "reExtract": "Re-extrair IA",
+    "delete": "Eliminar",
+    "confirmDelete": "Eliminar este certificado? Esta acção não pode ser revertida.",
+    "sectionTraining": "Formação",
+    "sectionMetadata": "Metadados",
+    "fieldCourseName": "Nome do curso",
+    "fieldProvider": "Plataforma / Emissor",
+    "fieldDate": "Data de conclusão",
+    "fieldExpiry": "Data de expiração",
+    "fieldHours": "Horas de formação",
+    "saveLoading": "A guardar…",
+    "save": "Guardar alterações",
+    "toastSaved": "Metadados actualizados.",
+    "toastSaveError": "Erro ao guardar alterações.",
+    "toastReExtracted": "Metadados re-extraídos com IA.",
+    "toastReExtractError": "Erro ao re-extrair metadados.",
+    "toastDeleted": "Certificado eliminado.",
+    "toastDeleteError": "Erro ao eliminar certificado.",
+    "altImage": "Certificado"
+  },
+  "certCard": {
+    "statusActive": "Ativo",
+    "statusExpiring": "A expirar",
+    "statusExpired": "Expirado"
+  },
+  "certUpload": {
+    "errorInvalidFormat": "Formato inválido. Usa PDF, PNG, JPG, WEBP, BMP, TIFF ou TXT.",
+    "errorTooLarge": "Ficheiro demasiado grande (máx. 10MB).",
+    "errorAlreadyExists": "Este curso já tem um certificado ativo. Remove ou substitui primeiro."
+  },
+  "dashboard": {
+    "roles": {
+      "USER": "Colaborador",
+      "ADMIN": "Administrador",
+      "SERVICE_LINE_MANAGER": "SL Manager"
+    },
+    "greetingMorning": "Bom dia",
+    "greetingAfternoon": "Boa tarde",
+    "greetingEvening": "Boa noite",
+    "stats": {
+      "total": "Total de formações",
+      "ongoing": "Em progresso",
+      "completed": "Concluídas",
+      "hours": "Horas de formação"
+    },
+    "inProgress": "Em Progresso",
+    "saved": "Guardados",
+    "viewAll": "Ver todos",
+    "empty": {
+      "progress": "Nenhuma formação em progresso. Começa a explorar cursos!",
+      "saved": "Nenhum curso guardado."
+    },
+    "recs": {
+      "label": "Insights Personalizados",
+      "unifiedTitle": "Recomendações Personalizadas",
+      "empty": "Ainda não foram geradas recomendações para o teu perfil.",
+      "error": {
+        "title": "Falha nas recomendações"
+      },
+      "career": {
+        "title": "Performance & Plano de Carreira",
+        "sub": "O teu percurso atual na Softinsa"
+      },
+      "interests": {
+        "title": "Novos Horizontes",
+        "sub": "Explora novas tecnologias e áreas"
+      },
+      "skills": {
+        "title": "Gaps de Perfil / SL",
+        "sub": "Skills necessárias para o teu nível"
+      }
+    },
+    "alertBanner": {
+      "viewCert": "Ver certificado",
+      "searchCourses": "Procurar cursos",
+      "dismissAria": "Dispensar alerta",
+      "title": "Alertas e Renovações ({{count}})",
+      "renewTitle": "Atualizar: {{courseName}}"
+    },
+    "calendar": {
+      "title": "Calendário",
+      "prevMonthAria": "Mês anterior",
+      "nextMonthAria": "Próximo mês",
+      "noReminders": "Sem lembretes para este dia",
+      "removeReminderAria": "Remover lembrete",
+      "reminderTitlePlaceholder": "Título do lembrete…",
+      "saveButton": "Guardar",
+      "addButton": "Novo lembrete",
+      "cancelAria": "Cancelar",
+      "selectedDateFormat": "d 'de' MMMM",
+      "weekdays": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+    },
+    "pendingFeedback": {
+      "title": "Feedback Pendente",
+      "description": "Notámos que acedeste recentemente a estas formações. Confirma o teu estado para mantermos o teu histórico atualizado:",
+      "started": "Comecei a fazer",
+      "alreadyDone": "Já tinha feito no passado",
+      "afterSuggestion": "Fiz após sugestão",
+      "toastSuccess": "Feedback registado com sucesso!",
+      "toastError": "Erro ao registar feedback."
+    },
+    "progressCard": {
+      "statusOngoing": "Em progresso",
+      "statusCompleted": "Concluído",
+      "statusPriority": "Prioritário",
+      "statusSaved": "Guardado",
+      "statusAccessed": "Acedido",
+      "statusCancelled": "Cancelado",
+      "unknownPlatform": "Plataforma desconhecida",
+      "completedOn": "Concluído em {{date}}",
+      "startedOn": "Iniciado em {{date}}",
+      "savedOn": "Guardado em {{date}}",
+      "stageStart": "Início",
+      "stageMid": "Meio",
+      "stageFinish": "Finalizar",
+      "progress": "Progresso",
+      "priority": "Prio: {{order}}",
+      "rating": "Rating",
+      "relevance": "Relevância",
+      "notStarted": "Não iniciado",
+      "documents": "Documentos",
+      "continue": "Continuar",
+      "viewCourse": "Ver curso",
+      "uploadSuccess": "Documento carregado com sucesso!",
+      "uploadError": "Erro ao carregar documento."
+    },
+    "quickActions": {
+      "title": "Ações Rápidas",
+      "myLearning": "As minhas Formações",
+      "myLearningDesc": "Gere o teu percurso de aprendizagem",
+      "uploadCert": "Carregar Certificado",
+      "uploadCertDesc": "Importa um certificado com IA",
+      "learningPlan": "Plano de Aprendizagem",
+      "learningPlanDesc": "Constrói o teu percurso",
+      "exploreCourses": "Explorar Cursos",
+      "exploreCoursesDesc": "Pesquisa em todas as plataformas",
+      "myTeam": "A minha Equipa",
+      "myTeamDesc": "Progresso e atividade do team",
+      "adminPanel": "Painel Admin",
+      "adminPanelDesc": "Utilizadores, analytics e plataformas",
+      "analytics": "Analytics",
+      "analyticsDesc": "Relatórios e métricas da plataforma"
+    },
+    "recentActivity": {
+      "title": "Última Atividade",
+      "subtitle": "Movimentações Recentes",
+      "empty": "Ainda sem atividade registada",
+      "exploreCourses": "Explorar cursos →",
+      "actionCompleted": "Concluído",
+      "actionOngoing": "Em progresso",
+      "actionPriority": "Prioritário",
+      "actionSaved": "Guardado",
+      "actionAccessed": "Acedido",
+      "actionCancelled": "Cancelado",
+      "justNow": "agora mesmo",
+      "minutesAgo": "há {{n}}min",
+      "hoursAgo": "há {{n}}h",
+      "yesterday": "ontem",
+      "daysAgo": "há {{n}} dias",
+      "viewAll": "Ver tudo →"
+    },
+    "recommendations": {
+      "completeProfile": "Completa o teu perfil para receber sugestões personalizadas.",
+      "refreshAria": "Atualizar recomendações",
+      "coursesCount_one": "· {{count}} curso",
+      "coursesCount_other": "· {{count}} cursos",
+      "categories": {
+        "improvement": {
+          "label": "Performance & Carreira",
+          "shortLabel": "Performance"
+        },
+        "interests": {
+          "label": "Novos Horizontes",
+          "shortLabel": "Horizontes"
+        },
+        "missing_skills": {
+          "label": "Gaps de Skills",
+          "shortLabel": "Skills"
+        }
+      },
+      "levels": {
+        "beginner": "Iniciante",
+        "intermediate": "Intermédio",
+        "advanced": "Avançado"
+      },
+      "profileLabel": "Perfil: {{n}}%",
+      "sourcesLabel": "{{n}} fontes RAG"
+    },
+    "mentionCourse": "Mencionar curso",
+    "attachFileTitle": "Anexar ficheiro (brevemente disponível)",
+    "inputPlaceholder": "Pergunta algo ao assistente IA… usa @ para mencionar um curso",
+    "sendTitle": "Enviar (Enter)",
+    "panel": {
+      "title": "Sugestões IA",
+      "focusSkills": "Focar nas tuas Skills",
+      "focusSkillQuery": "Recomenda cursos avançados de {{skill}}",
+      "newConversation": "Nova Conversa",
+      "history": "Histórico de Conversas",
+      "noTitle": "Sem título",
+      "deleteConversationAria": "Eliminar conversa",
+      "recent": "Recentes",
+      "clear": "Limpar",
+      "emptyHint": "Personaliza o teu perfil para obter sugestões IA.",
+      "suggestions": [
+        {"label": "Cursos recomendados", "query": "Recomenda cursos para o meu perfil e stack tecnológica atual"},
+        {"label": "Certificações em falta", "query": "Quais certificações importantes devo obter para a minha área?"},
+        {"label": "Plataformas de aprendizagem", "query": "Que plataformas de aprendizagem me recomendas para o meu nível?"},
+        {"label": "Plano de carreira", "query": "Cria um plano de aprendizagem estruturado para os próximos 3 meses"}
+      ]
+    }
+  },
+  "filter": {
+    "platforms": "Plataformas",
+    "noPlatforms": "Nenhuma plataforma encontrada",
+    "level": "Nível",
+    "language": "Idioma",
+    "price": "Preço",
+    "allPrices": "Todos os Preços",
+    "free": "Grátis",
+    "paid": "Pago",
+    "rating": "Avaliação",
+    "platformRating": "Avaliação da plataforma",
+    "platformRatingDesc": "Rating atribuído pela plataforma original (ex: Udemy, Coursera…)",
+    "internalRating": "Avaliação Interna",
+    "internalRatingMin": "Avaliação interna mínima",
+    "internalRatingDesc": "Rating dado pelos utilizadores ao concluírem o curso nesta plataforma.",
+    "relevance": "Relevância",
+    "relevanceMin": "Relevância mínima",
+    "relevanceDesc": "Utilidade do curso avaliada pelos utilizadores após conclusão.",
+    "apply": "Aplicar",
+    "applyWithCount": "Aplicar ({{count}})",
+    "clear": "Limpar",
+    "clearWithCount": "Limpar ({{count}})",
+    "levels": {
+      "beginner": "Iniciante",
+      "intermediate": "Intermédio",
+      "advanced": "Avançado"
+    },
+    "languages": {
+      "all": "Todos",
+      "pt": "Português",
+      "en": "Inglês"
+    }
+  },
+  "searchCard": {
+    "levelBeginner": "Iniciante",
+    "levelIntermediate": "Intermédio",
+    "levelAdvanced": "Avançado",
+    "durationVariable": "Variável",
+    "attended": "Frequentado",
+    "platformRatingAria": "Avaliação da plataforma",
+    "internalRatingAria": "Avaliação interna Softinsa",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "viewCourse": "Ver curso"
+  },
+  "myLearning": {
+    "title": "Painel de Progresso",
+    "subtitle": "Acompanha o teu progresso de aprendizagem.",
+    "hello": "Olá",
+    "discover": "Descobrir formação",
+    "tabs": {
+      "ongoing": "Em Progresso",
+      "completed": "Concluídos",
+      "later": "Guardados",
+      "priority": "Planos"
+    },
+    "stats": {
+      "ongoing": "Em Progresso",
+      "completed": "Concluídos",
+      "later": "Guardados",
+      "priority": "Planos"
+    },
+    "empty": {
+      "ongoingTitle": "Sem cursos em progresso",
+      "ongoingDesc": "Inicia um curso guardado ou procura formação na plataforma.",
+      "completedTitle": "Nenhum curso concluído",
+      "completedDesc": "Os cursos concluídos aparecerão aqui com a respetiva data e certificado.",
+      "laterTitle": "Nenhum curso guardado",
+      "laterDesc": "Guarda cursos da pesquisa para consultar mais tarde.",
+      "priorityTitle": "Plano de formação vazio",
+      "priorityDesc": "Marca cursos como prioritários para estruturar o teu plano de aprendizagem."
+    },
+    "statusMoved": {
+      "ongoing": "movido para Em Progresso.",
+      "completed": "marcado como concluído.",
+      "priority": "adicionado ao plano.",
+      "later": "guardado para mais tarde."
+    },
+    "coursePrefix": "Curso",
+    "errorUpdate": "Erro ao actualizar registo.",
+    "errorDelete": "Erro ao remover registo.",
+    "deleted": "Curso removido.",
+    "greetingSubtitle": "Aqui tens o teu progresso centralizado.",
+    "discoverBtn": "Procurar Novas Formações",
+    "navTab": {
+      "ongoing": "Iniciados",
+      "completed": "Concluídos",
+      "later": "Guardados",
+      "cancelled": "Cancelados"
+    },
+    "sectionOngoing": "Workspace em Progresso",
+    "sectionCompleted": "Linha do Tempo de Conquistas",
+    "sort": {
+      "newest": "Mais Recente",
+      "oldest": "Mais Antigo",
+      "stage": "Etapa Atual",
+      "date": "Data",
+      "rating": "Avaliação",
+      "relevance": "Relevância"
+    },
+    "searchPlaceholder": "Procurar...",
+    "emptyHereTitle": "Ainda não tens nada aqui...",
+    "emptyHereDesc": "Explora o catálogo ou adiciona uma formação manualmente.",
+    "discoverCourses": "Descobrir Cursos",
+    "noResultsTitle": "Nenhum resultado encontrado",
+    "noResultsDesc": "Não encontrámos formações que correspondam a \"{{term}}\" nesta aba.",
+    "clearSearch": "Limpar pesquisa",
+    "statusToast": {
+      "ongoing": "Em Progresso",
+      "completed": "Concluído com Sucesso!",
+      "cancelled": "Curso Cancelado",
+      "later": "Guardado para depois",
+      "default": "Estado atualizado"
+    },
+    "trainingCard": {
+      "statusOngoing": "Em Progresso",
+      "statusCompleted": "Concluído",
+      "statusPriority": "Prioritário",
+      "statusSaved": "Guardado",
+      "statusAccessed": "Acedido",
+      "statusCancelled": "Cancelado",
+      "stageStart": "Início",
+      "stageMid": "Meio",
+      "stageFinish": "Finalizar",
+      "finishedToday": "Finalizado hoje",
+      "focusDays_one": "{{count}} dia de foco",
+      "focusDays_other": "{{count}} dias de foco",
+      "cancel": "Cancelar",
+      "removePriority": "Remover Prioridade",
+      "priority": "Prioritário",
+      "remove": "Remover",
+      "reactivate": "Reativar",
+      "certificate": "Certificado",
+      "startedOn": "Iniciado {{date}}",
+      "completedOn": "Concluído {{date}}",
+      "actions": "Ações",
+      "currentStage": "Etapa Atual",
+      "collapse": "Recolher",
+      "resources": "Recursos",
+      "open": "Abrir",
+      "start": "Iniciar",
+      "complete": "Concluir"
+    },
+    "completionModal": {
+      "title": "Parabéns pela Conclusão!",
+      "description": "Antes de guardarmos esta conquista, por favor avalia o curso para ajudar a IA a recomendar melhores conteúdos.",
+      "ratingLabel": "Avaliação Geral",
+      "relevanceLabel": "Relevância para a tua função",
+      "saving": "A Guardar Conquista...",
+      "confirm": "Confirmar Conclusão",
+      "cancel": "Cancelar"
+    },
+    "completedTimeline": {
+      "certificate": "Certificado",
+      "emptyTitle": "Nenhum curso concluído ainda",
+      "emptyDesc": "Quando concluíres um curso, aparece aqui na linha do tempo."
+    },
+    "planCard": {
+      "priority": "Prioritário",
+      "estimatedHours": "{{n}}h estimadas",
+      "addedOn": "Adicionado {{date}}",
+      "start": "Começar",
+      "view": "Ver"
+    },
+    "resources": {
+      "documentsTitle": "Documentos do Curso",
+      "documentsSubtitle": "Material oficial e anexos ({{count}})",
+      "remove": "Remover",
+      "uploading": "A carregar...",
+      "addDocument": "Adicionar Documento",
+      "notesTitle": "Notas & Recursos",
+      "newNote": "Novo",
+      "noteTitlePlaceholder": "Título do recurso...",
+      "noteContentPlaceholder": "Escreve aqui as tuas notas...",
+      "toastResourceAdded": "Recurso adicionado",
+      "toastResourceUpdated": "Recurso atualizado",
+      "toastFileAddError": "Erro ao adicionar ficheiro",
+      "toastFileRemoveError": "Erro ao remover ficheiro",
+      "toastResourceRemoved": "Recurso removido",
+      "toastMaterialAdded": "Material adicionado",
+      "toastMaterialUploadError": "Erro ao carregar arquivo",
+      "toastMaterialDeleteError": "Erro ao eliminar arquivo",
+      "unexpectedError": "Ocorreu um erro inesperado",
+      "cancelNote": "Cancelar",
+      "saveNote": "Guardar",
+      "savingNote": "A guardar...",
+      "filesSelected": "{{count}} selecionados",
+      "attachFiles": "Anexar",
+      "emptyNotes": "Sem recursos criados",
+      "collapseButton": "Recolher Recursos"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "editActive": "Modo edição activo",
+    "editProfile": "Editar Perfil",
+    "memberSince": "Membro desde",
+    "experienceLevel": "Nível de experiência",
+    "jobTitle": "Cargo",
+    "jobTitlePlaceholder": "Ex: Software Engineer",
+    "department": "Departamento",
+    "departmentPlaceholder": "Ex: Engenharia",
+    "location": "Localização",
+    "locationNotSet": "Não definido",
+    "locationOffice": "Escritório",
+    "locationRemote": "Remoto",
+    "locationHybrid": "Híbrido",
+    "admin": "Administrador",
+    "collaborator": "Colaborador",
+    "noSkills": "Nenhuma skill adicionada.",
+    "noInterests": "Nenhum interesse adicionado.",
+    "saveSuccess": "Perfil guardado.",
+    "saveError": "Erro ao guardar o perfil.",
+    "unsavedChanges": "Tens alterações por guardar",
+    "saving": "A guardar...",
+    "saveProfile": "Guardar Perfil",
+    "subtitle": "Gere o teu perfil, competências e portfólio de aprendizagem.",
+    "learningInterestsLabel": "Interesses de aprendizagem",
+    "learningInterestsDesc": "Tópicos e tecnologias que queres explorar.",
+    "learningInterestsPlaceholder": "Ex: Kubernetes, Machine Learning...",
+    "technicalSkillsLabel": "Competências Técnicas",
+    "technicalSkillsDesc": "Gere as tuas competências técnicas e níveis de proficiência.",
+    "portfolioSection": "Portfólio & Partilha",
+    "portfolioTitle": "O teu portfólio de aprendizagem",
+    "portfolioCardTitle": "Portfólio de Aprendizagem",
+    "portfolioCardDesc": "Visualiza o teu percurso, competências e certificações num formato partilhável.",
+    "viewPortfolio": "Ver Portfólio",
+    "copyLink": "Copiar Link",
+    "copyLinkSuccess": "Link copiado!",
+    "exportPDF": "Exportar PDF",
+    "exportPDFDesc": "Gera um PDF do teu portfólio de aprendizagem.",
+    "copySummary": "Copiar Resumo",
+    "copySummaryDesc": "Copia um resumo de texto do teu portfólio para partilhar.",
+    "copySummarySuccess": "Resumo copiado para a área de transferência!",
+    "portfolio": {
+      "backToProfile": "Voltar ao Perfil",
+      "exportPDF": "Exportar PDF",
+      "totalHours": "Horas de Formação",
+      "coursesCompleted": "Cursos Concluídos",
+      "activeCerts": "Certificações Ativas",
+      "skillsSection": "Competências Técnicas",
+      "skillsTitle": "Skills",
+      "interestsSection": "Áreas de Interesse",
+      "interestsTitle": "Interesses",
+      "certsSection": "Certificações",
+      "certsTitle": "Portfólio de Certificações",
+      "certsActive_one": "{{count}} ativa",
+      "certsActive_other": "{{count}} ativas",
+      "certsEmpty": "Ainda sem certificações ativas",
+      "certsExpiredLabel": "Expiradas ({{count}})",
+      "certCompleted": "Concluído: {{date}}",
+      "certValidUntil": "Válido até {{date}}",
+      "certExpired": "Expirado",
+      "certPermanent": "Permanente",
+      "generatedOn": "Gerado em",
+      "footerText": "Portfólio gerado automaticamente pelo LearningHub Softinsa em {{date}}",
+      "role": {
+        "admin": "Administrador",
+        "collaborator": "Colaborador"
+      }
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "activity": "Atividade",
+      "certifications": "Certificações"
+    },
+    "recentActivity": "Atividade Recente",
+    "noActivity": "Nenhuma atividade recente.",
+    "certifications": "Certificações",
+    "noCertifications": "Nenhuma certificação registada.",
+    "downloadCv": "Download CV",
+    "shareProfile": "Partilhar Perfil",
+    "serviceLine": "Service Line",
+    "notDefined": "Não definido",
+    "memberId": "Membro desde {{date}}",
+    "months": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+    "levels": {
+      "junior": "Junior",
+      "intermedio": "Intermédio",
+      "senior": "Sénior",
+      "especialista": "Especialista",
+      "lider": "Líder"
+    },
+    "levelSubtitles": {
+      "junior": "Junior Professional",
+      "intermedio": "Mid-level Professional",
+      "senior": "Senior Professional",
+      "especialista": "Technical Specialist",
+      "lider": "Team Lead / Manager"
+    },
+    "skillsSection": {
+      "empty": "Nenhuma competência definida.",
+      "description": "Gere as tuas competências técnicas e níveis de proficiência.",
+      "placeholder": "Ex: Spring Boot, Figma...",
+      "levelBeginner": "Iniciante",
+      "levelIntermediate": "Intermédio",
+      "levelExperienced": "Experiente"
+    },
+    "impact": {
+      "section": "Impacto e Progresso",
+      "title": "Learning Impact",
+      "totalHours": "Horas Totais",
+      "coursesCompleted": "Cursos Concluídos",
+      "streak": "Streak (Dias)",
+      "hoursPerMonth": "Horas por mês (6 meses)",
+      "you": "Tu",
+      "companyAvg": "Média empresa",
+      "companyComparison": "Comparação com a empresa",
+      "companyNote": "* Média baseada em dados agregados e anónimos."
+    },
+    "tagInput": {
+      "placeholder": "Adicionar\u2026",
+      "hint": "Enter ou vírgula para adicionar · Backspace para remover o último"
+    }
+  },
+  "slManager": {
+    "title": "A minha Equipa",
+    "subtitle": "Gere o progresso e certificações dos membros da tua Service Line.",
+    "kpi": {
+      "activeMembers": "Membros ativos",
+      "completedTrainings": "Formações concluídas",
+      "completedSub": "+{{n}} últimos 30d",
+      "ongoing": "Em progresso",
+      "ongoingSub": "{{avg}} média/membro",
+      "totalSub": "{{n}} total"
+    },
+    "table": {
+      "title": "Membros da Service Line",
+      "colMember": "Colega",
+      "colRole": "Função / Nível",
+      "colTrainings": "Formações",
+      "colCerts": "Certificados",
+      "colLastActivity": "Última atividade",
+      "colActions": "Ações",
+      "empty": "Ainda não existem membros na tua equipa.",
+      "ongoing": "{{n}} em curso",
+      "expiring": "{{n}} a expirar",
+      "details": "Detalhes",
+      "memberCount_one": "{{count}} membro",
+      "memberCount_other": "{{count}} membros"
+    },
+    "detail": {
+      "backLink": "Voltar à equipa",
+      "loadError": "Não foi possível carregar os detalhes do colega.",
+      "inactive": "Inativo",
+      "tabs": {
+        "completed": "Concluídas",
+        "ongoing": "Em curso",
+        "certificates": "Certificados"
+      },
+      "kpi": {
+        "completed": "Concluídas",
+        "ongoing": "Em curso",
+        "hours": "Horas de aprendizagem",
+        "activeCerts": "Certs. ativos",
+        "expiring90d": "A expirar (90d)"
+      },
+      "sections": {
+        "skills": "Skills",
+        "interests": "Interesses declarados"
+      },
+      "alerts": {
+        "expiredCerts_one": "{{count}} certificado expirado — renovação necessária.",
+        "expiredCerts_other": "{{count}} certificados expirados — renovação necessária.",
+        "expiring30d_one": "{{count}} certificado a expirar nos próximos 30 dias.",
+        "expiring30d_other": "{{count}} certificados a expirar nos próximos 30 dias.",
+        "expiring90d_one": "{{count}} certificado a expirar nos próximos 90 dias.",
+        "expiring90d_other": "{{count}} certificados a expirar nos próximos 90 dias.",
+        "noTrainings": "Sem formações registadas até ao momento."
+      },
+      "expiry": {
+        "expired": "Expirado",
+        "noExpiry": "Sem validade"
+      },
+      "completed": {
+        "empty": "Sem formações concluídas."
+      },
+      "ongoing": {
+        "empty": "Nenhuma formação em curso.",
+        "startedOn": "Iniciada {{date}}",
+        "status": "Em curso"
+      },
+      "certificates": {
+        "empty": "Sem certificados registados.",
+        "issuedOn": "Emitido {{date}}",
+        "expiresOn": "Expira {{date}}",
+        "noName": "Sem nome"
+      }
+    }
+  },
+  "header": {
+    "aiActive": "IA Ativa",
+    "tips": [
+      "Completa um curso hoje e mantém o teu streak ativo.",
+      "Os teus certificados expiram? Verifica em Certificados.",
+      "Usa o Assistente IA para pedir recomendações personalizadas.",
+      "Adiciona skills ao teu perfil para melhores sugestões.",
+      "Cursos curtos de 1h são ideais para aprendizagem diária.",
+      "Pesquisa por tema e filtra por plataforma para melhores resultados.",
+      "Marca formações como Prioridade para as encontrar rapidamente."
+    ],
+    "notifications": {
+      "title": "Notificações",
+      "markAllReadAria": "Marcar todas como lidas",
+      "deleteAllAria": "Eliminar todas",
+      "empty": "Sem notificações",
+      "markAllRead": "Marcar todas como lidas",
+      "deleteAria": "Eliminar notificação"
+    }
+  },
+  "landing": {
+    "badge": "Plataforma interna Softinsa · IBM Company",
+    "heroLine1": "A plataforma de formação",
+    "heroLine2": "inteligente",
+    "heroDesc": "Agrega formações externas, recomenda percursos com IA, gere e organiza o teu progresso e centraliza certificados.",
+    "cta": "Iniciar sessão",
+    "statAI": "IA",
+    "stat1": "Plataformas",
+    "stat2": "Recomendações",
+    "stat3": "iOS · Android",
+    "platformsLabel": "Plataformas integradas",
+    "platformsTitle": "Pesquisa de formações simplificada.",
+    "featuresLabel": "Funcionalidades",
+    "featuresTitle": "Tudo o que precisas para crescer",
+    "feat1Title": "Recomendações com IA",
+    "feat1Desc": "Recebe sugestões de formações personalizadas com base no teu perfil, service line e lacunas de competências.",
+    "feat2Title": "Gestão de Certificados",
+    "feat2Desc": "Carrega e acompanha as tuas certificações com alertas automáticos de expiração.",
+    "feat3Title": "Assistente de IA",
+    "feat3Desc": "Faz perguntas ao assistente e obtém orientação imediata sobre que formações fazer a seguir.",
+    "slLabel": "Service Lines",
+    "slTitle": "Organizado pela estrutura da Softinsa.",
+    "slDesc": "As recomendações adaptam-se automaticamente à service line de cada colaborador.",
+    "mobileLabel": "Mobile",
+    "mobileTitle1": "Sempre consigo.",
+    "mobileTitle2": "Em qualquer dispositivo.",
+    "mobileDesc": "Acede ao teu percurso de aprendizagem, consulta recomendações e gere certificados a partir do teu smartphone — com a mesma experiência da versão web.",
+    "iosDesc": "Adiciona ao ecrã principal",
+    "androidDesc": "Instala como app nativa",
+    "desktopDesc": "Chrome, Edge, Safari",
+    "ctaTitle1": "O teu próximo passo",
+    "ctaTitle2": "começa aqui.",
+    "ctaDesc": "Acede ao teu perfil, descobre formações relevantes e mantém o teu percurso sempre atualizado — tudo numa única plataforma.",
+    "ctaButton": "Vamos começar",
+    "footerTagline": "Plataforma central de conhecimento da Softinsa, acelerando o desenvolvimento de competências.",
+    "footerPlatform": "Plataforma",
+    "footerResources": "Recursos",
+    "footerLegal": "Legal",
+    "footerSolutions": "Soluções",
+    "footerCurriculum": "Currículo",
+    "footerAI": "IA Engine",
+    "footerSupport": "Suporte",
+    "footerContact": "Contacto",
+    "footerCareers": "Carreiras",
+    "footerPrivacy": "Privacidade",
+    "footerTerms": "Termos de Uso",
+    "footerCopyright": "© 2026 Softinsa · LearningHub",
+    "footerRights": "Portugal · Todos os direitos reservados"
+  },
+  "settings2": {
+    "appSection": "Aplicação",
+    "notDefinedOption": "Não definido",
+    "toastSaved": "Definições guardadas.",
+    "toastError": "Erro ao guardar as definições.",
+    "installed": "Aplicação Instalada",
+    "installedDesc": "A LearningHub já está instalada no teu dispositivo.",
+    "installedBadge": "✓ Instalada",
+    "iosTitle": "Instalar no iPhone / iPad",
+    "iosDesc": "O Safari não suporta instalação automática. Segue estes passos:",
+    "iosStep1a": "Toca em",
+    "iosStep1b": "Partilhar",
+    "iosStep1c": "na barra do Safari",
+    "iosStep2a": "Seleciona",
+    "iosStep2b": "Adicionar ao ecrã principal",
+    "iosStep3a": "Toca em",
+    "iosStep3b": "Adicionar",
+    "install": "Instalar Aplicação",
+    "installDesc": "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa.",
+    "installDescNotAvail": "Abre esta página no Chrome para Android ou Edge para instalar a app.",
+    "installButton": "Instalar"
   }
 }

@@ -15,49 +15,33 @@ import {
   Timer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import type { TrainingRecord, TrainingStatus } from '@/types';
 import { TrainingResourcesInline } from './TrainingResourcesInline';
 import { CompletionModal } from './CompletionModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<
-  TrainingStatus,
-  { label: string; color: string; icon: ReactNode }
-> = {
-  ongoing: {
-    label: 'Em Progresso',
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    icon: <PlayCircle className="h-3 w-3" />,
-  },
-  completed: {
-    label: 'Concluído',
-    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    icon: <CheckCircle2 className="h-3 w-3" />,
-  },
-  priority: {
-    label: 'Prioritário',
-    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    icon: <Star className="h-3 w-3" />,
-  },
-  later: {
-    label: 'Guardado',
-    color: 'bg-muted text-muted-foreground',
-    icon: <Bookmark className="h-3 w-3" />,
-  },
-  accessed: {
-    label: 'Acedido',
-    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-    icon: <Timer className="h-3 w-3" />,
-  },
-  cancelled: {
-    label: 'Cancelado',
-    color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    icon: <XCircle className="h-3 w-3" />,
-  },
+const STATUS_CONFIG: Record<TrainingStatus, { color: string; icon: ReactNode }> = {
+  ongoing:   { color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',     icon: <PlayCircle className="h-3 w-3" /> },
+  completed: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', icon: <CheckCircle2 className="h-3 w-3" /> },
+  priority:  { color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', icon: <Star className="h-3 w-3" /> },
+  later:     { color: 'bg-muted text-muted-foreground',                                           icon: <Bookmark className="h-3 w-3" /> },
+  accessed:  { color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400', icon: <Timer className="h-3 w-3" /> },
+  cancelled: { color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',             icon: <XCircle className="h-3 w-3" /> },
+};
+
+const STATUS_LABEL_KEY: Record<TrainingStatus, string> = {
+  ongoing:   'myLearning.trainingCard.statusOngoing',
+  completed: 'myLearning.trainingCard.statusCompleted',
+  priority:  'myLearning.trainingCard.statusPriority',
+  later:     'myLearning.trainingCard.statusSaved',
+  accessed:  'myLearning.trainingCard.statusAccessed',
+  cancelled: 'myLearning.trainingCard.statusCancelled',
 };
 
 function StatusBadge({ status }: { status: TrainingStatus }) {
+  const { t } = useTranslation();
   const cfg = STATUS_CONFIG[status];
   return (
     <span
@@ -67,7 +51,7 @@ function StatusBadge({ status }: { status: TrainingStatus }) {
       )}
     >
       {cfg.icon}
-      {cfg.label}
+      {t(STATUS_LABEL_KEY[status])}
     </span>
   );
 }
@@ -105,9 +89,9 @@ interface TrainingCardProps {
 }
 
 const STAGES = [
-  { id: 'inicio', label: 'Início', color: 'bg-blue-500' },
-  { id: 'meio', label: 'Meio', color: 'bg-blue-600' },
-  { id: 'finalizar', label: 'Finalizar', color: 'bg-blue-700' },
+  { id: 'inicio',    labelKey: 'myLearning.trainingCard.stageStart',  color: 'bg-blue-500' },
+  { id: 'meio',      labelKey: 'myLearning.trainingCard.stageMid',    color: 'bg-blue-600' },
+  { id: 'finalizar', labelKey: 'myLearning.trainingCard.stageFinish', color: 'bg-blue-700' },
 ];
 
 function ProgressCircle({ percentage, colorClass }: { percentage: number; colorClass: string }) {
@@ -159,6 +143,9 @@ export function TrainingCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [completionModalOpen, setCompletionModalOpen] = useState(false);
 
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
+
   const isOngoing = training.status === 'ongoing';
   const isCompleted = training.status === 'completed';
   const isSaved = training.status === 'later' || training.status === 'priority';
@@ -178,8 +165,8 @@ export function TrainingCard({
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Finalizado hoje";
-    return `${diffDays} ${diffDays === 1 ? 'dia' : 'dias'} de foco`;
+    if (diffDays === 0) return t('myLearning.trainingCard.finishedToday');
+    return t('myLearning.trainingCard.focusDays', { count: diffDays });
   })();
 
   const handleStageChange = (stage: string) => {
@@ -203,7 +190,7 @@ export function TrainingCard({
           className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-500 transition hover:bg-red-500/10"
         >
           <XCircle className="h-3.5 w-3.5" />
-          Cancelar
+          {t('myLearning.trainingCard.cancel')}
         </button>
       );
     }
@@ -219,14 +206,14 @@ export function TrainingCard({
             className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-foreground transition hover:bg-muted"
           >
             <Star className={cn("h-3.5 w-3.5", training.status === 'priority' ? "fill-amber-500 text-amber-500" : "text-amber-500")} />
-            {training.status === 'priority' ? 'Remover Prioridade' : 'Prioritário'}
+            {training.status === 'priority' ? t('myLearning.trainingCard.removePriority') : t('myLearning.trainingCard.priority')}
           </button>
           <button
             onClick={() => { onDelete(training.id); setMenuOpen(false); }}
             className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-destructive transition hover:bg-destructive/10"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Remover
+            {t('myLearning.trainingCard.remove')}
           </button>
         </>
       );
@@ -240,7 +227,7 @@ export function TrainingCard({
             className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-foreground transition hover:bg-muted"
           >
             <RotateCcw className="h-3.5 w-3.5 text-emerald-500" />
-            Reativar
+            {t('myLearning.trainingCard.reactivate')}
           </button>
         )}
         <button
@@ -248,7 +235,7 @@ export function TrainingCard({
           className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-destructive transition hover:bg-destructive/10"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Remover
+          {t('myLearning.trainingCard.remove')}
         </button>
       </>
     );
@@ -290,7 +277,7 @@ export function TrainingCard({
                 {training.certificate && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                     <Trophy className="h-3 w-3" />
-                    Certificado
+                    {t('myLearning.trainingCard.certificate')}
                   </span>
                 )}
               </>
@@ -313,12 +300,12 @@ export function TrainingCard({
               <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground font-medium">
                 {training.startedAt && (
                   <span>
-                    Iniciado {new Date(training.startedAt).toLocaleDateString('pt-PT')}
+                    {t('myLearning.trainingCard.startedOn', { date: new Date(training.startedAt).toLocaleDateString(locale) })}
                   </span>
                 )}
                 {training.completedAt && (
                   <span>
-                    Concluído {new Date(training.completedAt).toLocaleDateString('pt-PT')}
+                    {t('myLearning.trainingCard.completedOn', { date: new Date(training.completedAt).toLocaleDateString(locale) })}
                   </span>
                 )}
               </div>
@@ -346,7 +333,7 @@ export function TrainingCard({
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-border bg-popover py-1.5 shadow-lg">
                 <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground opacity-60">
-                  Ações
+                  {t('myLearning.trainingCard.actions')}
                 </p>
                 {menuItems}
               </div>
@@ -358,7 +345,7 @@ export function TrainingCard({
       {/* Ongoing Specific: Stage Selector */}
       {isOngoing && !isExpanded && (
         <div className="mt-4 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground opacity-70">Etapa Atual</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground opacity-70">{t('myLearning.trainingCard.currentStage')}</p>
           <div className="flex p-1 gap-1 bg-muted/40 rounded-xl border border-border/40 w-fit">
             {STAGES.map((s) => (
               <button
@@ -371,7 +358,7 @@ export function TrainingCard({
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                {s.label}
+                {t(s.labelKey)}
               </button>
             ))}
           </div>
@@ -393,7 +380,7 @@ export function TrainingCard({
             )}
           >
             <FileText className={cn("h-3.5 w-3.5", isExpanded ? "text-background" : "text-primary/60")} />
-            {isExpanded ? 'Recolher' : 'Recursos'}
+            {isExpanded ? t('myLearning.trainingCard.collapse') : t('myLearning.trainingCard.resources')}
           </button>
         )}
 
@@ -403,7 +390,7 @@ export function TrainingCard({
             onClick={() => onStatusChange(training.id, 'ongoing', { progressLevel: 'inicio' })}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 py-2 text-xs font-semibold text-white transition hover:opacity-90 active:scale-[0.98]"
           >
-            Iniciar
+            {t('myLearning.trainingCard.start')}
             <PlayCircle className="h-3.5 w-3.5" />
           </button>
         )}
@@ -415,7 +402,7 @@ export function TrainingCard({
             onClick={() => setCompletionModalOpen(true)}
             className="flex flex-[1.5] items-center justify-center gap-1.5 rounded-lg bg-emerald-600 py-2 text-xs font-semibold text-white transition hover:opacity-90 active:scale-[0.98]"
           >
-            Concluir
+            {t('myLearning.trainingCard.complete')}
             <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
         ) : (
@@ -430,7 +417,7 @@ export function TrainingCard({
                 : "flex-[1.5] bg-primary/10 text-primary hover:bg-primary/20"
             )}
           >
-            Abrir
+            {t('myLearning.trainingCard.open')}
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}

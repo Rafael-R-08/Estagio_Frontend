@@ -75,7 +75,7 @@ const SECTIONS = [
   { id: 'notifications', labelKey: 'settings.sections.notifications', icon: Bell, customLabel: false },
   { id: 'privacy', labelKey: 'settings.sections.privacy', icon: Shield, customLabel: false },
   { id: 'appearance', labelKey: 'settings.sections.appearance', icon: Monitor, customLabel: false },
-  { id: 'app', labelKey: 'Aplicação', icon: Smartphone, customLabel: true },
+  { id: 'app', labelKey: 'settings.sections.app', icon: Smartphone, customLabel: false },
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
@@ -127,13 +127,14 @@ function SelectField({ value, options, onChange }: {
   options: { value: string; label: string }[];
   onChange: (v: string | null) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
       className="w-full sm:w-auto min-w-[120px] sm:min-w-[160px] rounded-full border border-border/60 bg-background/50 px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-4 focus:ring-foreground/10 cursor-pointer"
     >
-      <option value="">Não definido</option>
+      <option value="">{t('settings2.notDefinedOption')}</option>
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
@@ -280,9 +281,9 @@ export default function SettingsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['settings'] });
       setDraft(null);
-      toast.success('Definições guardadas.');
+      toast.success(t('settings2.toastSaved'));
     },
-    onError: () => toast.error('Erro ao guardar as definições.'),
+    onError: () => toast.error(t('settings2.toastError')),
   });
 
   const isDirty = draft !== null;
@@ -406,45 +407,45 @@ export default function SettingsPage() {
             {/* ── Notificações ── */}
             {activeSection === 'notifications' && (
               <SectionPanel title={t('settings.notifications.title')} icon={Bell}>
-                <SubLabel>Preferências de Email</SubLabel>
+                <SubLabel>{t('settings.notifications.emailPrefsLabel')}</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label="Notificações por Email"
-                    description="Receber alertas importantes e recomendações no teu email institucional."
+                    label={t('settings.notifications.email')}
+                    description={t('settings.notifications.emailDesc')}
                   >
                     <Toggle checked={current.notifyByEmail} onChange={(v) => set('notifyByEmail', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Notificações In-App"
-                    description="Receber alertas diretamente na plataforma."
+                    label={t('settings.notifications.inApp')}
+                    description={t('settings.notifications.inAppDesc')}
                   >
                     <Toggle checked={current.notifyInApp} onChange={(v) => set('notifyInApp', v)} />
                   </SettingRow>
                 </SectionItem>
 
-                <SubLabel>Conteúdo e Alertas</SubLabel>
+                <SubLabel>{t('settings.notifications.contentAlertsLabel')}</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label="Recomendações Semanais"
-                    description="Resumo semanal com novas sugestões personalizadas pela IA."
+                    label={t('settings.notifications.weeklyRecs')}
+                    description={t('settings.notifications.weeklyRecsDesc')}
                   >
                     <Toggle checked={current.notifyWeeklyRecs} onChange={(v) => set('notifyWeeklyRecs', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Expiração de Certificados"
-                    description="Alertar 30 e 7 dias antes de um certificado expirar."
+                    label={t('settings.notifications.certExpiry')}
+                    description={t('settings.notifications.certExpiryDesc')}
                   >
                     <Toggle checked={current.notifyCertExpiry} onChange={(v) => set('notifyCertExpiry', v)} />
                   </SettingRow>
                 </SectionItem>
                 <SectionItem>
                   <SettingRow
-                    label="Progresso de Aprendizagem"
-                    description="Alertar quando uma formação estiver parada há mais de 7 dias."
+                    label={t('settings.notifications.progress')}
+                    description={t('settings.notifications.progressDesc')}
                   >
                     <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
                   </SettingRow>
@@ -509,42 +510,40 @@ export default function SettingsPage() {
 
             {/* ── App ── */}
             {activeSection === 'app' && (
-              <SectionPanel title="Aplicação" icon={Smartphone}>
+              <SectionPanel title={t('settings.sections.app')} icon={Smartphone}>
                 <SectionItem>
                   {isInstalled ? (
                     <SettingRow
-                      label="Aplicação Instalada"
-                      description="A LearningHub já está instalada no teu dispositivo."
+                      label={t('settings2.installed')}
+                      description={t('settings2.installedDesc')}
                     >
                       <span className="flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        ✓ Instalada
+                        {t('settings2.installedBadge')}
                       </span>
                     </SettingRow>
                   ) : isIOS ? (
                     <div className="py-4">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1">Instalar no iPhone / iPad</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">O Safari não suporta instalação automática. Segue estes passos:</p>
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1">{t('settings2.iosTitle')}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{t('settings2.iosDesc')}</p>
                       <ol className="space-y-3">
                         <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
-                          <span>Toca em <Share className="inline h-4 w-4 text-primary mx-0.5" /> <strong>Partilhar</strong> na barra do Safari</span>
+                          <span>{t('settings2.iosStep1a')} <Share className="inline h-4 w-4 text-primary mx-0.5" /> <strong>{t('settings2.iosStep1b')}</strong> {t('settings2.iosStep1c')}</span>
                         </li>
                         <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
-                          <span>Seleciona <strong>"Adicionar ao ecrã principal"</strong></span>
+                          <span>{t('settings2.iosStep2a')} <strong>"{t('settings2.iosStep2b')}"</strong></span>
                         </li>
                         <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
-                          <span>Toca em <strong>Adicionar</strong></span>
+                          <span>{t('settings2.iosStep3a')} <strong>{t('settings2.iosStep3b')}</strong></span>
                         </li>
                       </ol>
                     </div>
                   ) : (
                     <SettingRow
-                      label="Instalar Aplicação"
-                      description={isInstallable
-                        ? "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa."
-                        : "Abre esta página no Chrome para Android ou Edge para instalar a app."}
+                      label={t('settings2.install')}
+                      description={isInstallable ? t('settings2.installDesc') : t('settings2.installDescNotAvail')}
                     >
                       <button
                         type="button"
@@ -558,7 +557,7 @@ export default function SettingsPage() {
                         )}
                       >
                         <Download className="h-3.5 w-3.5" />
-                        Instalar
+                        {t('settings2.installButton')}
                       </button>
                     </SettingRow>
                   )}

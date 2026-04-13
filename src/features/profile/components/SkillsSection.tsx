@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Plus, Target, Award, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { UserSkill } from '@/types';
 
@@ -12,9 +13,9 @@ interface SkillsSectionProps {
 }
 
 const LEVELS = [
-  { value: 'iniciante', label: 'Iniciante', icon: Zap, color: 'text-blue-500' },
-  { value: 'intermedio', label: 'Intermédio', icon: Target, color: 'text-amber-500' },
-  { value: 'experiente', label: 'Experiente', icon: Award, color: 'text-emerald-500' },
+  { value: 'iniciante',  labelKey: 'profile.skillsSection.levelBeginner',    icon: Zap,    color: 'text-blue-500' },
+  { value: 'intermedio', labelKey: 'profile.skillsSection.levelIntermediate', icon: Target, color: 'text-amber-500' },
+  { value: 'experiente', labelKey: 'profile.skillsSection.levelExperienced',  icon: Award,  color: 'text-emerald-500' },
 ] as const;
 
 export function SkillsSection({
@@ -23,8 +24,7 @@ export function SkillsSection({
   skills,
   onChange,
   isEditing,
-}: SkillsSectionProps) {
-  const [newSkillName, setNewSkillName] = useState('');
+}: SkillsSectionProps) {  const { t } = useTranslation();  const [newSkillName, setNewSkillName] = useState('');
 
   function addSkill() {
     const name = newSkillName.trim();
@@ -51,7 +51,7 @@ export function SkillsSection({
           {description && <p className="text-[10px] text-muted-foreground/40 mt-1">{description}</p>}
         </div>
         {skills.length === 0 ? (
-          <p className="text-xs text-muted-foreground/40 italic py-2 text-center">Nenhuma competência definida.</p>
+          <p className="text-xs text-muted-foreground/40 italic py-2 text-center">{t('profile.skillsSection.empty')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {skills.map((skill) => {
@@ -67,7 +67,7 @@ export function SkillsSection({
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-foreground truncate">{skill.skillName}</p>
-                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">{levelInfo.label}</p>
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">{t(levelInfo.labelKey)}</p>
                   </div>
                 </div>
               );
@@ -82,7 +82,7 @@ export function SkillsSection({
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="space-y-1.5">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-        <p className="text-[11px] text-muted-foreground/60">{description || "Gere as tuas competências técnicas e níveis de proficiência."}</p>
+        <p className="text-[11px] text-muted-foreground/60">{description || t('profile.skillsSection.description')}</p>
       </div>
 
       {/* List of skills in edit mode */}
@@ -113,7 +113,7 @@ export function SkillsSection({
                       : "text-muted-foreground/60 hover:bg-muted/50"
                   )}
                 >
-                  {l.label}
+                  {t(l.labelKey)}
                 </button>
               ))}
             </div>
@@ -130,7 +130,7 @@ export function SkillsSection({
             value={newSkillName}
             onChange={(e) => setNewSkillName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-            placeholder="Ex: Spring Boot, Figma..."
+            placeholder={t('profile.skillsSection.placeholder')}
             className="w-full rounded-xl border border-border/60 bg-background px-10 py-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold"
           />
         </div>

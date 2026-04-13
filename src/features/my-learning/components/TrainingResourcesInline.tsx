@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FileText,
   Download,
@@ -27,6 +28,7 @@ interface TrainingResourcesInlineProps {
 }
 
 export function TrainingResourcesInline({ training, onClose, readOnly }: TrainingResourcesInlineProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // Unified Form State: 'new' | resourceId | null
@@ -52,7 +54,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
         return Object.values(m.constraints || {}).join(', ');
       }).join('; ');
     }
-    return errorData || 'Ocorreu um erro inesperado';
+    return errorData || t('myLearning.resources.unexpectedError');
   };
 
   // ── Mutations ────────────────────────────────────────────────────────────
@@ -61,7 +63,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
     mutationFn: (data: any) => trainingApi.createResource(training.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
-      toast.success('Recurso adicionado');
+      toast.success(t('myLearning.resources.toastResourceAdded'));
       resetForm();
     },
     onError: (err: any) => toast.error(extractError(err)),
@@ -72,7 +74,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
       trainingApi.updateResource(training.id, resId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
-      toast.success('Recurso atualizado');
+      toast.success(t('myLearning.resources.toastResourceUpdated'));
       setActiveResourceId(null);
       resetForm();
     },
@@ -83,21 +85,21 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
     mutationFn: ({ resId, file }: { resId: string; file: File }) =>
       trainingApi.addResourceFile(training.id, resId, file),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
-    onError: () => toast.error('Erro ao adicionar ficheiro')
+    onError: () => toast.error(t('myLearning.resources.toastFileAddError'))
   });
 
   const deleteResourceFileMutation = useMutation({
     mutationFn: ({ resId, fileId }: { resId: string; fileId: string }) =>
       trainingApi.deleteResourceFile(training.id, resId, fileId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
-    onError: () => toast.error('Erro ao remover ficheiro')
+    onError: () => toast.error(t('myLearning.resources.toastFileRemoveError'))
   });
 
   const deleteResourceMutation = useMutation({
     mutationFn: (resId: string) => trainingApi.deleteResource(training.id, resId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
-      toast.success('Recurso removido');
+      toast.success(t('myLearning.resources.toastResourceRemoved'));
     },
     onError: (err: any) => toast.error(extractError(err))
   });
@@ -106,11 +108,11 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
     mutationFn: (file: File) => trainingApi.uploadDocument(training.id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
-      toast.success('Material adicionado');
+      toast.success(t('myLearning.resources.toastMaterialAdded'));
       setIsUploadingDoc(false);
     },
     onError: () => {
-      toast.error('Erro ao carregar arquivo');
+      toast.error(t('myLearning.resources.toastMaterialUploadError'));
       setIsUploadingDoc(false);
     }
   });
@@ -118,7 +120,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
   const deleteDocumentMutation = useMutation({
     mutationFn: (docId: string) => trainingApi.deleteDocument(training.id, docId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
-    onError: () => toast.error('Erro ao eliminar arquivo')
+    onError: () => toast.error(t('myLearning.resources.toastMaterialDeleteError'))
   });
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -213,8 +215,8 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
               <FileText className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Documentos do Curso</h3>
-              <p className="text-[10px] text-muted-foreground opacity-60">Material oficial e anexos ({training.documents?.length || 0})</p>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">{t('myLearning.resources.documentsTitle')}</h3>
+              <p className="text-[10px] text-muted-foreground opacity-60">{t('myLearning.resources.documentsSubtitle', { count: training.documents?.length || 0 })}</p>
             </div>
           </div>
           {showDocs ? <ChevronUp className="h-4 w-4 opacity-40" /> : <ChevronDown className="h-4 w-4 opacity-40" />}
@@ -236,7 +238,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
                       </a>
                       {!readOnly && (
                         <button onClick={() => deleteDocumentMutation.mutate(doc.id)} className="text-[9px] font-bold text-muted-foreground hover:text-red-500 opacity-0 group-hover/doc:opacity-100 transition-all">
-                          Remover
+                          {t('myLearning.resources.remove')}
                         </button>
                       )}
                     </div>
@@ -247,7 +249,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
 
             {!readOnly && (
               <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 p-3 text-[10px] font-bold text-muted-foreground transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary active:scale-[0.98]">
-                {isUploadingDoc ? <div className="animate-pulse">A carregar...</div> : <><Plus className="h-3 w-3" /> Adicionar Documento</>}
+                {isUploadingDoc ? <div className="animate-pulse">{t('myLearning.resources.uploading')}</div> : <><Plus className="h-3 w-3" /> {t('myLearning.resources.addDocument')}</>}
                 <input
                   type="file"
                   className="hidden"
@@ -263,7 +265,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
       {/* ── Resources Toolbar ── */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Notas & Recursos</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">{t('myLearning.resources.notesTitle')}</h3>
           <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-bold">{sortedResources.length}</span>
         </div>
         {(activeResourceId === null && !readOnly) && (
@@ -272,7 +274,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-background text-[10px] font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95"
           >
             <Plus className="h-3.5 w-3.5" />
-            Novo
+            {t('myLearning.resources.newNote')}
           </button>
         )}
       </div>
@@ -286,13 +288,13 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
               <form onSubmit={handleSaveResource} className="space-y-4">
                 <input
                   autoFocus
-                  placeholder="Título do recurso..."
+                  placeholder={t('myLearning.resources.noteTitlePlaceholder')}
                   className="w-full bg-transparent font-bold text-lg outline-none border-b border-border/40 pb-2 placeholder:opacity-30"
                   value={formTitle}
                   onChange={e => setFormTitle(e.target.value)}
                 />
                 <textarea
-                  placeholder="Escreve aqui as tuas notas..."
+                  placeholder={t('myLearning.resources.noteContentPlaceholder')}
                   className="w-full bg-transparent text-sm min-h-[120px] outline-none resize-none border-none leading-relaxed placeholder:opacity-30"
                   value={formContent}
                   onChange={e => setFormContent(e.target.value)}
@@ -313,13 +315,13 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
                 <div className="flex items-center justify-between pt-4 border-t border-border/40">
                   <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary cursor-pointer group">
                     <Paperclip className="h-4 w-4" />
-                    {selectedFiles.length > 0 ? `${selectedFiles.length} selecionados` : 'Anexar'}
+                    {selectedFiles.length > 0 ? t('myLearning.resources.filesSelected', { count: selectedFiles.length }) : t('myLearning.resources.attachFiles')}
                     <input type="file" multiple className="hidden" onChange={handleFileChange} />
                   </label>
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={resetForm} className="text-[10px] font-bold px-4 py-2 hover:bg-muted rounded-lg">Cancelar</button>
+                    <button type="button" onClick={resetForm} className="text-[10px] font-bold px-4 py-2 hover:bg-muted rounded-lg">{t('myLearning.resources.cancelNote')}</button>
                     <button disabled={!formTitle.trim() || isSubmitting} className="text-[10px] font-bold bg-blue-600 text-white px-5 py-2 rounded-lg shadow-sm shadow-blue-600/20 disabled:opacity-50">
-                      {isSubmitting ? 'A guardar...' : 'Guardar'}
+                      {isSubmitting ? t('myLearning.resources.savingNote') : t('myLearning.resources.saveNote')}
                     </button>
                   </div>
                 </div>
@@ -381,7 +383,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
             ))}
             {sortedResources.length === 0 && (
               <div className="col-span-full py-10 text-center border-2 border-dashed border-border/20 rounded-2xl">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/30">Sem recursos criados</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/30">{t('myLearning.resources.emptyNotes')}</p>
               </div>
             )}
           </div>
@@ -393,7 +395,7 @@ export function TrainingResourcesInline({ training, onClose, readOnly }: Trainin
           onClick={onClose}
           className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
-          Recolher Resources
+          {t('myLearning.resources.collapseButton')}
         </button>
       </div>
     </div>

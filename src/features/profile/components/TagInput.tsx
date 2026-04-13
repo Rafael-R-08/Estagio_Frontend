@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import { X, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -16,9 +17,11 @@ export function TagInput({
   description,
   tags,
   onChange,
-  placeholder = 'Adicionar…',
+  placeholder,
   colorClass = 'bg-primary/10 text-primary',
 }: Props) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('profile.tagInput.placeholder');
   const [input, setInput] = useState('');
 
   function addTag(raw: string) {
@@ -79,7 +82,7 @@ export function TagInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
         <button
@@ -92,7 +95,7 @@ export function TagInput({
         </button>
       </div>
       <p className="text-[10px] text-muted-foreground/50">
-        Enter ou vírgula para adicionar · Backspace para remover o último
+        {t('profile.tagInput.hint')}
       </p>
     </div>
   );

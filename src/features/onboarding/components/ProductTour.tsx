@@ -1,76 +1,34 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { X, ChevronRight, ChevronLeft, Check, Bell, User, LayoutDashboard, Search, Sparkles, BookOpen, Award, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../../components/ui/button';
 import { cn } from '../../../lib/utils';
 
 interface TourStep {
   targetId: string;
-  title: string;
-  content: string;
+  tourKey: string;
   icon: any;
   position: 'right' | 'left' | 'bottom' | 'top';
 }
 
-const TOUR_STEPS: TourStep[] = [
-  {
-    targetId: 'tour-dashboard',
-    title: 'A tua Dashboard',
-    content: 'Aqui tens um resumo de todo o teu progresso, recomendações personalizadas e as tuas estatísticas de aprendizagem.',
-    icon: LayoutDashboard,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-search',
-    title: 'Pesquisa de Cursos',
-    content: 'Explora milhares de cursos de várias plataformas. Podes filtrar por tecnologia, nível ou duração.',
-    icon: Search,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-ai',
-    title: 'AI Assistant',
-    content: 'O teu co-piloto inteligente. Tira dúvidas, pede sugestões de carreira ou ajuda para encontrar o curso ideal.',
-    icon: Sparkles,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-certificates',
-    title: 'Os teus Certificados',
-    content: 'Gere todas as tuas conquistas e certificados num só lugar. Podes até fazer upload de certificados externos.',
-    icon: Award,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-mylearning',
-    title: 'O teu Progresso',
-    content: 'Acompanha em tempo real os cursos que tens em mãos e o teu histórico de aprendizagem.',
-    icon: BookOpen,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-profile',
-    title: 'O teu Perfil',
-    content: 'Mantém o teu perfil técnico em dia para que a IA te consiga recomendar os melhores conteúdos.',
-    icon: User,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-settings',
-    title: 'Definições',
-    content: 'Personaliza a tua experiência, altera idiomas e gere as tuas preferências de privacidade.',
-    icon: Settings,
-    position: 'right',
-  },
-  {
-    targetId: 'tour-notifications',
-    title: 'Notificações',
-    content: 'Fica a saber quando novos cursos obrigatórios são partilhados ou quando um certificado está prestes a expirar.',
-    icon: Bell,
-    position: 'bottom',
-  },
+const TOUR_STEPS_CONFIG: TourStep[] = [
+  { targetId: 'tour-dashboard', tourKey: 'dashboard', icon: LayoutDashboard, position: 'right' },
+  { targetId: 'tour-search', tourKey: 'search', icon: Search, position: 'right' },
+  { targetId: 'tour-ai', tourKey: 'ai', icon: Sparkles, position: 'right' },
+  { targetId: 'tour-certificates', tourKey: 'certificates', icon: Award, position: 'right' },
+  { targetId: 'tour-mylearning', tourKey: 'myLearning', icon: BookOpen, position: 'right' },
+  { targetId: 'tour-profile', tourKey: 'profile', icon: User, position: 'right' },
+  { targetId: 'tour-settings', tourKey: 'settings', icon: Settings, position: 'right' },
+  { targetId: 'tour-notifications', tourKey: 'notifications', icon: Bell, position: 'bottom' },
 ];
 
 export function ProductTour() {
+  const { t } = useTranslation();
+  const TOUR_STEPS = TOUR_STEPS_CONFIG.map((s) => ({
+    ...s,
+    title: t(`onboarding.tour.${s.tourKey}.title`),
+    content: t(`onboarding.tour.${s.tourKey}.content`),
+  }));
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -214,7 +172,7 @@ export function ProductTour() {
           <button
             onClick={handleComplete}
             className="absolute top-4 right-4 p-1.5 rounded-full text-muted-foreground/40 hover:bg-muted hover:text-foreground transition-all active:scale-90"
-            title="Sair do Tutorial"
+            title={t('onboarding.exitTourAria')}
           >
             <X className="h-4 w-4" />
           </button>
@@ -248,7 +206,7 @@ export function ProductTour() {
               onClick={handleComplete}
               className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 hover:text-foreground transition-colors"
             >
-              Saltar Tutorial
+              {t('onboarding.skipTour')}
             </button>
             <div className="flex gap-2">
               {currentStep > 0 && (
@@ -267,11 +225,11 @@ export function ProductTour() {
               >
                 {currentStep === TOUR_STEPS.length - 1 ? (
                   <>
-                    Finalizar <Check className="h-4 w-4" />
+                    {t('onboarding.tour.finish')} <Check className="h-4 w-4" />
                   </>
                 ) : (
                   <>
-                    Seguinte <ChevronRight className="h-4 w-4" />
+                    {t('onboarding.tour.next')} <ChevronRight className="h-4 w-4" />
                   </>
                 )}
               </Button>

@@ -20,7 +20,9 @@ import type { AdminAnalytics } from '@/types';
 import { SERVICE_LINE_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import type { Locale } from 'date-fns';
+import { pt, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -149,9 +151,9 @@ function UrgencyBadge({ days }: { days: number }) {
 
 // ─── Format month label ───────────────────────────────────────────────────────
 
-function fmtMonth(m: string) {
+function fmtMonth(m: string, locale: Locale) {
   try {
-    return format(parseISO(`${m}-01`), 'MMM yy', { locale: pt });
+    return format(parseISO(`${m}-01`), 'MMM yy', { locale });
   } catch {
     return m;
   }
@@ -160,6 +162,8 @@ function fmtMonth(m: string) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function AnalyticsTab() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'pt' ? pt : enUS;
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'analytics'],
     queryFn: async () => {
@@ -192,227 +196,398 @@ export function AnalyticsTab() {
   const expiringIn30 = analytics.certificateStats?.expiringIn30Days ?? analytics.expiringCertificates.length;
 
   return (
-    <div className="space-y-6">
-      {/* KPI cards — visão geral */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Users} label="Utilizadores ativos" value={isLoading ? '—' : activeUsers} color="bg-softinsa-blue/10 text-softinsa-blue" />
-        <StatCard icon={Award} label="Total utilizadores" value={isLoading ? '—' : totalUsers} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" />
-        <StatCard icon={Calendar} label="Certs. a expirar (30d)" value={isLoading ? '—' : expiringIn30} color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" />
-        <StatCard icon={TrendingUp} label="Skill mais procurada" value={isLoading ? '—' : (analytics.topSkills[0]?.skill ?? '—')} color="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" />
-      </div>
+    <div className="space-y-8">
+      {/* ── Secção: Utilizadores ───────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <Users className="h-3.5 w-3.5" /> {t('admin.analytics.sections.users')}
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard icon={Users} label={t('admin.analytics.stats.activeUsers')} value={isLoading ? '—' : activeUsers} color="bg-softinsa-blue/10 text-softinsa-blue" />
+          <StatCard icon={Award} label={t('admin.analytics.stats.totalUsers')} value={isLoading ? '—' : totalUsers} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" />
+          <StatCard
+            icon={TrendingUp}
+            label={t('admin.analytics.stats.newThisMonth')}
+            value={isLoading ? '—' : (analytics.overview?.newUsersThisMonth ?? '—')}
+            color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+          />
+          <StatCard
+            icon={Target}
+            label={t('admin.analytics.stats.onboardingRate')}
+            value={isLoading ? '—' : analytics.overview?.onboardingRate !== undefined ? `${analytics.overview.onboardingRate}%` : '—'}
+            color="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+          />
+        </div>
 
-      {/* KPI cards — segunda linha */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Target} label="Taxa de conclusão" value={isLoading ? '—' : completionRate !== null ? `${completionRate}%` : '—'} color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" />
-        <StatCard icon={FileCheck} label="Certs. emitidos/mês" value={isLoading ? '—' : (analytics.certificateStats?.issuedThisMonth ?? '—')} color="bg-softinsa-blue/10 text-softinsa-blue" />
-        <StatCard icon={Bot} label="Conversas IA (30d)" value={isLoading ? '—' : (analytics.aiUsageStats?.conversationsLast30Days ?? '—')} color="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400" />
-        <StatCard icon={Database} label="Cursos indexados" value={isLoading ? '—' : (analytics.platformStats?.totalIndexedCourses ?? '—')} color="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300" />
-      </div>
+        {/* Distribution charts */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartCard title={t('admin.analytics.stats.usersByServiceLine')}>
+            {isLoading ? <ChartSkeleton /> : (() => {
+              const entries = Object.entries(analytics.overview?.usersByServiceLine ?? {});
+              if (entries.length === 0) return <p className="text-xs text-muted-foreground text-center py-8">{t('admin.analytics.stats.noData')}</p>;
+              const SL_SHORT: Record<string, string> = {
+                HYBRID_CLOUD: 'Hybrid Cloud',
+                DATA: 'Data',
+                BUSINESS_APPLICATIONS: 'Bus. Apps',
+                APPLICATION_OPERATIONS: 'App Ops',
+                SOURCING_TALENT_MANAGEMENT: 'Sourcing',
+              };
+              const chartData = entries.map(([k, v]) => ({ name: SL_SHORT[k] ?? k, value: v as number }));
+              return (
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
+                      {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              );
+            })()}
+          </ChartCard>
 
-      {/* Charts row 1 */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Bar: Cursos concluídos por mês */}
-        <ChartCard title="Cursos concluídos por mês">
-          {isLoading ? <ChartSkeleton /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={analytics.completedByMonth.map((d) => ({ ...d, month: fmtMonth(d.month) }))} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
-                  cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-                />
-                <Bar dataKey="count" name="Concluídos" fill="#0057B7" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartCard>
+          <ChartCard title={t('admin.analytics.stats.usersByLevel')}>
+            {isLoading ? <ChartSkeleton /> : (() => {
+              const EXP_LABELS: Record<string, string> = {
+                junior: t('admin.analytics.levels.junior'),
+                intermedio: t('admin.analytics.levels.intermedio'),
+                senior: t('admin.analytics.levels.senior'),
+                especialista: t('admin.analytics.levels.especialista'),
+                lider: t('admin.analytics.levels.lider'),
+              };
+              const entries = Object.entries(analytics.overview?.usersByExperienceLevel ?? {});
+              if (entries.length === 0) return <p className="text-xs text-muted-foreground text-center py-8">{t('admin.analytics.stats.noData')}</p>;
+              const chartData = entries.map(([k, v]) => ({ name: EXP_LABELS[k] ?? k, value: v as number }));
+              return (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartData} barSize={32}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }} cursor={{ fill: 'var(--muted)', opacity: 0.4 }} />
+                    <Bar dataKey="value" name={t('admin.analytics.stats.usersBar')} fill="#8B5CF6" radius={[6, 6, 0, 0]}>
+                      {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              );
+            })()}
+          </ChartCard>
+        </div>
+      </section>
 
-        {/* Pie: Plataformas mais usadas */}
-        <ChartCard title="Plataformas mais usadas">
-          {isLoading ? <ChartSkeleton /> : (
-            <div className="flex items-center gap-4">
+      {/* ── Secção: Formação ──────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <Target className="h-3.5 w-3.5" /> {t('admin.analytics.sections.training')}
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <StatCard
+            icon={Target}
+            label={t('admin.analytics.stats.completionRate')}
+            value={isLoading ? '—' : completionRate !== null ? `${completionRate}%` : '—'}
+            color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+          />
+          <StatCard
+            icon={TrendingUp}
+            label={t('admin.analytics.stats.totalTrainings')}
+            value={isLoading ? '—' : (analytics.trainingStats?.total ?? '—')}
+            color="bg-softinsa-blue/10 text-softinsa-blue"
+          />
+          <StatCard
+            icon={FileCheck}
+            label={t('admin.analytics.stats.ongoing')}
+            value={isLoading ? '—' : (analytics.trainingStats?.byStatus?.ongoing ?? '—')}
+            color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+          />
+        </div>
+      </section>
+
+      {/* ── Secção: Certificados ──────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <Award className="h-3.5 w-3.5" /> {t('admin.analytics.sections.certificates')}
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard
+            icon={FileCheck}
+            label={t('admin.analytics.stats.totalCerts')}
+            value={isLoading ? '—' : (analytics.certificateStats?.total ?? '—')}
+            color="bg-softinsa-blue/10 text-softinsa-blue"
+          />
+          <StatCard
+            icon={FileCheck}
+            label={t('admin.analytics.stats.issuedThisMonth')}
+            value={isLoading ? '—' : (analytics.certificateStats?.issuedThisMonth ?? '—')}
+            color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+          />
+          <StatCard
+            icon={Calendar}
+            label={t('admin.analytics.stats.expiring30d')}
+            value={isLoading ? '—' : expiringIn30}
+            color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+          />
+          <StatCard
+            icon={Calendar}
+            label={t('admin.analytics.stats.expiring6090d')}
+            value={isLoading ? '—' : (analytics.certificateStats?.expiringIn31to60Days ?? '—')}
+            color="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+          />
+        </div>
+      </section>
+
+      {/* ── Secção: IA & Plataformas ──────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <Bot className="h-3.5 w-3.5" /> {t('admin.analytics.sections.aiPlatforms')}
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard
+            icon={Bot}
+            label={t('admin.analytics.stats.aiConversations30d')}
+            value={isLoading ? '—' : (analytics.aiUsageStats?.conversationsLast30Days ?? '—')}
+            color="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400"
+          />
+          <StatCard
+            icon={Bot}
+            label={t('admin.analytics.stats.aiTotalMessages')}
+            value={isLoading ? '—' : (analytics.aiUsageStats?.totalMessages ?? '—')}
+            color="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400"
+          />
+          <StatCard
+            icon={Database}
+            label={t('admin.analytics.stats.indexedCourses')}
+            value={isLoading ? '—' : (analytics.platformStats?.totalIndexedCourses ?? '—')}
+            color="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+          />
+          <StatCard
+            icon={Database}
+            label={t('admin.analytics.stats.activePlatforms')}
+            value={isLoading ? '—' : (analytics.platformStats?.active ?? '—')}
+            color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+          />
+        </div>
+      </section>
+
+      {/* ── Secção: Gráficos ──────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <TrendingUp className="h-3.5 w-3.5" /> {t('admin.analytics.sections.charts')}
+        </h2>
+
+        {/* Charts row 1 */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Bar: Cursos concluídos por mês */}
+          <ChartCard title={t('admin.analytics.stats.completedByMonth')}>
+            {isLoading ? <ChartSkeleton /> : (
               <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={analytics.platformUsage}
-                    dataKey="count"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                  >
-                    {analytics.platformUsage.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
+                <BarChart data={analytics.completedByMonth.map((d) => ({ ...d, month: fmtMonth(d.month, dateLocale) }))} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
+                    cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
+                  />
+                  <Bar dataKey="count" name={t('admin.analytics.stats.completedBar')} fill="#0057B7" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </ChartCard>
+
+          {/* Pie: Plataformas mais usadas */}
+          <ChartCard title={t('admin.analytics.stats.mostUsedPlatforms')}>
+            {isLoading ? <ChartSkeleton /> : (
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={analytics.platformUsage}
+                      dataKey="count"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={3}
+                    >
+                      {analytics.platformUsage.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
+                    />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Charts row 2 */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Line: Crescimento de utilizadores */}
+          <ChartCard title={t('admin.analytics.charts.userGrowth')}>
+            {isLoading ? <ChartSkeleton /> : (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={analytics.userGrowth.map((d) => ({ ...d, month: fmtMonth(d.month, dateLocale) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
                   />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                </PieChart>
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    name={t('admin.analytics.stats.usersBar')}
+                    stroke="#0057B7"
+                    strokeWidth={2.5}
+                    dot={{ fill: '#0057B7', r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
-            </div>
-          )}
-        </ChartCard>
-      </div>
+            )}
+          </ChartCard>
 
-      {/* Charts row 2 */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Line: Crescimento de utilizadores */}
-        <ChartCard title="Crescimento de utilizadores">
-          {isLoading ? <ChartSkeleton /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={analytics.userGrowth.map((d) => ({ ...d, month: fmtMonth(d.month) }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  name="Utilizadores"
-                  stroke="#0057B7"
-                  strokeWidth={2.5}
-                  dot={{ fill: '#0057B7', r: 4, strokeWidth: 0 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </ChartCard>
-
-        {/* Horizontal bar: Skills mais procuradas */}
-        <ChartCard title="Skills mais procuradas">
-          {isLoading ? <ChartSkeleton /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                layout="vertical"
-                data={[...analytics.topSkills].sort((a, b) => b.count - a.count).slice(0, 6)}
-                barSize={16}
-                margin={{ left: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="skill" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={72} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
-                  cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-                />
-                <Bar dataKey="count" name="Pesquisas" fill="#45A5FF" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartCard>
-      </div>
-
-      {/* Expiring certificates table */}
-      <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
-          <h3 className="text-sm font-semibold text-foreground">Certificados a expirar em breve</h3>
-          <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-            {analytics.expiringCertificates.length} certificado{analytics.expiringCertificates.length !== 1 ? 's' : ''}
-          </span>
+          {/* Horizontal bar: Skills mais procuradas */}
+          <ChartCard title={t('admin.analytics.charts.topSkills')}>
+            {isLoading ? <ChartSkeleton /> : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart
+                  layout="vertical"
+                  data={[...analytics.topSkills].sort((a, b) => b.count - a.count).slice(0, 6)}
+                  barSize={16}
+                  margin={{ left: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="skill" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={72} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }}
+                    cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
+                  />
+                  <Bar dataKey="count" name={t('admin.analytics.stats.searchesBar')} fill="#45A5FF" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </ChartCard>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/40 bg-muted/20">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Utilizador</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curso</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Expira em</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Urgência</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border">
-                    {Array.from({ length: 4 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3"><div className="h-4 animate-pulse rounded bg-muted w-3/4" /></td>
-                    ))}
-                  </tr>
-                ))
-              ) : analytics.expiringCertificates.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
-                    Nenhum certificado a expirar brevemente.
-                  </td>
-                </tr>
-              ) : (
-                [...analytics.expiringCertificates]
-                  .sort((a, b) => a.daysLeft - b.daysLeft)
-                  .map((cert, i) => (
-                    <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-foreground">{cert.userName}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{cert.courseName}</td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">
-                        {format(parseISO(cert.expirationDate), 'dd MMM yyyy', { locale: pt })}
-                      </td>
-                      <td className="px-4 py-3">
-                        <UrgencyBadge days={cert.daysLeft} />
-                      </td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </section>
 
-      {/* Recent users table */}
-      {(analytics.recentUsers?.length ?? 0) > 0 && (
+      {/* ── Secção: Alertas & Utilizadores Recentes ──────────────────────── */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+          <Calendar className="h-3.5 w-3.5" /> {t('admin.analytics.sections.alertsRecent')}
+        </h2>
+
+        {/* Expiring certificates table */}
         <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm overflow-hidden">
           <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
-            <h3 className="text-sm font-semibold text-foreground">Utilizadores recentes</h3>
-            <span className="rounded-full bg-softinsa-blue/10 px-2.5 py-0.5 text-xs font-semibold text-softinsa-blue">
-              últimos {analytics.recentUsers?.length}
+            <h3 className="text-sm font-semibold text-foreground">{t('admin.analytics.certTable.title')}</h3>
+            <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+              {t(analytics.expiringCertificates.length !== 1 ? 'admin.analytics.certTable.countPlural' : 'admin.analytics.certTable.countSingle', { count: analytics.expiringCertificates.length })}
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/20">
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service Line</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registado</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.certTable.columns.user')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.certTable.columns.course')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.certTable.columns.expiresIn')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.certTable.columns.urgency')}</th>
                 </tr>
               </thead>
               <tbody>
-                {analytics.recentUsers?.map((u) => (
-                  <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-softinsa-blue/10 text-softinsa-blue text-xs font-bold">
-                          {u.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-medium text-foreground">{u.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{u.role}</span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {u.serviceLine ? (SERVICE_LINE_LABELS[u.serviceLine] ?? u.serviceLine) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {format(parseISO(u.createdAt), 'dd MMM yyyy', { locale: pt })}
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <tr key={i} className="border-b border-border">
+                      {Array.from({ length: 4 }).map((_, j) => (
+                        <td key={j} className="px-4 py-3"><div className="h-4 animate-pulse rounded bg-muted w-3/4" /></td>
+                      ))}
+                    </tr>
+                  ))
+                ) : analytics.expiringCertificates.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                      {t('admin.analytics.certTable.noResults')}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  [...analytics.expiringCertificates]
+                    .sort((a, b) => a.daysLeft - b.daysLeft)
+                    .map((cert, i) => (
+                      <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3 font-medium text-foreground">{cert.userName}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{cert.courseName}</td>
+                        <td className="px-4 py-3 text-muted-foreground text-xs">
+                          {format(parseISO(cert.expirationDate), 'dd MMM yyyy', { locale: dateLocale })}
+                        </td>
+                        <td className="px-4 py-3">
+                          <UrgencyBadge days={cert.daysLeft} />
+                        </td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      )}
+
+        {/* Recent users table */}
+        {(analytics.recentUsers?.length ?? 0) > 0 && (
+          <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-xl shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+              <h3 className="text-sm font-semibold text-foreground">{t('admin.analytics.recentUsersTable.title')}</h3>
+              <span className="rounded-full bg-softinsa-blue/10 px-2.5 py-0.5 text-xs font-semibold text-softinsa-blue">
+                {t('admin.analytics.recentUsersTable.last', { n: analytics.recentUsers?.length })}
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-muted/20">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.recentUsersTable.columns.name')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.recentUsersTable.columns.email')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.recentUsersTable.columns.role')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.recentUsersTable.columns.serviceLine')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.analytics.recentUsersTable.columns.registered')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analytics.recentUsers?.map((u) => (
+                    <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-softinsa-blue/10 text-softinsa-blue text-xs font-bold">
+                            {u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium text-foreground">{u.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{u.role}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {u.serviceLine ? (SERVICE_LINE_LABELS[u.serviceLine] ?? u.serviceLine) : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {format(parseISO(u.createdAt), 'dd MMM yyyy', { locale: dateLocale })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

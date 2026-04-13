@@ -9,8 +9,6 @@ import type { RecommendationResponse, RecommendedCourse } from '@/types';
 const CATEGORY_CONFIG = {
   improvement: {
     icon: TrendingUp,
-    label: 'Performance & Carreira',
-    shortLabel: 'Performance',
     iconColor: 'text-emerald-500 dark:text-emerald-400',
     bgColor: 'bg-emerald-50/60 dark:bg-emerald-500/10',
     borderColor: 'border-emerald-200/60 dark:border-emerald-500/20',
@@ -18,8 +16,6 @@ const CATEGORY_CONFIG = {
   },
   interests: {
     icon: Lightbulb,
-    label: 'Novos Horizontes',
-    shortLabel: 'Horizontes',
     iconColor: 'text-amber-500 dark:text-amber-400',
     bgColor: 'bg-amber-50/60 dark:bg-amber-500/10',
     borderColor: 'border-amber-200/60 dark:border-amber-500/20',
@@ -27,20 +23,12 @@ const CATEGORY_CONFIG = {
   },
   missing_skills: {
     icon: Target,
-    label: 'Gaps de Skills',
-    shortLabel: 'Skills',
     iconColor: 'text-blue-500 dark:text-blue-400',
     bgColor: 'bg-blue-50/60 dark:bg-blue-500/10',
     borderColor: 'border-blue-200/60 dark:border-blue-500/20',
     badgeBg: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
   },
 } as const;
-
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Iniciante',
-  intermediate: 'Intermédio',
-  advanced: 'Avançado',
-};
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
@@ -79,9 +67,10 @@ function RecommendationSkeleton() {
 // ─── Course Card ──────────────────────────────────────────────────────────────
 
 function CourseCard({ course }: { course: RecommendedCourse }) {
+  const { t } = useTranslation();
   const cfg = CATEGORY_CONFIG[course.category];
   const Icon = cfg.icon;
-  const levelLabel = course.level ? (LEVEL_LABELS[course.level.toLowerCase()] ?? course.level) : null;
+  const levelLabel = course.level ? t(`dashboard.recommendations.levels.${course.level.toLowerCase()}`, { defaultValue: course.level }) : null;
 
   return (
     <div className={cn(
@@ -179,7 +168,7 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
           </p>
           {!data?.hasContextualCourses && (
             <p className="text-[11px] text-muted-foreground/60">
-              Completa o teu perfil para receber sugestões personalizadas.
+              {t('dashboard.recommendations.completeProfile')}
             </p>
           )}
         </div>
@@ -233,7 +222,7 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
             <button
               onClick={onRetry}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-foreground hover:text-background active:scale-90"
-              title="Atualizar recomendações"
+              title={t('dashboard.recommendations.refreshAria')}
             >
               <RefreshCw className="h-4 w-4" />
             </button>
@@ -269,8 +258,8 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
                 )}
               >
                 <Icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{c.label}</span>
-                <span className="inline sm:hidden">{c.shortLabel}</span>
+                <span className="hidden sm:inline">{t(`dashboard.recommendations.categories.${cat}.label`)}</span>
+                <span className="inline sm:hidden">{t(`dashboard.recommendations.categories.${cat}.shortLabel`)}</span>
                 <span className={cn(
                   'rounded-full px-1.5 py-0.5 text-[9px] font-black',
                   safeTab === cat ? 'bg-current/10' : 'bg-muted text-muted-foreground',
@@ -290,10 +279,10 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
             <TabIcon className="h-3.5 w-3.5" />
           </div>
           <h3 className={cn('text-sm font-black tracking-tight', cfg.iconColor)}>
-            {cfg.label}
+            {t(`dashboard.recommendations.categories.${safeTab}.label`)}
           </h3>
           <span className="text-[11px] text-muted-foreground/50 font-medium">
-            · {tabCourses.length} curso{tabCourses.length !== 1 ? 's' : ''}
+            {t('dashboard.recommendations.coursesCount', { count: tabCourses.length })}
           </span>
         </div>
 
@@ -313,13 +302,13 @@ export function UnifiedRecommendationCard({ data, isLoading, isError, onRetry }:
                 'h-1.5 w-1.5 rounded-full',
                 data.metadata.profileScore >= 0.8 ? 'bg-emerald-500' : data.metadata.profileScore >= 0.5 ? 'bg-amber-500' : 'bg-rose-500',
               )} />
-              Perfil: {Math.round(data.metadata.profileScore * 100)}%
+              {t('dashboard.recommendations.profileLabel', { n: Math.round(data.metadata.profileScore * 100) })}
             </span>
           )}
           {typeof data?.metadata?.sourcesCount === 'number' && (
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
               <BookOpen className="h-3 w-3" />
-              {data.metadata.sourcesCount} fontes RAG
+              {t('dashboard.recommendations.sourcesLabel', { n: data.metadata.sourcesCount })}
             </span>
           )}
         </div>

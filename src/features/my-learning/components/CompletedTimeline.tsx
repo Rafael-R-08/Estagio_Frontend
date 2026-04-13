@@ -1,4 +1,5 @@
 import { CheckCircle2, ExternalLink, Trophy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { TrainingRecord } from '@/types';
 
@@ -27,12 +28,15 @@ function Stars({ rating }: { rating?: number }) {
 function TimelineItem({
   training,
   isLast,
+  locale,
 }: {
   training: TrainingRecord;
   isLast: boolean;
+  locale: string;
 }) {
+  const { t } = useTranslation();
   const date = training.completedAt
-    ? new Date(training.completedAt).toLocaleDateString('pt-PT', {
+    ? new Date(training.completedAt).toLocaleDateString(locale, {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -64,7 +68,7 @@ function TimelineItem({
                 {training.certificate && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                     <Trophy className="h-3 w-3" />
-                    Certificado
+                    {t('myLearning.completedTimeline.certificate')}
                   </span>
                 )}
               </div>
@@ -111,11 +115,11 @@ function TimelineItem({
 
 // ─── Group by month ───────────────────────────────────────────────────────────
 
-function groupByMonth(records: TrainingRecord[]) {
+function groupByMonth(records: TrainingRecord[], locale: string) {
   const groups: Record<string, TrainingRecord[]> = {};
   for (const r of records) {
     const d = r.completedAt ? new Date(r.completedAt) : new Date(r.createdAt ?? '');
-    const key = d.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+    const key = d.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
     if (!groups[key]) groups[key] = [];
     groups[key].push(r);
   }
@@ -129,15 +133,18 @@ interface CompletedTimelineProps {
 }
 
 export function CompletedTimeline({ trainings }: CompletedTimelineProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
+
   if (trainings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
           <CheckCircle2 className="h-7 w-7 text-muted-foreground/40" />
         </div>
-        <p className="text-sm font-medium text-foreground">Nenhum curso concluído ainda</p>
+        <p className="text-sm font-medium text-foreground">{t('myLearning.completedTimeline.emptyTitle')}</p>
         <p className="text-xs text-muted-foreground">
-          Quando concluíres um curso, aparece aqui na linha do tempo.
+          {t('myLearning.completedTimeline.emptyDesc')}
         </p>
       </div>
     );
@@ -149,7 +156,7 @@ export function CompletedTimeline({ trainings }: CompletedTimelineProps) {
     return db - da; // mais recente primeiro
   });
 
-  const groups = groupByMonth(sorted);
+  const groups = groupByMonth(sorted, locale);
 
   return (
     <div className="space-y-8">
@@ -160,7 +167,7 @@ export function CompletedTimeline({ trainings }: CompletedTimelineProps) {
           </p>
           <div>
             {items.map((t, i) => (
-              <TimelineItem key={t.id} training={t} isLast={i === items.length - 1} />
+              <TimelineItem key={t.id} training={t} isLast={i === items.length - 1} locale={locale} />
             ))}
           </div>
         </div>

@@ -274,6 +274,7 @@ export interface CreateTrainingRecordDto {
   platformId?: string;
   startedAt?: string;
   notes?: string;
+  durationHours?: number;
 }
 
 export interface UpdateTrainingRecordDto {

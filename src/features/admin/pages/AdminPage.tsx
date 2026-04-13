@@ -1,9 +1,10 @@
-import { Users, Globe, BarChart2, ShieldCheck } from 'lucide-react';
+import { Users, Globe, BarChart2, ShieldCheck, ClipboardList } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { UsersTab } from '../components/UsersTab';
 import { PlatformsTab } from '../components/PlatformsTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
+import { AuditTab } from '../components/AuditTab';
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 
@@ -11,12 +12,13 @@ const TABS = [
   { id: 'users', labelKey: 'admin.tabs.users', icon: Users, labelFallback: 'Utilizadores' },
   { id: 'platforms', labelKey: 'admin.tabs.platforms', icon: Globe, labelFallback: 'Plataformas' },
   { id: 'analytics', labelKey: 'admin.tabs.analytics', icon: BarChart2, labelFallback: 'Analítica' },
+  { id: 'audit', labelKey: 'admin.tabs.audit', icon: ClipboardList, labelFallback: 'Auditoria' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
 
 function isValidTab(t: string | null): t is TabId {
-  return t === 'users' || t === 'platforms' || t === 'analytics';
+  return t === 'users' || t === 'platforms' || t === 'analytics' || t === 'audit';
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ export default function AdminPage() {
       {active === 'users' && <UsersTab />}
       {active === 'platforms' && <PlatformsTab />}
       {active === 'analytics' && <AnalyticsTab />}
+      {active === 'audit' && <AuditTab />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast-store';
 import { trainingApi } from '@/services/api';
 import type { TrainingRecord } from '@/types';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function PendingFeedbackModal({ courses, onClose }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [list, setList] = useState(courses);
 
@@ -21,10 +23,10 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
       setList((prev) => prev.filter((c) => c.id !== variables.id));
-      toast.success('Feedback registado com sucesso!');
+      toast.success(t('dashboard.pendingFeedback.toastSuccess'));
       if (list.length <= 1) onClose(); // if that was the last one, close modal
     },
-    onError: () => toast.error('Erro ao registar feedback.'),
+    onError: () => toast.error(t('dashboard.pendingFeedback.toastError')),
   });
 
   const handleAction = (id: string, action: 'ongoing' | 'past' | 'suggested') => {
@@ -51,7 +53,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
       <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-border bg-card shadow-xl">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold text-foreground">
-            Feedback Pendente
+            {t('dashboard.pendingFeedback.title')}
           </h2>
           <button
             onClick={onClose}
@@ -63,7 +65,7 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
           <p className="text-sm text-foreground/80 mb-4">
-            Notámos que acedeste recentemente a estas formações. Confirma o teu estado para mantermos o teu histórico atualizado:
+            {t('dashboard.pendingFeedback.description')}
           </p>
           <div className="space-y-3">
             {list.map((course) => (
@@ -88,21 +90,21 @@ export function PendingFeedbackModal({ courses, onClose }: Props) {
                     disabled={updateMutation.isPending}
                     className="w-full sm:w-auto text-left sm:text-center text-xs px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-400 font-medium transition flex items-center gap-1.5 disabled:opacity-50"
                   >
-                    <Clock className="w-3.5 h-3.5 shrink-0" /> Comecei a fazer
+                    <Clock className="w-3.5 h-3.5 shrink-0" /> {t('dashboard.pendingFeedback.started')}
                   </button>
                   <button
                     onClick={() => handleAction(course.id, 'past')}
                     disabled={updateMutation.isPending}
                     className="w-full sm:w-auto text-left sm:text-center text-xs px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 dark:text-emerald-400 font-medium transition flex items-center gap-1.5 disabled:opacity-50"
                   >
-                    <Calendar className="w-3.5 h-3.5 shrink-0" /> Já tinha feito no passado
+                    <Calendar className="w-3.5 h-3.5 shrink-0" /> {t('dashboard.pendingFeedback.alreadyDone')}
                   </button>
                   <button
                     onClick={() => handleAction(course.id, 'suggested')}
                     disabled={updateMutation.isPending}
                     className="w-full sm:w-auto text-left sm:text-center text-xs px-3 py-1.5 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:text-purple-400 font-medium transition flex items-center gap-1.5 disabled:opacity-50"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Fiz após sugestão
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> {t('dashboard.pendingFeedback.afterSuggestion')}
                   </button>
                 </div>
               </div>

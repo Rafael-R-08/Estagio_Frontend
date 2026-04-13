@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   Download,
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [meta, setMeta] = useState<UpdateCertificateDto>({
@@ -56,13 +58,11 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
     mutationFn: () => certificatesApi.update(cert.id, meta),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['certificates'] });
-      toast.success('Metadados actualizados.');
+      toast.success(t('certDetail.toastSaved'));
       setDirty(false);
     },
-    onError: () => toast.error('Erro ao guardar alterações.'),
+    onError: () => toast.error(t('certDetail.toastSaveError')),
   });
-
-  // ── Re-extract with AI ───────────────────────────────────────────────
   const reextractMutation = useMutation({
     mutationFn: () => certificatesApi.reextract(cert.id),
     onSuccess: (res) => {
@@ -75,10 +75,10 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
         expirationDate: data.expirationDate,
         durationHours: data.durationHours,
       });
-      toast.success('Metadados re-extraídos com IA.');
+      toast.success(t('certDetail.toastReExtracted'));
       setDirty(false);
     },
-    onError: () => toast.error('Erro ao re-extrair metadados.'),
+    onError: () => toast.error(t('certDetail.toastReExtractError')),
   });
 
   // ── Delete ────────────────────────────────────────────────────────────
@@ -86,10 +86,10 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
     mutationFn: () => certificatesApi.delete(cert.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['certificates'] });
-      toast.success('Certificado eliminado.');
+      toast.success(t('certDetail.toastDeleted'));
       onClose();
     },
-    onError: () => toast.error('Erro ao eliminar certificado.'),
+    onError: () => toast.error(t('certDetail.toastDeleteError')),
   });
 
   const isLoading = updateMutation.isPending || reextractMutation.isPending || deleteMutation.isPending;
@@ -102,7 +102,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
       <div className="relative w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="text-base font-semibold text-foreground">Detalhe do Certificado</h2>
+          <h2 className="text-base font-semibold text-foreground">{t('certDetail.title')}</h2>
           <button
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
@@ -124,7 +124,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               ) : (
                 <img
                   src={cert.fileUrl}
-                  alt="Certificado"
+                  alt={t('certDetail.altImage')}
                   className="h-40 w-full object-contain"
                 />
               )}
@@ -138,7 +138,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
             >
               <Download className="h-4 w-4" />
-              Descarregar
+              {t('certDetail.download')}
             </a>
             <a
               href={cert.fileUrl}
@@ -147,14 +147,14 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
             >
               <ExternalLink className="h-4 w-4" />
-              Abrir
+              {t('certDetail.open')}
             </a>
             <button
               onClick={onReplace}
               className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
             >
               <Upload className="h-4 w-4" />
-              Substituir
+              {t('certDetail.replace')}
             </button>
             <button
               onClick={() => reextractMutation.mutate()}
@@ -164,18 +164,18 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               {reextractMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin text-primary/70" />
-                  A re-extrair...
+                  {t('certDetail.reExtractLoading')}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 text-primary/70" />
-                  Re-extrair IA
+                  {t('certDetail.reExtract')}
                 </>
               )}
             </button>
             <button
               onClick={() => {
-                if (confirm('Eliminar este certificado? Esta acção não pode ser revertida.')) {
+                if (confirm(t('certDetail.confirmDelete'))) {
                   deleteMutation.mutate();
                 }
               }}
@@ -183,22 +183,22 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               className="flex items-center justify-center gap-2 rounded-lg border border-destructive/40 px-3 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/10 disabled:opacity-60"
             >
               <Trash2 className="h-4 w-4" />
-              Eliminar
+              {t('certDetail.delete')}
             </button>
           </div>
 
           {/* ── Right: metadata ── */}
           <div className="flex-1 space-y-4">
             <div className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Formação</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('certDetail.sectionTraining')}</p>
               <p className="text-sm text-foreground">{cert.training?.title ?? '—'}</p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Metadados</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('certDetail.sectionMetadata')}</p>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Nome do curso</label>
+                <label className="text-xs font-medium text-foreground">{t('certDetail.fieldCourseName')}</label>
                 <input
                   type="text"
                   value={meta.courseName ?? ''}
@@ -208,7 +208,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Plataforma / Emissor</label>
+                <label className="text-xs font-medium text-foreground">{t('certDetail.fieldProvider')}</label>
                 <input
                   type="text"
                   value={meta.provider ?? ''}
@@ -219,7 +219,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-foreground">Data de conclusão</label>
+                  <label className="text-xs font-medium text-foreground">{t('certDetail.fieldDate')}</label>
                   <input
                     type="date"
                     value={fmtDateInput(meta.completionDate)}
@@ -228,7 +228,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-foreground">Data de expiração</label>
+                  <label className="text-xs font-medium text-foreground">{t('certDetail.fieldExpiry')}</label>
                   <input
                     type="date"
                     value={fmtDateInput(meta.expirationDate)}
@@ -239,7 +239,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Horas de formação</label>
+                <label className="text-xs font-medium text-foreground">{t('certDetail.fieldHours')}</label>
                 <input
                   type="number"
                   min="0"
@@ -259,7 +259,7 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
                   className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
                 >
                   <Save className="h-4 w-4" />
-                  {updateMutation.isPending ? 'A guardar…' : 'Guardar alterações'}
+                  {updateMutation.isPending ? t('certDetail.saveLoading') : t('certDetail.save')}
                 </button>
               </div>
             )}

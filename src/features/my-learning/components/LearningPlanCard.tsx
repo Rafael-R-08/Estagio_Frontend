@@ -1,4 +1,5 @@
 import { ArrowRight, Star, ExternalLink, GripVertical } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { TrainingRecord } from '@/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -18,6 +19,8 @@ export function LearningPlanCard({
   onStart,
   isUpdating,
 }: LearningPlanCardProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
   return (
     <div
       className={`flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md ${
@@ -40,7 +43,7 @@ export function LearningPlanCard({
           )}
           <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
             <Star className="h-3 w-3 fill-current" />
-            Prioritário
+            {t('myLearning.planCard.priority')}
           </span>
         </div>
 
@@ -49,10 +52,10 @@ export function LearningPlanCard({
         </h3>
 
         <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-          {training.durationHours && <span>{training.durationHours}h estimadas</span>}
+          {training.durationHours && <span>{t('myLearning.planCard.estimatedHours', { n: training.durationHours })}</span>}
           {training.createdAt && (
             <span>
-              Adicionado {new Date(training.createdAt).toLocaleDateString('pt-PT')}
+              {t('myLearning.planCard.addedOn', { date: new Date(training.createdAt).toLocaleDateString(locale) })}
             </span>
           )}
         </div>
@@ -69,7 +72,7 @@ export function LearningPlanCard({
           onClick={() => onStart(training.id)}
           className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
         >
-          Começar
+          {t('myLearning.planCard.start')}
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
         <a
@@ -79,7 +82,7 @@ export function LearningPlanCard({
           className="flex items-center justify-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <ExternalLink className="h-3.5 w-3.5" />
-          Ver
+          {t('myLearning.planCard.view')}
         </a>
       </div>
     </div>

@@ -10,20 +10,21 @@ import {
   subMonths,
   parseISO,
 } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { pt, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarDays, X, Loader2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { calendarApi } from '@/services/api';
 import type { CalendarEvent } from '@/types';
 
-// ─── Weekday labels (Monday-first) ───────────────────────────────────────────
-
-const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function MiniCalendar() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'pt' ? pt : enUS;
+  const weekdays = t('dashboard.calendar.weekdays', { returnObjects: true }) as string[];
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>(
     format(new Date(), 'yyyy-MM-dd'),
@@ -98,7 +99,7 @@ export function MiniCalendar() {
       <div className="flex items-center gap-2 mb-4">
         <CalendarDays className="h-3.5 w-3.5 text-muted-foreground/50" />
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
-          Calendário
+          {t('dashboard.calendar.title')}
         </p>
         {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/30 ml-auto" />}
       </div>
@@ -108,17 +109,17 @@ export function MiniCalendar() {
         <button
           onClick={() => setCurrentMonth((m) => subMonths(m, 1))}
           className="p-1.5 rounded-xl hover:bg-muted/50 transition-colors"
-          aria-label="Mês anterior"
+          aria-label={t('dashboard.calendar.prevMonthAria')}
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
         <span className="text-xs font-bold capitalize">
-          {format(currentMonth, 'MMMM yyyy', { locale: pt })}
+          {format(currentMonth, 'MMMM yyyy', { locale: dateLocale })}
         </span>
         <button
           onClick={() => setCurrentMonth((m) => addMonths(m, 1))}
           className="p-1.5 rounded-xl hover:bg-muted/50 transition-colors"
-          aria-label="Próximo mês"
+          aria-label={t('dashboard.calendar.nextMonthAria')}
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
@@ -126,7 +127,7 @@ export function MiniCalendar() {
 
       {/* ── Weekday headers ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-7 text-center mb-1">
-        {WEEKDAYS.map((d) => (
+        {weekdays.map((d) => (
           <span key={d} className="text-[9px] font-bold uppercase text-muted-foreground/50">
             {d[0]}
           </span>
@@ -173,13 +174,13 @@ export function MiniCalendar() {
       {/* ── Day detail ───────────────────────────────────────────────────── */}
       <div className="border-t border-border/40 mt-4 pt-4 space-y-3">
         <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
-          {format(parseISO(selectedDate), "d 'de' MMMM", { locale: pt })}
+          {format(parseISO(selectedDate), t('dashboard.calendar.selectedDateFormat'), { locale: dateLocale })}
         </p>
 
         {/* Events list */}
         {selectedEvents.length === 0 && !showForm ? (
           <p className="text-[11px] text-muted-foreground/40 text-center py-1">
-            Sem lembretes para este dia
+            {t('dashboard.calendar.noReminders')}
           </p>
         ) : (
           <ul className="space-y-1.5">
@@ -196,7 +197,7 @@ export function MiniCalendar() {
                   onClick={() => removeMutation.mutate(ev.id)}
                   disabled={removeMutation.isPending}
                   className="text-muted-foreground/30 hover:text-destructive transition-colors shrink-0 disabled:opacity-30"
-                  aria-label="Remover lembrete"
+                  aria-label={t('dashboard.calendar.removeReminderAria')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -216,7 +217,7 @@ export function MiniCalendar() {
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Título do lembrete…"
+              placeholder={t('dashboard.calendar.reminderTitlePlaceholder')}
               maxLength={80}
               className="w-full rounded-xl border border-border/60 bg-muted/20 px-3 py-2 text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/50 transition"
             />
@@ -231,7 +232,7 @@ export function MiniCalendar() {
                 type="button"
                 onClick={() => { setShowForm(false); setNewTitle(''); setNewTime('09:00'); }}
                 className="p-2 rounded-xl border border-border/60 text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
-                aria-label="Cancelar"
+                aria-label={t('dashboard.calendar.cancelAria')}
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -241,7 +242,7 @@ export function MiniCalendar() {
                 className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Guardar
+                {t('dashboard.calendar.saveButton')}
               </button>
             </div>
           </form>
@@ -251,7 +252,7 @@ export function MiniCalendar() {
             className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/60 py-2 text-[11px] font-medium text-muted-foreground/50 hover:border-primary/40 hover:text-primary transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
-            Novo lembrete
+            {t('dashboard.calendar.addButton')}
           </button>
         )}
       </div>

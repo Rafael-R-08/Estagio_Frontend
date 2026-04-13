@@ -100,8 +100,8 @@ function PlatformModal({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) { toast.error('O nome é obrigatório.'); return; }
-    if (!form.type.trim()) { toast.error('O tipo é obrigatório.'); return; }
+    if (!form.name.trim()) { toast.error(t('admin.platforms.validationName')); return; }
+    if (!form.type.trim()) { toast.error(t('admin.platforms.validationType')); return; }
     onSave(form);
   }
 
@@ -122,34 +122,34 @@ function PlatformModal({
         <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden">
           <div className="overflow-y-auto px-6 py-5 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nome *</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.platforms.fields.name')} *</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="ex. Udemy"
+                placeholder={t('admin.platforms.fields.namePlaceholder')}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tipo *</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.platforms.fields.type')} *</label>
               <input
                 type="text"
                 value={form.type}
                 onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                placeholder="ex. udemy | coursera | linkedin | custom"
+                placeholder={t('admin.platforms.fields.typePlaceholder')}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">API Endpoint</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.platforms.fields.apiEndpoint')}</label>
               <input
                 type="url"
                 value={form.apiEndpoint}
                 onChange={(e) => setForm((f) => ({ ...f, apiEndpoint: e.target.value }))}
-                placeholder="https://..."
+                placeholder={t('admin.platforms.fields.urlPlaceholder')}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
               />
             </div>
@@ -157,14 +157,14 @@ function PlatformModal({
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                 <KeyRound className="h-3 w-3" />
-                API Key
+                {t('admin.platforms.fields.apiKey')}
               </label>
               <div className="relative">
                 <input
                   type={showApiKey ? 'text' : 'password'}
                   value={form.apiKey}
                   onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
-                  placeholder="Deixa em branco para não alterar"
+                  placeholder={isEditing ? t('admin.platforms.fields.apiKeyChangeHint') : t('admin.platforms.fields.apiKeyPlaceholder')}
                   autoComplete="new-password"
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40 font-mono"
                 />
@@ -176,29 +176,29 @@ function PlatformModal({
                   {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-muted-foreground">Necessária para plataformas com pesquisa via API (ex. Udemy, Coursera).</p>
+              <p className="text-[11px] text-muted-foreground">{t('admin.platforms.fields.apiKeyNote')}</p>
             </div>
 
             <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Requer API Key</p>
-                <p className="text-xs text-muted-foreground">A plataforma exige autenticação via API key</p>
+                <p className="text-sm font-medium text-foreground">{t('admin.platforms.fields.requiresApiKey')}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.platforms.fields.requiresApiKeyDesc')}</p>
               </div>
               <ToggleSwitch checked={form.apiKeyRequired} onChange={(v) => setForm((f) => ({ ...f, apiKeyRequired: v }))} />
             </div>
 
             <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Plataforma ativa</p>
-                <p className="text-xs text-muted-foreground">Visível para os utilizadores</p>
+                <p className="text-sm font-medium text-foreground">{t('admin.platforms.fields.active')}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.platforms.fields.activeDesc')}</p>
               </div>
               <ToggleSwitch checked={form.isActive} onChange={(v) => setForm((f) => ({ ...f, isActive: v }))} />
             </div>
 
             <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Pesquisa ativada</p>
-                <p className="text-xs text-muted-foreground">Permite pesquisar cursos nesta plataforma</p>
+                <p className="text-sm font-medium text-foreground">{t('admin.platforms.fields.search')}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.platforms.fields.searchDesc')}</p>
               </div>
               <ToggleSwitch checked={form.isSearchEnabled} onChange={(v) => setForm((f) => ({ ...f, isSearchEnabled: v }))} />
             </div>
@@ -208,7 +208,7 @@ function PlatformModal({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                   <Settings2 className="h-3 w-3" />
-                  Config (credenciais)
+                  {t('admin.platforms.fields.config')}
                 </label>
                 <button
                   type="button"
@@ -216,12 +216,12 @@ function PlatformModal({
                   className="flex items-center gap-1 rounded-lg border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
                 >
                   <Plus className="h-3 w-3" />
-                  Adicionar campo
+                  {t('admin.platforms.fields.configAdd')}
                 </button>
               </div>
               {form.configEntries.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground px-1">
-                  Nenhum campo configurado. Usa para credenciais OAuth (ex. <code className="font-mono">clientId</code>, <code className="font-mono">clientSecret</code>).
+                  {t('admin.platforms.fields.configEmpty')}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -229,14 +229,14 @@ function PlatformModal({
                     <div key={i} className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder="chave"
+                        placeholder={t('admin.platforms.fields.configKeyPlaceholder')}
                         value={entry.key}
                         onChange={(e) => updateEntry(i, 'key', e.target.value)}
                         className="w-2/5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
                       />
                       <input
                         type="text"
-                        placeholder="valor"
+                        placeholder={t('admin.platforms.fields.configValuePlaceholder')}
                         value={entry.value}
                         onChange={(e) => updateEntry(i, 'value', e.target.value)}
                         className="flex-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-softinsa-blue/40"
@@ -351,20 +351,20 @@ export function PlatformsTab() {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateAdminPlatformPayload) => platformsApi.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success('Plataforma criada.'); setModalOpen(false); },
-    onError: () => toast.error('Erro ao criar plataforma.'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success(t('admin.platforms.toastCreated')); setModalOpen(false); },
+    onError: () => toast.error(t('admin.platforms.toastCreateError')),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateAdminPlatformPayload }) => platformsApi.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success('Plataforma atualizada.'); setEditing(null); setModalOpen(false); },
-    onError: () => toast.error('Erro ao atualizar plataforma.'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success(t('admin.platforms.toastUpdated')); setEditing(null); setModalOpen(false); },
+    onError: () => toast.error(t('admin.platforms.toastUpdateError')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => platformsApi.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success('Plataforma eliminada.'); setDeleteTarget(null); },
-    onError: () => toast.error('Erro ao eliminar plataforma.'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success(t('admin.platforms.toastDeleted')); setDeleteTarget(null); },
+    onError: () => toast.error(t('admin.platforms.toastDeleteError')),
   });
 
   function handleSave(data: PlatformFormData) {
@@ -435,9 +435,9 @@ export function PlatformsTab() {
             <thead>
               <tr className="border-b border-border/40 bg-muted/20">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.name')}</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Endpoint</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cursos</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.type')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.apiEndpoint')}</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.courses')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.active')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.search')}</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('admin.platforms.columns.actions')}</th>
@@ -520,7 +520,7 @@ export function PlatformsTab() {
         </div>
         {!isLoading && filtered.length > 0 && (
           <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
-            {filtered.length} plataforma{filtered.length !== 1 ? 's' : ''}
+            {t(filtered.length !== 1 ? 'admin.platforms.countPlural' : 'admin.platforms.countSingle', { count: filtered.length })}
           </div>
         )}
       </div>

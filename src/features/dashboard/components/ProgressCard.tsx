@@ -1,4 +1,5 @@
 import { ExternalLink, Clock, Star, BookOpen, FileText, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { TrainingRecord, TrainingStatus } from '@/types';
 import { trainingApi } from '@/services/api';
@@ -7,13 +8,22 @@ import { useState } from 'react';
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<TrainingStatus, { label: string; className: string }> = {
-  ongoing: { label: 'Em progresso', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  completed: { label: 'Concluído', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  priority: { label: 'Prioritário', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  later: { label: 'Guardado', className: 'bg-muted text-muted-foreground' },
-  accessed: { label: 'Acedido', className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
-  cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+const STATUS_CONFIG: Record<TrainingStatus, { className: string }> = {
+  ongoing:   { className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  completed: { className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  priority:  { className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  later:     { className: 'bg-muted text-muted-foreground' },
+  accessed:  { className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
+  cancelled: { className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+};
+
+const STATUS_LABEL_KEY: Record<TrainingStatus, string> = {
+  ongoing:   'dashboard.progressCard.statusOngoing',
+  completed: 'dashboard.progressCard.statusCompleted',
+  priority:  'dashboard.progressCard.statusPriority',
+  later:     'dashboard.progressCard.statusSaved',
+  accessed:  'dashboard.progressCard.statusAccessed',
+  cancelled: 'dashboard.progressCard.statusCancelled',
 };
 
 
@@ -45,9 +55,13 @@ interface ProgressCardProps {
 }
 
 export function ProgressCard({ record, variant = 'progress', onUpdate }: ProgressCardProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'pt' ? 'pt-PT' : 'en-GB';
+  const fmtShortDate = (iso: string) => new Date(iso).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short' });
   const [isUploading, setIsUploading] = useState(false);
   const status = STATUS_CONFIG[record.status] ?? STATUS_CONFIG.later;
-  const platform = record.platform?.name ?? 'Plataforma desconhecida';
+  const statusLabel = t(STATUS_LABEL_KEY[record.status] ?? 'dashboard.progressCard.statusSaved');
+  const platform = record.platform?.name ?? t('dashboard.progressCard.unknownPlatform');
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,11 +70,11 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
     try {
       setIsUploading(true);
       await trainingApi.uploadDocument(record.id, file);
-      toast.success('Documento carregado com sucesso!');
+      toast.success(t('dashboard.progressCard.uploadSuccess'));
       onUpdate?.();
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Erro ao carregar documento.');
+      toast.error(t('dashboard.progressCard.uploadError'));
     } finally {
       setIsUploading(false);
     }
@@ -68,13 +82,13 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
 
   const dateLabel = (() => {
     if (variant === 'completed' && record.completedAt) {
-      return `Concluído em ${new Date(record.completedAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}`;
+      return t('dashboard.progressCard.completedOn', { date: fmtShortDate(record.completedAt) });
     }
     if (record.startedAt) {
-      return `Iniciado em ${new Date(record.startedAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}`;
+      return t('dashboard.progressCard.startedOn', { date: fmtShortDate(record.startedAt) });
     }
     if (record.createdAt) {
-      return `Guardado em ${new Date(record.createdAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}`;
+      return t('dashboard.progressCard.savedOn', { date: fmtShortDate(record.createdAt) });
     }
     return null;
   })();
@@ -97,11 +111,11 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
         </div>
         <div className="flex flex-col items-end gap-1.5">
           <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.05em] border border-border/40', status.className)}>
-            {status.label}
+            {statusLabel}
           </span>
           {variant === 'saved' && record.priorityOrder !== undefined && (
             <span className="text-[10px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200/50">
-              Prio: {record.priorityOrder}
+              {t('dashboard.progressCard.priority', { order: record.priorityOrder })}
             </span>
           )}
         </div>
@@ -111,23 +125,23 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
       {variant === 'progress' && (() => {
         const level = record.progressLevel?.toLowerCase();
         const stages = [
-          { id: 'inicio', label: 'Início' },
-          { id: 'meio', label: 'Meio' },
-          { id: 'finalizar', label: 'Finalizar' },
+          { id: 'inicio', label: t('dashboard.progressCard.stageStart') },
+          { id: 'meio', label: t('dashboard.progressCard.stageMid') },
+          { id: 'finalizar', label: t('dashboard.progressCard.stageFinish') },
         ];
         const percentage =
           level === 'início' || level === 'inicio' ? 25 :
           level === 'meio' ? 55 :
           level === 'finalizar' ? 90 : 0;
         const activeLabel =
-          level === 'início' || level === 'inicio' ? 'Início' :
-          level === 'meio' ? 'Meio' :
-          level === 'finalizar' ? 'Finalizar' : 'Não iniciado';
+          level === 'início' || level === 'inicio' ? t('dashboard.progressCard.stageStart') :
+          level === 'meio' ? t('dashboard.progressCard.stageMid') :
+          level === 'finalizar' ? t('dashboard.progressCard.stageFinish') : t('dashboard.progressCard.notStarted');
 
         return (
           <div className="space-y-3">
             <div className="flex items-center justify-between text-[10px]">
-              <span className="font-semibold text-muted-foreground uppercase tracking-tight">Progresso</span>
+              <span className="font-semibold text-muted-foreground uppercase tracking-tight">{t('dashboard.progressCard.progress')}</span>
               <span className="font-bold text-primary">{activeLabel}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -164,7 +178,7 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
           <div className="flex items-center gap-4">
             {record.rating && (
               <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase">Rating</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase">{t('dashboard.progressCard.rating')}</span>
                 <div className="flex items-center gap-0.5 text-amber-500">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className={cn("h-2.5 w-2.5", i < record.rating! ? "fill-current" : "text-muted")} />
@@ -174,7 +188,7 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
             )}
             {record.relevance && (
               <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase">Relevância</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase">{t('dashboard.progressCard.relevance')}</span>
                 <div className="flex items-center gap-0.5 text-blue-500">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className={cn("h-2.5 w-2.5", i < record.relevance! ? "fill-current" : "text-muted")} />
@@ -186,7 +200,7 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
 
           {record.documents && record.documents.length > 0 && (
             <div className="space-y-1.5">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase">Documentos</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase">{t('dashboard.progressCard.documents')}</span>
               <div className="flex flex-wrap gap-1.5">
                 {record.documents.map((doc) => (
                   <a
@@ -230,7 +244,7 @@ export function ProgressCard({ record, variant = 'progress', onUpdate }: Progres
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary transition hover:bg-primary hover:text-primary-foreground"
           >
-            {variant === 'progress' ? 'Continuar' : 'Ver curso'}
+            {variant === 'progress' ? t('dashboard.progressCard.continue') : t('dashboard.progressCard.viewCourse')}
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>

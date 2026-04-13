@@ -1,4 +1,5 @@
 import { Award, Clock, Calendar, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { Certificate } from '@/types';
 
@@ -15,15 +16,21 @@ function getCertStatus(cert: Certificate): CertStatus {
   return 'active';
 }
 
-const STATUS_CONFIG: Record<CertStatus, { label: string; className: string }> = {
-  active:   { label: 'Ativo',      className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  expiring: { label: 'A expirar',  className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  expired:  { label: 'Expirado',   className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+const STATUS_CONFIG: Record<CertStatus, { className: string }> = {
+  active:   { className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  expiring: { className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  expired:  { className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
 };
 
-function fmtDate(iso?: string) {
+const STATUS_LABEL_KEY: Record<CertStatus, string> = {
+  active:   'certCard.statusActive',
+  expiring: 'certCard.statusExpiring',
+  expired:  'certCard.statusExpired',
+};
+
+function fmtDate(iso?: string, locale = 'pt-PT') {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -52,8 +59,11 @@ interface Props {
 }
 
 export function CertificateCard({ cert, onClick }: Props) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-GB';
   const status = getCertStatus(cert);
-  const { label, className } = STATUS_CONFIG[status];
+  const { className } = STATUS_CONFIG[status];
+  const label = t(STATUS_LABEL_KEY[status]);
   const title = cert.courseName ?? cert.training?.title ?? 'Certificado';
 
   return (
@@ -86,7 +96,7 @@ export function CertificateCard({ cert, onClick }: Props) {
         {cert.completionDate && (
           <span className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            {fmtDate(cert.completionDate)}
+            {fmtDate(cert.completionDate, locale)}
           </span>
         )}
         {cert.durationHours != null && (
@@ -101,7 +111,7 @@ export function CertificateCard({ cert, onClick }: Props) {
             status === 'expired' ? 'text-red-500' : 'text-amber-500',
           )}>
             <ExternalLink className="h-4 w-4" />
-            {fmtDate(cert.expirationDate)}
+            {fmtDate(cert.expirationDate, locale)}
           </span>
         )}
       </div>

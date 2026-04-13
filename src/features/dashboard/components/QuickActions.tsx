@@ -1,113 +1,114 @@
 import { Search, Sparkles, BookOpen, Upload, Map, Users, BarChart3, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { Role } from '@/types';
 
 // ─── Action definition ────────────────────────────────────────────────────────
 
-interface Action {
+interface ActionMeta {
   icon: React.ElementType;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
   href: string;
   color: string;
 }
 
-const USER_ACTIONS: Action[] = [
+const USER_ACTIONS: ActionMeta[] = [
   {
     icon: BookOpen,
-    label: 'As minhas Formações',
-    description: 'Gere o teu percurso de aprendizagem',
+    labelKey: 'dashboard.quickActions.myLearning',
+    descKey: 'dashboard.quickActions.myLearningDesc',
     href: '/my-learning',
     color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
   },
   {
     icon: Upload,
-    label: 'Carregar Certificado',
-    description: 'Importa um certificado com IA',
+    labelKey: 'dashboard.quickActions.uploadCert',
+    descKey: 'dashboard.quickActions.uploadCertDesc',
     href: '/certificates',
     color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
   },
   {
     icon: Map,
-    label: 'Plano de Aprendizagem',
-    description: 'Constrói o teu percurso',
+    labelKey: 'dashboard.quickActions.learningPlan',
+    descKey: 'dashboard.quickActions.learningPlanDesc',
     href: '/ai',
     color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
   },
   {
     icon: Search,
-    label: 'Explorar Cursos',
-    description: 'Pesquisa em todas as plataformas',
+    labelKey: 'dashboard.quickActions.exploreCourses',
+    descKey: 'dashboard.quickActions.exploreCoursesDesc',
     href: '/search',
     color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
   },
 ];
 
-const SL_MANAGER_ACTIONS: Action[] = [
+const SL_MANAGER_ACTIONS: ActionMeta[] = [
   {
     icon: Users,
-    label: 'A minha Equipa',
-    description: 'Progresso e atividade do team',
+    labelKey: 'dashboard.quickActions.myTeam',
+    descKey: 'dashboard.quickActions.myTeamDesc',
     href: '/sl-manager',
     color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
   },
   {
     icon: Upload,
-    label: 'Carregar Certificado',
-    description: 'Importa um certificado com IA',
+    labelKey: 'dashboard.quickActions.uploadCert',
+    descKey: 'dashboard.quickActions.uploadCertDesc',
     href: '/certificates',
     color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
   },
   {
     icon: Map,
-    label: 'Plano de Aprendizagem',
-    description: 'Constrói o teu percurso',
+    labelKey: 'dashboard.quickActions.learningPlan',
+    descKey: 'dashboard.quickActions.learningPlanDesc',
     href: '/ai',
     color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
   },
   {
     icon: Search,
-    label: 'Explorar Cursos',
-    description: 'Pesquisa em todas as plataformas',
+    labelKey: 'dashboard.quickActions.exploreCourses',
+    descKey: 'dashboard.quickActions.exploreCoursesDesc',
     href: '/search',
     color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
   },
 ];
 
-const ADMIN_ACTIONS: Action[] = [
+const ADMIN_ACTIONS: ActionMeta[] = [
   {
     icon: ShieldCheck,
-    label: 'Painel Admin',
-    description: 'Utilizadores, analytics e plataformas',
+    labelKey: 'dashboard.quickActions.adminPanel',
+    descKey: 'dashboard.quickActions.adminPanelDesc',
     href: '/admin',
     color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
   },
   {
     icon: BarChart3,
-    label: 'Analytics',
-    description: 'Relatórios e métricas da plataforma',
+    labelKey: 'dashboard.quickActions.analytics',
+    descKey: 'dashboard.quickActions.analyticsDesc',
     href: '/admin',
     color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
   },
   {
     icon: Map,
-    label: 'Plano de Aprendizagem',
-    description: 'Constrói o teu percurso',
+    labelKey: 'dashboard.quickActions.learningPlan',
+    descKey: 'dashboard.quickActions.learningPlanDesc',
     href: '/ai',
     color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
   },
   {
     icon: Search,
-    label: 'Explorar Cursos',
-    description: 'Pesquisa em todas as plataformas',
+    labelKey: 'dashboard.quickActions.exploreCourses',
+    descKey: 'dashboard.quickActions.exploreCoursesDesc',
     href: '/search',
     color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
   },
 ];
 
-function getActions(role?: Role): Action[] {
+function getMeta(role?: Role): ActionMeta[] {
   if (role === 'ADMIN') return ADMIN_ACTIONS;
   if (role === 'SERVICE_LINE_MANAGER') return SL_MANAGER_ACTIONS;
   return USER_ACTIONS;
@@ -118,14 +119,19 @@ function getActions(role?: Role): Action[] {
 export function QuickActions() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const actions = getActions(user?.role);
+  const { t } = useTranslation();
+  const actions = getMeta(user?.role).map((m) => ({
+    ...m,
+    label: t(m.labelKey),
+    description: t(m.descKey),
+  }));
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm p-5">
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <Sparkles className="h-3.5 w-3.5 text-muted-foreground/50" />
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Ações Rápidas</h2>
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('dashboard.quickActions.title')}</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 relative z-10">

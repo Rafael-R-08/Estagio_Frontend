@@ -1,5 +1,6 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ExternalLink,
@@ -34,9 +35,6 @@ const LEVEL_STYLES: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200/50',
   intermediate: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200/50',
   advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400 border-violet-200/50',
-};
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Iniciante', intermediate: 'Intermédio', advanced: 'Avançado',
 };
 
 // ─── Skeleton helpers ─────────────────────────────────────────────────────────
@@ -125,6 +123,7 @@ export default function CourseDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Course detail — first try location.state (passed from search card click)
   const stateData = location.state as CourseSearchResult | null;
@@ -173,23 +172,23 @@ export default function CourseDetailPage() {
       updateTraining.mutate(
         { id: existingRecord.id, dto: { status } },
         {
-          onSuccess: () => toast.success('Estado atualizado!'),
-          onError: () => toast.error('Erro ao atualizar.'),
+          onSuccess: () => toast.success(t('search.courseDetail.toastUpdated')),
+          onError: () => toast.error(t('search.courseDetail.toastUpdateError')),
         },
       );
     } else {
       createTraining.mutate(
-        { title: course.title, url: course.url, status, platformId: course.platformId },
+        { title: course.title, url: course.url, status, platformId: course.platformId, durationHours: course.durationHours },
         {
           onSuccess: () => {
             const labels: Record<string, string> = {
-              ongoing: 'Adicionado ao plano!',
-              completed: 'Marcado como concluído!',
-              later: 'Guardado!',
+              ongoing: t('search.courseDetail.toastSavedOngoing'),
+              completed: t('search.courseDetail.toastSavedCompleted'),
+              later: t('search.courseDetail.toastSaved'),
             };
             toast.success(labels[status]);
           },
-          onError: () => toast.error('Erro ao guardar.'),
+          onError: () => toast.error(t('search.courseDetail.toastSaveError')),
         },
       );
     }
@@ -208,26 +207,31 @@ export default function CourseDetailPage() {
           <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
         <div>
-          <p className="text-sm font-black text-foreground">Curso não encontrado</p>
+          <p className="text-sm font-black text-foreground">{t('search.courseDetail.notFoundTitle')}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Este curso pode não estar disponível ou houve um erro ao carregar.
+            {t('search.courseDetail.notFoundDesc')}
           </p>
         </div>
         <button
           onClick={() => navigate('/search')}
           className="rounded-full bg-foreground px-6 py-3 text-xs font-black uppercase tracking-widest text-background hover:opacity-90 transition-all"
         >
-          Pesquisar outros cursos
+          {t('search.courseDetail.notFoundBtn')}
         </button>
       </div>
     );
   }
 
   const levelStyle = course.level ? LEVEL_STYLES[course.level] : undefined;
-  const levelLabel = course.level ? LEVEL_LABELS[course.level] : undefined;
+  const levelLabelKey: Record<string, string> = {
+    beginner: t('search.courseDetail.levelBeginner'),
+    intermediate: t('search.courseDetail.levelIntermediate'),
+    advanced: t('search.courseDetail.levelAdvanced'),
+  };
+  const levelLabel = course.level ? levelLabelKey[course.level] : undefined;
 
   const formatHours = (h?: number) => {
-    if (!h) return 'Variável';
+    if (!h) return t('search.courseDetail.durationVariable');
     const hrs = Math.floor(h);
     const mins = Math.round((h - hrs) * 60);
     if (hrs === 0) return `${mins}min`;
@@ -243,7 +247,7 @@ export default function CourseDetailPage() {
         className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-all hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Voltar à pesquisa
+        {t('search.courseDetail.back')}
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
@@ -265,7 +269,7 @@ export default function CourseDetailPage() {
                 {existingRecord && (
                   <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-500/20">
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    {existingRecord.status === 'completed' ? 'Concluído' : 'Guardado'}
+                    {existingRecord.status === 'completed' ? t('search.courseDetail.statusCompleted') : t('search.courseDetail.statusSaved')}
                   </span>
                 )}
               </div>
@@ -315,19 +319,19 @@ export default function CourseDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard 
               icon={Clock} 
-              label="Duração" 
+              label={t('search.courseDetail.statDuration')} 
               value={formatHours(course.durationHours)} 
             />
             <StatCard 
               icon={Star} 
-              label="Avaliação" 
+              label={t('search.courseDetail.statRating')} 
               value={course.rating ? `${course.rating.toFixed(1)} / 5.0` : 'N/A'}
               colorClass="text-amber-500"
             />
             {course.internalRating !== undefined && (
               <StatCard 
                 icon={Star} 
-                label="Avaliação Interna" 
+                label={t('search.courseDetail.statInternalRating')} 
                 value={`${course.internalRating.toFixed(1)} / 5.0`}
                 colorClass="text-orange-500"
               />
@@ -335,25 +339,25 @@ export default function CourseDetailPage() {
             {!!course.completedCount && (
               <StatCard 
                 icon={Users} 
-                label="Concluído por" 
-                value={`${course.completedCount} coleg${course.completedCount === 1 ? 'a' : 'as'}`}
+                label={t('search.courseDetail.statCompletedBy')} 
+                value={t('search.courseDetail.statCompletedByValue', { count: course.completedCount })}
                 colorClass="text-violet-500"
               />
             )}
             <StatCard 
               icon={BarChart3} 
-              label="Relevância" 
+              label={t('search.courseDetail.statRelevance')} 
               value={(course.relevanceScore || course.similarityScore) ? `${Math.round((course.relevanceScore || course.similarityScore || 0) * 100)}%` : 'N/A'}
               colorClass="text-blue-500"
             />
             <StatCard 
               icon={DollarSign} 
-              label="Investimento" 
+              label={t('search.courseDetail.statCost')} 
               value={
                 course.isFree === true
-                  ? 'Gratuito'
+                  ? t('search.courseDetail.statCostFree')
                   : course.isFree === false
-                    ? (course.price || 'Pago')
+                    ? (course.price || t('search.courseDetail.statCostPaid'))
                     : (course.price || '—')
               }
               colorClass={
@@ -373,13 +377,12 @@ export default function CourseDetailPage() {
                   <Sparkles className="h-7 w-7" />
                 </div>
                 <div>
-                  <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-1">Algoritmo Softinsa</h2>
-                  <p className="text-sm font-bold text-foreground/60">Análise de IA de Alta Precisão</p>
+                  <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-1">{t('search.courseDetail.aiSectionLabel')}</h2>
+                  <p className="text-sm font-bold text-foreground/60">{t('search.courseDetail.aiSectionSub')}</p>
                 </div>
               </div>
               <p className="relative text-xl leading-relaxed text-foreground/80 font-medium tracking-tight">
-                Este curso foi priorizado no teu dashboard com uma aderência de <span className="font-black text-primary underline decoration-primary/30 underline-offset-8 decoration-2">{Math.round(course.similarityScore * 100)}%</span>. 
-                Identificámos que o conteúdo em <span className="font-black text-foreground">{course.tags.slice(0, 3).join(', ')}</span> é fundamental para o teu desenvolvimento atual.
+                {t('search.courseDetail.aiSectionBody_1')} <span className="font-black text-primary underline decoration-primary/30 underline-offset-8 decoration-2">{Math.round(course.similarityScore * 100)}%</span>{t('search.courseDetail.aiSectionBody_2')} <span className="font-black text-foreground">{course.tags.slice(0, 3).join(', ')}</span>{t('search.courseDetail.aiSectionBody_3')}
               </p>
             </div>
           )}
@@ -389,18 +392,18 @@ export default function CourseDetailPage() {
         <div className="space-y-6">
           <div className="sticky top-10 rounded-[2.5rem] border border-border/60 bg-background/60 p-8 shadow-2xl shadow-foreground/5 backdrop-blur-3xl space-y-8 border-t-primary/20 border-t-2">
             <div className="space-y-6">
-              <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 border-b border-border/40 pb-4">Gestão de Aprendisagem</h3>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 border-b border-border/40 pb-4">{t('search.courseDetail.sidebarTitle')}</h3>
               <div className="flex flex-col gap-4">
                 <ActionButton
                   icon={Bookmark}
-                  label={existingRecord?.status === 'later' ? 'Curso Guardado' : 'Guardar Curso'}
+                  label={existingRecord?.status === 'later' ? t('search.courseDetail.actionSaved') : t('search.courseDetail.actionSave')}
                   onClick={() => handleAction('later')}
                   active={existingRecord?.status === 'later'}
                   loading={isPending}
                 />
                 <ActionButton
                   icon={CheckCircle2}
-                  label={existingRecord?.status === 'completed' ? 'Curso Concluído' : 'Marcar como Concluído'}
+                  label={existingRecord?.status === 'completed' ? t('search.courseDetail.actionCompleted') : t('search.courseDetail.actionComplete')}
                   onClick={() => handleAction('completed')}
                   active={existingRecord?.status === 'completed'}
                   loading={isPending}
@@ -411,10 +414,10 @@ export default function CourseDetailPage() {
             <div className="space-y-6">
               <div className="space-y-3">
                 <p className="text-[11px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 leading-relaxed">
-                  Acesso Externo
+                  {t('search.courseDetail.externalAccess')}
                 </p>
                 <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
-                  Serás redirecionado para a plataforma oficial do fornecedor para iniciar o conteúdo.
+                  {t('search.courseDetail.externalAccessDesc')}
                 </p>
               </div>
               <a
@@ -423,7 +426,7 @@ export default function CourseDetailPage() {
                 rel="noopener noreferrer"
                 className="flex w-full items-center justify-center gap-3 rounded-full bg-foreground px-8 py-5 text-xs font-black uppercase tracking-[0.25em] text-background shadow-2xl transition-all hover:scale-[1.02] active:scale-95 hover:shadow-primary/10"
               >
-                Começar agora
+                {t('search.courseDetail.startNow')}
                 <ExternalLink className="h-4 w-4" />
               </a>
             </div>
@@ -436,14 +439,14 @@ export default function CourseDetailPage() {
         <div className="space-y-10 pt-20 border-t border-border/40">
           <div className="flex items-center justify-between px-2">
             <div className="space-y-1">
-              <h2 className="text-3xl font-black tracking-tight text-foreground">Sugestões Semelhantes</h2>
-              <p className="text-sm text-muted-foreground font-medium italic">Baseado no conteúdo deste curso</p>
+              <h2 className="text-3xl font-black tracking-tight text-foreground">{t('search.courseDetail.relatedTitle')}</h2>
+              <p className="text-sm text-muted-foreground font-medium italic">{t('search.courseDetail.relatedSub')}</p>
             </div>
             <button 
               onClick={() => navigate('/search')}
               className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-all"
             >
-              Ver todos os resultados
+              {t('search.courseDetail.viewAllResults')}
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1.5" />
             </button>
           </div>

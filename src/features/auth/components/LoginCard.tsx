@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
@@ -23,6 +23,7 @@ interface LoginCardProps {
 }
 
 export default function LoginCard({ onSuccess, className }: LoginCardProps) {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -52,7 +53,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
       const msg = axiosErr?.response?.data?.message;
       if (Array.isArray(msg)) setServerError(msg.join(', '));
       else if (msg) setServerError(msg);
-      else setServerError(axiosErr?.message ?? 'Erro ao iniciar sessão.');
+      else setServerError(axiosErr?.message ?? t('login.errorDefault'));
     }
   };
 
@@ -75,7 +76,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <img src={logoIcon} alt="Softinsa Learning Hub" className="h-14 w-14 object-contain" />
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-            Entrar no <span className="text-blue-600 dark:text-blue-400">LearningHub</span>.
+            {t('login.title')} <span className="text-blue-600 dark:text-blue-400">{t('login.appName')}</span>.
           </h1>
         </div>
 
@@ -84,14 +85,14 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
             
             {/* Email */}
             <div className="space-y-2">
-              <label className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60" htmlFor="email">Utilizador</label>
+              <label className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60" htmlFor="email">{t('login.emailLabel')}</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="teu.nome@softinsa.pt"
+                  placeholder={t('login.emailPlaceholder')}
                   className={cn(
                     'h-12 w-full rounded-full border border-border/80 bg-background lg:bg-transparent pl-11 pr-4 text-sm outline-none transition-all focus:border-blue-600 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-600/10',
                     errors.email && 'border-red-500 focus:border-red-500 focus:ring-red-500/10'
@@ -100,20 +101,14 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
                 />
               </div>
               {errors.email && (
-                <p className="px-4 text-[11px] font-medium text-red-500">{errors.email.message}</p>
+                <p className="px-4 text-[11px] font-medium text-red-500">{t('login.errorInvalidEmail')}</p>
               )}
             </div>
 
             {/* Password */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between px-4">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60" htmlFor="password">Senha</label>
-                <Link 
-                  to="/forgot-password" 
-                  className="text-[10px] font-semibold text-muted-foreground/60 hover:text-foreground transition-colors"
-                >
-                  Esqueceste a palavra-passe?
-                </Link>
+              <div className="px-4">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60" htmlFor="password">{t('login.passwordLabel')}</label>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
@@ -137,7 +132,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
                 </button>
               </div>
               {errors.password && (
-                <p className="px-4 text-[11px] font-medium text-red-500">{errors.password.message}</p>
+                <p className="px-4 text-[11px] font-medium text-red-500">{t('login.errorMinPassword')}</p>
               )}
             </div>
 
@@ -158,7 +153,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  'Entrar na plataforma'
+                  t('login.submit')
                 )}
               </button>
             </div>
@@ -169,7 +164,7 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
                 <div className="w-full border-t border-border/40"></div>
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black">
-                <span className="bg-background px-4 text-muted-foreground/30">ou</span>
+                <span className="bg-background px-4 text-muted-foreground/30">{t('login.or')}</span>
               </div>
             </div>
 
@@ -184,13 +179,13 @@ export default function LoginCard({ onSuccess, className }: LoginCardProps) {
                 <rect x="1" y="11" width="9" height="9" fill="#00a1f1"/>
                 <rect x="11" y="11" width="9" height="9" fill="#ffbb00"/>
               </svg>
-              <span>Entrar com Microsoft</span>
+              <span>{t('login.microsoftLogin')}</span>
             </button>
           </form>
 
           <div className="pt-4 border-t border-border/50 text-center">
             <p className="text-[10px] font-bold tracking-[0.15em] text-muted-foreground uppercase opacity-30">
-              Usa as tuas credenciais internas Softinsa
+              {t('login.footer')}
             </p>
           </div>
         </div>

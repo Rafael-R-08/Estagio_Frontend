@@ -15,6 +15,7 @@ import {
   Users,
   Globe,
   BarChart2,
+  ClipboardList,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -39,6 +40,7 @@ const ADMIN_NAV = [
   { labelKey: 'nav.users', href: '/admin?tab=users', icon: Users },
   { labelKey: 'nav.platforms', href: '/admin?tab=platforms', icon: Globe },
   { labelKey: 'nav.analytics', href: '/admin?tab=analytics', icon: BarChart2 },
+  { labelKey: 'nav.audit', href: '/admin?tab=audit', icon: ClipboardList },
 ] as const;
 
 // ─── Component ────────────────────────────────────────────────────────────────

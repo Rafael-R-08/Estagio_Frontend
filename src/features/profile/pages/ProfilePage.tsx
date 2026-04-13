@@ -36,21 +36,13 @@ function UserAvatar({ name }: { name: string }) {
 
 // ─── LEVELS ──────────────────────────────────────────────────────────────────
 
-const LEVELS: { value: ExperienceLevel; label: string }[] = [
-  { value: 'junior', label: 'Junior' },
-  { value: 'intermedio', label: 'Intermédio' },
-  { value: 'senior', label: 'Sénior' },
-  { value: 'especialista', label: 'Especialista' },
-  { value: 'lider', label: 'Líder' },
+const LEVELS: { value: ExperienceLevel; labelKey: string }[] = [
+  { value: 'junior',      labelKey: 'profile.levels.junior' },
+  { value: 'intermedio',  labelKey: 'profile.levels.intermedio' },
+  { value: 'senior',      labelKey: 'profile.levels.senior' },
+  { value: 'especialista', labelKey: 'profile.levels.especialista' },
+  { value: 'lider',       labelKey: 'profile.levels.lider' },
 ];
-
-const LEVEL_SUBTITLE: Record<ExperienceLevel, string> = {
-  junior: 'Junior Professional',
-  intermedio: 'Mid-level Professional',
-  senior: 'Senior Professional',
-  especialista: 'Technical Specialist',
-  lider: 'Team Lead / Manager',
-};
 
 
 // ─── ProfileSidebar ───────────────────────────────────────────────────────────
@@ -80,7 +72,8 @@ function ProfileSidebar({
   onNameChange, onLevelChange, onInterestsChange, onSkillsChange,
   onUserFunctionChange, onServiceLineChange,
 }: SidebarProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
   return (
     <div className="space-y-4">
       {/* Identity card */}
@@ -99,7 +92,7 @@ function ProfileSidebar({
               <h2 className="text-lg font-bold text-foreground">{draftName || user.name}</h2>
             )}
             <p className="text-sm font-medium text-primary">
-              {draftLevel ? LEVEL_SUBTITLE[draftLevel] : user.role === 'ADMIN' ? t('profile.admin') : t('profile.collaborator')}
+              {draftLevel ? t(`profile.levelSubtitles.${draftLevel}`) : user.role === 'ADMIN' ? t('profile.admin') : t('profile.collaborator')}
             </p>
             {draftLevel && (
               <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">
@@ -152,7 +145,7 @@ function ProfileSidebar({
                           : 'border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
                       )}
                     >
-                      {l.label}
+                      {t(l.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -168,13 +161,13 @@ function ProfileSidebar({
                 />
               </div>
               <div className="space-y-1.5 text-left">
-                <p className="text-xs font-medium text-muted-foreground ml-1">Service Line</p>
+                <p className="text-xs font-medium text-muted-foreground ml-1">{t('profile.serviceLine')}</p>
                 <select
                   value={draftServiceLine || ''}
                   onChange={(e) => onServiceLineChange((e.target.value as ServiceLine) || null)}
                   className="w-full rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
-                  <option value="">Não definido</option>
+                  <option value="">{t('profile.locationNotSet')}</option>
                   {Object.entries(SERVICE_LINE_LABELS).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
                   ))}
@@ -188,8 +181,7 @@ function ProfileSidebar({
           <p className="text-xs font-medium text-foreground">{user.email}</p>
           {user.createdAt && (
             <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-              Membro desde{' '}
-              {new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
+              {t('profile.memberId', { date: new Date(user.createdAt).toLocaleDateString(locale, { month: 'long', year: 'numeric' }) })}
             </p>
           )}
         </div>
@@ -201,20 +193,20 @@ function ProfileSidebar({
         <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/5 blur-2xl group-hover:bg-violet-500/10 transition-colors" />
         {isEditing ? (
           <TagInput
-            label="Interesses de Aprendizagem"
-            description="Áreas que gostarias de explorar"
+            label={t('profile.learningInterestsLabel')}
+            description={t('profile.learningInterestsDesc')}
             tags={draftInterests}
             onChange={onInterestsChange}
-            placeholder="Ex: Cloud, DevOps..."
+            placeholder={t('profile.learningInterestsPlaceholder')}
             colorClass="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400"
           />
         ) : (
           <div className="relative z-10">
             <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
-              Learning Interests
+              {t('profile.learningInterestsLabel')}
             </p>
             {draftInterests.length === 0 ? (
-              <p className="text-xs text-muted-foreground/40 italic">Nenhum interesse adicionado.</p>
+              <p className="text-xs text-muted-foreground/40 italic">{t('profile.noInterests')}</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {draftInterests.map((interest) => (
@@ -236,8 +228,8 @@ function ProfileSidebar({
         <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
         <div className="relative z-10">
           <SkillsSection
-            label="Competências Técnicas"
-            description="Aptidões e níveis de proficiência"
+            label={t('profile.technicalSkillsLabel')}
+            description={t('profile.technicalSkillsDesc')}
             skills={draftSkills}
             onChange={onSkillsChange}
             isEditing={isEditing}
@@ -338,14 +330,14 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         {/* Save bar */}
         {dirty && (
           <div className="flex items-center justify-between rounded-full border border-blue-600/20 bg-blue-600 px-6 py-3 text-white shadow-2xl animate-in fade-in slide-in-from-top-4 relative z-50">
-            <p className="text-sm font-black tracking-tight">Tens alterações por guardar.</p>
+            <p className="text-sm font-black tracking-tight">{t('profile.unsavedChanges')}</p>
             <button
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
               className="flex items-center gap-2 rounded-full bg-background px-6 py-2 text-xs font-black text-foreground transition hover:opacity-90 disabled:opacity-60 active:scale-95 shadow-lg"
             >
               <Save className="h-4 w-4" />
-              {saveMutation.isPending ? 'A guardar…' : 'GRAVAR PERFIL'}
+              {saveMutation.isPending ? t('profile.saving') : t('profile.saveProfile')}
             </button>
           </div>
         )}
@@ -356,8 +348,8 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         {/* Portfólio & Partilha */}
         <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl overflow-hidden">
           <div className="border-b border-border/40 px-8 py-6 bg-muted/10">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Portfólio</h2>
-            <p className="font-black text-foreground tracking-tight">Portfólio & Partilha</p>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">{t('profile.portfolioSection')}</h2>
+            <p className="font-black text-foreground tracking-tight">{t('profile.portfolioTitle')}</p>
           </div>
 
           {/* Featured — portfolio card */}
@@ -367,9 +359,9 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
                 <Award className="h-6 w-6" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-black text-foreground tracking-tight">Portfólio de Certificações</p>
+                <p className="font-black text-foreground tracking-tight">{t('profile.portfolioCardTitle')}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">
-                  Vista organizada de todas as tuas certificações, competências e conquistas de aprendizagem.
+                  {t('profile.portfolioCardDesc')}
                 </p>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
@@ -379,19 +371,19 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
                   className="flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:opacity-90 active:scale-95 shadow-lg shadow-emerald-600/20"
                 >
                   <LayoutTemplate className="h-3.5 w-3.5" />
-                  Ver Portfólio
+                  {t('profile.viewPortfolio')}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     const url = `${window.location.origin}/portfolio`;
                     navigator.clipboard.writeText(url);
-                    toast.success('Link do portfólio copiado!');
+                    toast.success(t('profile.copyLinkSuccess'));
                   }}
                   className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/60 dark:bg-emerald-900/20 dark:border-emerald-800/40 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition hover:bg-emerald-50 dark:hover:bg-emerald-900/30 active:scale-95"
                 >
                   <Link2 className="h-3.5 w-3.5" />
-                  Copiar link
+                  {t('profile.copyLink')}
                 </button>
               </div>
             </div>
@@ -408,8 +400,8 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
                 <Download className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">Exportar PDF</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Portfólio em formato PDF</p>
+                <span className="text-[13px] font-bold text-foreground">{t('profile.exportPDF')}</span>
+                <p className="text-[10px] font-medium text-muted-foreground">{t('profile.exportPDFDesc')}</p>
               </div>
             </button>
             <button
@@ -432,7 +424,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
                   .filter(Boolean)
                   .join('\n');
                 navigator.clipboard.writeText(resumo);
-                toast.success('Resumo copiado para a área de transferência!');
+                toast.success(t('profile.copySummarySuccess'));
               }}
               className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
             >
@@ -440,8 +432,8 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
                 <ClipboardCopy className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">Copiar Resumo</span>
-                <p className="text-[10px] font-medium text-muted-foreground">Texto formatado para CV / LinkedIn</p>
+                <span className="text-[13px] font-bold text-foreground">{t('profile.copySummary')}</span>
+                <p className="text-[10px] font-medium text-muted-foreground">{t('profile.copySummaryDesc')}</p>
               </div>
             </button>
           </div>
@@ -472,6 +464,7 @@ export default function ProfilePage() {
       const res = await trainingApi.getAll({ status: 'completed' });
       return toList(res.data);
     },
+    staleTime: 0,
   });
 
   const { data: stats } = useQuery({
@@ -480,6 +473,7 @@ export default function ProfilePage() {
       const res = await trainingApi.getStats();
       return res.data;
     },
+    staleTime: 0,
   });
 
   const timeline = useMemo(
@@ -502,7 +496,7 @@ export default function ProfilePage() {
           {t('profile.title')}
         </h1>
         <p className="mt-2 text-base font-medium text-muted-foreground max-w-2xl">
-          Gere a tua presença digital na Softinsa, visualiza as tuas conquistas e partilha o teu impacto com a equipa.
+          {t('profile.subtitle')}
         </p>
       </div>
       {formSource && (

@@ -192,7 +192,23 @@ export const adminApi = {
 
   getAnalytics: () =>
     api.get<AdminAnalytics>('/admin/analytics'),
+
+  getAuditLogs: (params?: { limit?: number; offset?: number }) =>
+    api.get<{ items: AuditLog[]; total: number }>('/admin/audit', { params }),
 };
+
+// ─── Admin — Audit types ──────────────────────────────────────────────────────
+
+export interface AuditLog {
+  id: string;
+  actorId: string;
+  actorName: string;
+  action: string;
+  targetId?: string;
+  targetName?: string;
+  details?: string;
+  createdAt: string;
+}
 
 // ─── Admin — Platforms ────────────────────────────────────────────────────────
 
@@ -386,6 +402,14 @@ export const recommendationsApi = {
     api.post<RecommendationResponse>('/ai/recommendations', {}),
 
   /**
+   * Bust the server-side recommendation cache and receive fresh recommendations.
+   * DELETE /recommendations/me/cache
+   * Response: identical to getForMe — { courses[], hasContextualCourses, summary, metadata }
+   */
+  deleteCache: () =>
+    api.delete<RecommendationResponse>('/recommendations/me/cache'),
+
+  /**
    * Welcome/greeting message on first AI assistant load.
    * GET /ai/recommendations/welcome  (falls back to POST)
    * Response: { welcome: string }
@@ -462,6 +486,12 @@ export const notificationsApi = {
 
   markAllAsRead: () =>
     api.patch<{ count: number }>('/notifications/read-all'),
+
+  delete: (id: string) =>
+    api.delete(`/notifications/${id}`),
+
+  deleteAll: () =>
+    api.delete('/notifications'),
 };
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────

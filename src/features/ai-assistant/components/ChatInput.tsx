@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Send, Paperclip, AtSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MentionableCourse } from '@/types';
@@ -26,6 +27,7 @@ export function ChatInput({
   mentionedIds = [],
   onMentionedIdsChange,
 }: Props) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -128,7 +130,7 @@ export function ChatInput({
         <div className="absolute bottom-full left-0 right-0 mb-2 max-h-52 overflow-y-auto rounded-xl border border-border bg-card shadow-xl z-50">
           <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 border-b border-border/40">
             <AtSign className="inline h-3 w-3 mr-1" />
-            Mencionar curso
+            {t('aiChat.mentionCourse')}
           </div>
           {filteredCourses.map((course, idx) => (
             <button
@@ -159,7 +161,7 @@ export function ChatInput({
         <button
           type="button"
           disabled
-          title="Anexar ficheiro (brevemente disponível)"
+          title={t('aiChat.attachFileTitle')}
           className={cn(
             'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/30 transition',
             'cursor-not-allowed',
@@ -183,7 +185,7 @@ export function ChatInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={loading}
-          placeholder="Pergunta algo ao assistente IA… usa @ para mencionar um curso"
+          placeholder={t('aiChat.inputPlaceholder')}
           className={cn(
             'flex-1 resize-none bg-transparent py-0.5 text-sm text-foreground placeholder:text-muted-foreground/60',
             'focus:outline-none disabled:opacity-50',
@@ -197,7 +199,7 @@ export function ChatInput({
           type="button"
           onClick={onSend}
           disabled={!canSend}
-          title="Enviar (Enter)"
+          title={t('aiChat.sendTitle')}
           className={cn(
             'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition',
             canSend

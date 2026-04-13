@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { TrainingRecord } from '@/types';
 import {
@@ -33,7 +34,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       id: r.id,
       title: r.title,
       platform: r.platform?.name,
-      action: 'Concluído',
+      action: 'dashboard.recentActivity.actionCompleted',
       actionColor: 'text-emerald-600 dark:text-emerald-400',
       icon: CheckCircle2,
       iconColor: 'text-emerald-600 dark:text-emerald-400',
@@ -47,7 +48,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       id: r.id,
       title: r.title,
       platform: r.platform?.name,
-      action: 'Em progresso',
+      action: 'dashboard.recentActivity.actionOngoing',
       actionColor: 'text-blue-600 dark:text-blue-400',
       icon: PlayCircle,
       iconColor: 'text-blue-600 dark:text-blue-400',
@@ -61,7 +62,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       id: r.id,
       title: r.title,
       platform: r.platform?.name,
-      action: r.status === 'priority' ? 'Prioritário' : 'Guardado',
+      action: r.status === 'priority' ? 'dashboard.recentActivity.actionPriority' : 'dashboard.recentActivity.actionSaved',
       actionColor: r.status === 'priority'
         ? 'text-amber-600 dark:text-amber-400'
         : 'text-muted-foreground',
@@ -81,7 +82,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       id: r.id,
       title: r.title,
       platform: r.platform?.name,
-      action: 'Acedido',
+      action: 'dashboard.recentActivity.actionAccessed',
       actionColor: 'text-indigo-600 dark:text-indigo-400',
       icon: Timer,
       iconColor: 'text-indigo-600 dark:text-indigo-400',
@@ -95,7 +96,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
     id: r.id,
     title: r.title,
     platform: r.platform?.name,
-    action: 'Cancelado',
+    action: 'dashboard.recentActivity.actionCancelled',
     actionColor: 'text-red-500 dark:text-red-400',
     icon: XCircle,
     iconColor: 'text-red-500 dark:text-red-400',
@@ -105,19 +106,19 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
   };
 }
 
-function relativeTime(date: Date): string {
+function relativeTime(date: Date, t: (key: string, opts?: Record<string, unknown>) => string, locale: string): string {
   const now = Date.now();
   const diffMs = now - date.getTime();
   const mins = Math.floor(diffMs / 60_000);
   const hours = Math.floor(diffMs / 3_600_000);
   const days = Math.floor(diffMs / 86_400_000);
 
-  if (mins < 1) return 'agora mesmo';
-  if (mins < 60) return `há ${mins}min`;
-  if (hours < 24) return `há ${hours}h`;
-  if (days === 1) return 'ontem';
-  if (days < 7) return `há ${days} dias`;
-  return date.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
+  if (mins < 1) return t('dashboard.recentActivity.justNow');
+  if (mins < 60) return t('dashboard.recentActivity.minutesAgo', { n: mins });
+  if (hours < 24) return t('dashboard.recentActivity.hoursAgo', { n: hours });
+  if (days === 1) return t('dashboard.recentActivity.yesterday');
+  if (days < 7) return t('dashboard.recentActivity.daysAgo', { n: days });
+  return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -156,6 +157,8 @@ interface RecentActivityProps {
 
 export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-GB';
 
   if (isLoading) return <RecentActivitySkeleton />;
 
@@ -169,12 +172,12 @@ export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityPr
     return (
       <div className="rounded-[2rem] border border-dashed border-border/60 bg-background/20 p-8 flex flex-col items-center justify-center gap-2 text-center">
         <Activity className="h-8 w-8 text-muted-foreground/30" />
-        <p className="text-xs text-muted-foreground">Ainda sem atividade registada</p>
+        <p className="text-xs text-muted-foreground">{t('dashboard.recentActivity.empty')}</p>
         <button
           onClick={() => navigate('/search')}
           className="mt-1 text-xs font-bold text-primary hover:underline"
         >
-          Explorar cursos →
+          {t('dashboard.recentActivity.exploreCourses')}
         </button>
       </div>
     );
@@ -190,10 +193,10 @@ export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityPr
           </div>
           <div>
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-              Última Atividade
+              {t('dashboard.recentActivity.title')}
             </p>
             <p className="text-sm font-black tracking-tight text-foreground leading-tight">
-              Movimentações Recentes
+              {t('dashboard.recentActivity.subtitle')}
             </p>
           </div>
         </div>
@@ -201,7 +204,7 @@ export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityPr
           onClick={() => navigate('/my-learning')}
           className="text-[11px] font-bold text-primary hover:underline"
         >
-          Ver tudo →
+          {t('dashboard.recentActivity.viewAll')}
         </button>
       </div>
 
@@ -235,7 +238,7 @@ export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityPr
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={cn('text-[10px] font-bold', ev.actionColor)}>
-                    {ev.action}
+                    {t(ev.action)}
                   </span>
                   {ev.platform && (
                     <>
@@ -250,7 +253,7 @@ export function RecentActivity({ records, isLoading, max = 5 }: RecentActivityPr
 
               {/* Time */}
               <span className="shrink-0 text-[10px] font-medium text-muted-foreground/60 tabular-nums">
-                {relativeTime(ev.date)}
+                {relativeTime(ev.date, t, locale)}
               </span>
             </a>
           );

@@ -5,6 +5,7 @@ import type { User } from '../../../types';
 import { api } from '../../../lib/axios';
 import { storage } from '../../../lib/storage';
 import { queryClient } from '../../../lib/queryClient';
+import i18n from '../../../i18n';
 
 const AUTH_LOGIN_PATH = (import.meta.env.VITE_AUTH_LOGIN_PATH || '/auth/login').trim();
 const AUTH_ME_PATH = (import.meta.env.VITE_AUTH_ME_PATH || '/auth/me').trim();
@@ -63,6 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storage.setUser(data.user);
     setToken(data.access_token);
     setUser(data.user);
+    // Restore app language (landing page toggle is session-only)
+    const savedLang = (localStorage.getItem('lh_lang') as 'pt' | 'en') ?? 'pt';
+    i18n.changeLanguage(savedLang);
   }, []);
 
 

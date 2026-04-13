@@ -226,13 +226,13 @@ export function UploadModal({ trainings, certificates, replaceTarget, onClose, o
     const ext = f.name.split('.').pop()?.toLowerCase() || '';
 
     if (!(validMimeTypes.includes(f.type) || validExtensions.includes(ext))) {
-      setErrorMsg('Formato inválido. Usa PDF, PNG, JPG, WEBP, BMP, TIFF ou TXT.');
+      setErrorMsg(t('certUpload.errorInvalidFormat'));
       setState('error');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
-      setErrorMsg('File too large (max 10MB).');
+      setErrorMsg(t('certUpload.errorTooLarge'));
       setState('error');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;

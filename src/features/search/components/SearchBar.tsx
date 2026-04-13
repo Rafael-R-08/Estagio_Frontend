@@ -1,5 +1,6 @@
 import { Search, X, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
@@ -16,9 +17,11 @@ export function SearchBar({
   onChange,
   onSearch,
   isLoading = false,
-  placeholder = 'Pesquisa cursos, temas, tecnologias…',
+  placeholder,
   className,
 }: SearchBarProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('search.placeholder');
   const [localValue, setLocalValue] = useState(value);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,7 +84,7 @@ export function SearchBar({
         value={localValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         className={cn(
           'flex-1 bg-transparent py-4 text-base font-medium text-foreground placeholder:text-muted-foreground/50',
           'outline-none',
@@ -93,7 +96,7 @@ export function SearchBar({
         <button
           onClick={handleClear}
           className="mr-3 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted-foreground/20"
-          aria-label="Limpar pesquisa"
+          aria-label={t('search.clearAria')}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -110,7 +113,7 @@ export function SearchBar({
         )}
         disabled={!localValue.trim()}
       >
-        Pesquisar
+        {t('search.searchBtn')}
       </button>
     </div>
   );

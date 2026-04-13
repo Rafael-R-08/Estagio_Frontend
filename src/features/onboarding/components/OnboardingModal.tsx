@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../../lib/axios';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { SERVICE_LINE_LABELS, type ServiceLine } from '../../../types';
@@ -14,24 +15,26 @@ import { Label } from '../../../components/ui/label';
 import { Check, Plus, ChevronRight, ChevronLeft, Sparkles, Brain, Target, Cloud, Database, Briefcase, Settings, Users, UserCircle, X, ShieldCheck, Lock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
-const formSchema = z.object({
-  serviceLine: z.enum([
-    'HYBRID_CLOUD',
-    'DATA',
-    'BUSINESS_APPLICATIONS',
-    'APPLICATION_OPERATIONS',
-    'SOURCING_TALENT_MANAGEMENT'
-  ]),
-  userFunction: z.string().min(2, 'Por favor indica a tua função'),
-  experienceLevel: z.enum(['junior', 'intermedio', 'senior', 'especialista', 'lider']),
-  interests: z.array(z.string()).min(1, 'Seleciona pelo menos um interesse'),
-  skills: z.array(z.object({
-    skillName: z.string().min(1, 'Nome da skill necessário'),
-    level: z.enum(['iniciante', 'intermedio', 'experiente']),
-  })).min(1, 'Adiciona pelo menos uma skill'),
-});
+type FormValues = z.infer<ReturnType<typeof makeFormSchema>>;
 
-type FormValues = z.infer<typeof formSchema>;
+function makeFormSchema(functionRequired: string) {
+  return z.object({
+    serviceLine: z.enum([
+      'HYBRID_CLOUD',
+      'DATA',
+      'BUSINESS_APPLICATIONS',
+      'APPLICATION_OPERATIONS',
+      'SOURCING_TALENT_MANAGEMENT'
+    ]),
+    userFunction: z.string().min(2, functionRequired),
+    experienceLevel: z.enum(['junior', 'intermedio', 'senior', 'especialista', 'lider']),
+    interests: z.array(z.string()).min(1, 'Seleciona pelo menos um interesse'),
+    skills: z.array(z.object({
+      skillName: z.string().min(1, 'Nome da skill necessário'),
+      level: z.enum(['iniciante', 'intermedio', 'experiente']),
+    })).min(1, 'Adiciona pelo menos uma skill'),
+  });
+}
 
 const COMMON_INTERESTS = [
   'Cloud Architecture', 'DevOps', 'Cybersecurity', 'Data Science',
@@ -42,9 +45,12 @@ const COMMON_INTERESTS = [
 
 export function OnboardingModal() {
   const { setUser } = useAuth();
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [customInterest, setCustomInterest] = useState('');
+
+  const formSchema = useMemo(() => makeFormSchema(t('onboarding.modal.functionRequired')), [t]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -102,10 +108,10 @@ export function OnboardingModal() {
 
       const { data } = await api.post('/auth/onboarding', mappedPayload);
       setUser(data);
-      toast.success('Onboarding completed! Your personalized hub is ready.');
+      toast.success(t('onboarding.modal.toastSuccess'));
     } catch (error) {
       console.error('Onboarding error:', error);
-      toast.error('Erro ao guardar dados. Tenta novamente.');
+      toast.error(t('onboarding.modal.toastError'));
     } finally {
       setIsLoading(false);
     }
@@ -135,16 +141,16 @@ export function OnboardingModal() {
             {step === 2 && <Brain className="h-8 w-8 text-violet-500" />}
             {step === 3 && <Target className="h-8 w-8 text-emerald-500" />}
             {step === 4 && <ShieldCheck className="h-8 w-8 text-blue-500" />}
-            {step === 1 && "Definir o teu Perfil"}
-            {step === 2 && "Os teus Interesses"}
-            {step === 3 && "As tuas Skills"}
-            {step === 4 && "Transparência e IA"}
+            {step === 1 && t('onboarding.modal.step1Title')}
+            {step === 2 && t('onboarding.modal.step2Title')}
+            {step === 3 && t('onboarding.modal.step3Title')}
+            {step === 4 && t('onboarding.modal.step4Title')}
           </CardTitle>
           <CardDescription className="text-muted-foreground text-lg">
-            {step === 1 && "Personaliza a tua experiência com base na tua área e nível."}
-            {step === 2 && "Que áreas tens curiosidade em explorar na Softinsa?"}
-            {step === 3 && "Identifica as tuas competências principais."}
-            {step === 4 && "Como potenciar a tua jornada de aprendizagem."}
+            {step === 1 && t('onboarding.modal.step1Desc')}
+            {step === 2 && t('onboarding.modal.step2Desc')}
+            {step === 3 && t('onboarding.modal.step3Desc')}
+            {step === 4 && t('onboarding.modal.step4Desc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -209,7 +215,7 @@ export function OnboardingModal() {
                       name="userFunction"
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">Função / Cargo</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">{t('onboarding.modal.functionLabel')}</FormLabel>
                           <FormControl>
                             <div className="relative group">
                               <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
@@ -231,7 +237,7 @@ export function OnboardingModal() {
                       name="experienceLevel"
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">Nível</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">{t('onboarding.modal.levelLabel')}</FormLabel>
                           <FormControl>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 bg-muted/20 p-1.5 rounded-[1.25rem] border border-border/40">
                               {(['junior', 'intermedio', 'senior', 'especialista', 'lider'] as const).map((lvl) => (
@@ -246,9 +252,11 @@ export function OnboardingModal() {
                                       : "text-muted-foreground hover:bg-muted/30"
                                   )}
                                 >
-                                  {lvl === 'intermedio' ? 'Intermédio' :
-                                    lvl === 'senior' ? 'Sénior' :
-                                      lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+                                  {lvl === 'junior' ? t('onboarding.modal.levelJunior') :
+                                    lvl === 'intermedio' ? t('onboarding.modal.levelIntermediate') :
+                                    lvl === 'senior' ? t('onboarding.modal.levelSenior') :
+                                    lvl === 'especialista' ? t('onboarding.modal.levelSpecialist') :
+                                    t('onboarding.modal.levelLeader')}
                                 </button>
                               ))}
                             </div>
@@ -278,7 +286,7 @@ export function OnboardingModal() {
                             handleAddCustomInterest();
                           }
                         }}
-                        placeholder="Adiciona outro interesse (ex: Blockchain, Go, UX...)"
+                        placeholder={t('onboarding.modal.addInterestPlaceholder')}
                         className="flex h-12 w-full rounded-2xl border-2 border-border/40 bg-background/30 pl-11 pr-24 text-sm focus:outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/5 transition-all font-bold placeholder:font-medium placeholder:opacity-50"
                       />
                       <button
@@ -287,12 +295,12 @@ export function OnboardingModal() {
                         disabled={!customInterest.trim()}
                         className="absolute right-2 top-2 h-8 px-4 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-wider disabled:opacity-0 transition-all hover:bg-violet-700 shadow-lg shadow-violet-500/20 active:scale-95"
                       >
-                        Adicionar
+                        {t('onboarding.modal.addButton')}
                       </button>
                     </div>
 
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Sugestões Populares</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">{t('onboarding.modal.popularLabel')}</p>
                       <FormField
                         control={form.control}
                         name="interests"
@@ -350,7 +358,7 @@ export function OnboardingModal() {
                             name={`skills.${index}.skillName` as const}
                             render={({ field }) => (
                               <FormItem className="space-y-1">
-                                <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Especialidade / Competência</FormLabel>
+                                <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">{t('onboarding.modal.skillNameLabel')}</FormLabel>
                                 <FormControl>
                                   <input
                                     {...field}
@@ -372,7 +380,7 @@ export function OnboardingModal() {
                             render={({ field }) => (
                               <FormItem className="space-y-1">
                                 <div className="flex items-center justify-between ml-1">
-                                  <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">O teu Nível</FormLabel>
+                                  <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{t('onboarding.modal.skillLevelLabel')}</FormLabel>
                                 </div>
                                 <FormControl>
                                   <div className="flex gap-1 p-1 bg-muted/20 border border-border/30 rounded-xl h-[44px]">
@@ -388,9 +396,9 @@ export function OnboardingModal() {
                                             : "text-muted-foreground/60 hover:bg-muted/30"
                                         )}
                                       >
-                                        {lv === 'iniciante' && 'Iniciante'}
-                                        {lv === 'intermedio' && 'Intermédio'}
-                                        {lv === 'experiente' && 'Experiente'}
+                                        {lv === 'iniciante' && t('onboarding.modal.skillLevelBeginner')}
+                                        {lv === 'intermedio' && t('onboarding.modal.skillLevelIntermediate')}
+                                        {lv === 'experiente' && t('onboarding.modal.skillLevelExpert')}
                                       </button>
                                     ))}
                                   </div>
@@ -422,7 +430,7 @@ export function OnboardingModal() {
                     onClick={() => append({ skillName: '', level: 'intermedio' })}
                   >
                     <Plus className="h-4 w-4 mr-2 text-primary" />
-                    Adicionar outra competência
+                    {t('onboarding.modal.addSkill')}
                   </Button>
                 </div>
               )}
@@ -432,16 +440,16 @@ export function OnboardingModal() {
                 <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">Compromisso de Transparência</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">{t('onboarding.modal.transparencyLabel')}</p>
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex items-center gap-4 p-4 rounded-xl border border-border/40 bg-card/30 transition-all hover:bg-muted/5 group">
                           <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:scale-110 transition-transform">
                             <Brain className="h-5 w-5" />
                           </div>
                           <div className="space-y-0.5 pr-4">
-                            <p className="text-[11px] font-black uppercase tracking-tight text-foreground">O Teu Co-piloto de IA</p>
+                            <p className="text-[11px] font-black uppercase tracking-tight text-foreground">{t('onboarding.modal.copilotTitle')}</p>
                             <p className="text-[11px] leading-relaxed text-muted-foreground/80">
-                              Os teus dados de perfil são utilizados exclusivamente para gerar recomendações personalizadas.
+                              {t('onboarding.modal.copilotDesc')}
                             </p>
                           </div>
                         </div>
@@ -451,9 +459,9 @@ export function OnboardingModal() {
                             <Lock className="h-5 w-5" />
                           </div>
                           <div className="space-y-0.5 pr-4">
-                            <p className="text-[11px] font-black uppercase tracking-tight text-foreground">Visibilidade e Carreira</p>
+                            <p className="text-[11px] font-black uppercase tracking-tight text-foreground">{t('onboarding.modal.visibilityTitle')}</p>
                             <p className="text-[11px] leading-relaxed text-muted-foreground/80">
-                              Os responsáveis de Service Line acompanham o teu progresso para identificar oportunidades de formação.
+                              {t('onboarding.modal.visibilityDesc')}
                             </p>
                           </div>
                         </div>
@@ -461,12 +469,12 @@ export function OnboardingModal() {
                     </div>
 
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">Consentimento e Utilização</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">{t('onboarding.modal.consentLabel')}</p>
                       <div className="p-6 rounded-2xl bg-muted/20 border-2 border-dashed border-border/40 text-[11px] leading-relaxed text-muted-foreground/90 font-medium relative group overflow-hidden">
                         <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
                           <ShieldCheck className="h-16 w-16" />
                         </div>
-                        "Ao finalizar, confirmas a tua ciência sobre a utilização destes dados pela plataforma para otimizar e apoiar a tua evolução profissional na Softinsa."
+                        "{t('onboarding.modal.consentText')}"
                       </div>
                     </div>
                   </div>
@@ -478,7 +486,7 @@ export function OnboardingModal() {
                 {step > 1 ? (
                   <Button type="button" variant="ghost" className="rounded-xl px-6 text-xs font-bold" onClick={prevStep}>
                     <ChevronLeft className="h-4 w-4 mr-2" />
-                    Anterior
+                    {t('onboarding.prev')}
                   </Button>
                 ) : (
                   <div /> /* spacer */
@@ -491,7 +499,7 @@ export function OnboardingModal() {
                     className="rounded-xl px-8 bg-blue-600 text-white hover:bg-blue-700 transition-all active:scale-95 text-xs font-bold"
                     onClick={nextStep}
                   >
-                    Seguinte
+                    {t('onboarding.next')}
                     <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
@@ -501,7 +509,7 @@ export function OnboardingModal() {
                     className="rounded-xl px-10 bg-primary font-bold shadow-lg shadow-primary/10 transition-all active:scale-95 text-xs"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'A Guardar...' : 'Finalizar'}
+                    {isLoading ? t('onboarding.modal.saving') : t('onboarding.tour.finish')}
                     {!isLoading && <Check className="h-4 w-4 ml-2" />}
                   </Button>
                 )}
