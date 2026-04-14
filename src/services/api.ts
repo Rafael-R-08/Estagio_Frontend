@@ -37,10 +37,15 @@ import type {
   SlManagerUser,
   SlManagerUserDetail,
   SlManagerAlerts,
+  SlManagerActivityItem,
   NotificationsResponse,
   CalendarEvent,
   CreateCalendarEventDto,
   UpdateCalendarEventDto,
+  Collection,
+  CreateCollectionDto,
+  AddCourseToCollectionDto,
+  ProgressReport,
 } from '../types';
 
 type RawCourseResult = Partial<CourseSearchResult> & {
@@ -119,6 +124,7 @@ function normalizeCourseResult(course: RawCourseResult): CourseSearchResult {
     internalRating: typeof course.internalRating === 'number' ? course.internalRating : undefined,
     internalRelevance: typeof course.internalRelevance === 'number' ? course.internalRelevance : undefined,
     completedCount: typeof course.completedCount === 'number' ? course.completedCount : undefined,
+    userStatus: typeof course.userStatus === 'string' ? course.userStatus as import('../types').TrainingStatus : undefined,
   };
 }
 
@@ -494,6 +500,25 @@ export const notificationsApi = {
     api.delete('/notifications'),
 };
 
+// ─── SL Manager ───────────────────────────────────────────────────────────────
+
+export const slManagerApi = {
+  getOverview: () =>
+    api.get<SlManagerOverview>('/sl-manager/overview'),
+
+  getUsers: () =>
+    api.get<SlManagerUser[]>('/sl-manager/users'),
+
+  getUserDetail: (id: string) =>
+    api.get<SlManagerUserDetail>(`/sl-manager/users/${id}`),
+
+  getAlerts: () =>
+    api.get<SlManagerAlerts>('/sl-manager/alerts'),
+
+  getActivity: (limit = 30) =>
+    api.get<SlManagerActivityItem[]>('/sl-manager/activity', { params: { limit } }),
+};
+
 // ─── Calendar ─────────────────────────────────────────────────────────────────
 
 export const calendarApi = {
@@ -511,21 +536,52 @@ export const calendarApi = {
 
   remove: (id: string) =>
     api.delete<{ message: string }>(`/calendar/${id}`),
+
+  exportIcs: () =>
+    api.get('/calendar/export.ics', { responseType: 'blob' }),
 };
 
-// ─── SL Manager ───────────────────────────────────────────────────────────────
+// ─── Collections ──────────────────────────────────────────────────────────────
 
-export const slManagerApi = {
-  getOverview: () =>
-    api.get<SlManagerOverview>('/sl-manager/overview'),
+export const collectionsApi = {
+  getAll: () =>
+    api.get<Collection[]>('/collections'),
 
-  getUsers: () =>
-    api.get<SlManagerUser[]>('/sl-manager/users'),
+  getOne: (id: string) =>
+    api.get<Collection>(`/collections/${id}`),
 
-  getUserDetail: (id: string) =>
-    api.get<SlManagerUserDetail>(`/sl-manager/users/${id}`),
+  create: (dto: CreateCollectionDto) =>
+    api.post<Collection>('/collections', dto),
 
-  getAlerts: () =>
-    api.get<SlManagerAlerts>('/sl-manager/alerts'),
+  update: (id: string, dto: Partial<CreateCollectionDto>) =>
+    api.patch<Collection>(`/collections/${id}`, dto),
+
+  delete: (id: string) =>
+    api.delete(`/collections/${id}`),
+
+  addCourse: (collectionId: string, dto: AddCourseToCollectionDto) =>
+    api.post(`/collections/${collectionId}/courses`, dto),
+
+  removeCourse: (collectionId: string, externalId: string) =>
+    api.delete(`/collections/${collectionId}/courses/${externalId}`),
 };
 
+// ─── Push Notifications ────────────────────────────────────────────────────────
+
+export const pushApi = {
+  getVapidPublicKey: () =>
+    api.get<{ publicKey: string }>('/push/vapid-public-key'),
+
+  subscribe: (subscription: PushSubscriptionJSON) =>
+    api.post('/push/subscribe', subscription),
+
+  unsubscribe: () =>
+    api.delete('/push/subscribe'),
+};
+
+// ─── Reports ───────────────────────────────────────────────────────────────────
+
+export const reportsApi = {
+  getProgressReport: () =>
+    api.get<ProgressReport>('/reports/progress'),
+};

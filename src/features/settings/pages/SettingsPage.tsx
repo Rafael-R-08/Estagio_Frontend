@@ -2,17 +2,16 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Sparkles,
   Bell,
-  Shield,
   Monitor,
   Save,
   Smartphone,
-  Download,
   Share,
+  BellRing,
+  Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { settingsApi } from '@/services/api';
+import { settingsApi, pushApi } from '@/services/api';
 import type { UserSettings, UpdateUserSettingsDto } from '@/types';
 import { cn } from '@/lib/utils';
 import { applyTheme, type Theme } from '@/utils/theme';
@@ -46,34 +45,10 @@ function loadAppearance() {
   };
 }
 
-// ─── AI prefs stored in localStorage (not persisted to backend) ───────────────
-
-interface LocalAiPrefs {
-  aiResponseDetail: string | null;
-  aiResponseLanguage: string | null;
-  aiExplainReasoning: boolean;
-  aiRecommendationMode: string | null;
-}
-
-const AI_PREFS_KEY = 'lh_ai_prefs';
-
-function loadAiPrefs(): LocalAiPrefs {
-  try {
-    const raw = localStorage.getItem(AI_PREFS_KEY);
-    return raw
-      ? (JSON.parse(raw) as LocalAiPrefs)
-      : { aiResponseDetail: null, aiResponseLanguage: null, aiExplainReasoning: false, aiRecommendationMode: null };
-  } catch {
-    return { aiResponseDetail: null, aiResponseLanguage: null, aiExplainReasoning: false, aiRecommendationMode: null };
-  }
-}
-
 // ─── Nav sections ─────────────────────────────────────────────────────────────
 
 const SECTIONS = [
-  { id: 'ai', labelKey: 'settings.sections.ai', icon: Sparkles, customLabel: false },
   { id: 'notifications', labelKey: 'settings.sections.notifications', icon: Bell, customLabel: false },
-  { id: 'privacy', labelKey: 'settings.sections.privacy', icon: Shield, customLabel: false },
   { id: 'appearance', labelKey: 'settings.sections.appearance', icon: Monitor, customLabel: false },
   { id: 'app', labelKey: 'settings.sections.app', icon: Smartphone, customLabel: false },
 ] as const;
@@ -142,43 +117,6 @@ function SelectField({ value, options, onChange }: {
   );
 }
 
-function RadioGroup({ value, options, onChange }: {
-  value: string | null;
-  options: { value: string; label: string; description?: string }[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      {options.map((o) => (
-        <label
-          key={o.value}
-          className={cn(
-            'flex items-start gap-4 rounded-3xl border-2 px-6 py-4 cursor-pointer transition-all active:scale-[0.98]',
-            value === o.value
-              ? 'border-foreground bg-foreground/5 dark:bg-foreground/10'
-              : 'border-border/60 hover:border-border',
-          )}
-        >
-          <input
-            type="radio"
-            name={o.value}
-            value={o.value}
-            checked={value === o.value}
-            onChange={() => onChange(o.value)}
-            className="mt-1 accent-foreground shrink-0 h-4 w-4"
-          />
-          <div>
-            <span className="text-sm font-bold text-foreground">{o.label}</span>
-            {o.description && (
-              <p className="text-xs text-muted-foreground mt-0.5">{o.description}</p>
-            )}
-          </div>
-        </label>
-      ))}
-    </div>
-  );
-}
-
 
 function SectionPanel({ title, icon: Icon, children }: {
   title: string;
@@ -212,11 +150,81 @@ function SubLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ─── Push Notification Toggle ─────────────────────────────────────────────────
+
+function PushToggle() {
+  const { t } = useTranslation();
+  const [subscribed, setSubscribed] = useState<boolean>(() => !!localStorage.getItem('lh_push_sub'));
+  const [loading, setLoading] = useState(false);
+
+  const supported = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window;
+
+  if (!supported) return null;
+
+  async function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  }
+
+  async function handleToggle() {
+    setLoading(true);
+    try {
+      if (subscribed) {
+        // Unsubscribe
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) await sub.unsubscribe();
+        await pushApi.unsubscribe();
+        localStorage.removeItem('lh_push_sub');
+        setSubscribed(false);
+        toast.success(t('settings.notifications.pushUnsubscribed'));
+      } else {
+        // Subscribe
+        const { data } = await pushApi.getVapidPublicKey();
+        const reg = await navigator.serviceWorker.ready;
+        const applicationServerKey = await urlBase64ToUint8Array(data.publicKey);
+        const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
+        await pushApi.subscribe(sub.toJSON());
+        localStorage.setItem('lh_push_sub', '1');
+        setSubscribed(true);
+        toast.success(t('settings.notifications.pushSubscribed'));
+      }
+    } catch {
+      toast.error(t('settings.notifications.pushError'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={subscribed}
+      disabled={loading}
+      onClick={handleToggle}
+      className={cn(
+        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-foreground/10 disabled:opacity-50',
+        subscribed ? 'bg-foreground' : 'bg-muted',
+      )}
+    >
+      <span
+        className={cn(
+          'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-background shadow-xl ring-0 transition duration-200',
+          subscribed ? 'translate-x-5' : 'translate-x-0',
+        )}
+      />
+    </button>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const qc = useQueryClient();
-  const [activeSection, setActiveSection] = useState<SectionId>('ai');
+  const [activeSection, setActiveSection] = useState<SectionId>('notifications');
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
 
   const isIOS = typeof navigator !== 'undefined' &&
@@ -246,15 +254,6 @@ export default function SettingsPage() {
   const { t } = useTranslation();
 
   const [appearance, setAppearance] = useState(loadAppearance);
-  const [aiPrefs, setAiPrefs] = useState<LocalAiPrefs>(loadAiPrefs);
-
-  const setAiPref = <K extends keyof LocalAiPrefs>(key: K, value: LocalAiPrefs[K]) => {
-    setAiPrefs((prev) => {
-      const next = { ...prev, [key]: value };
-      localStorage.setItem(AI_PREFS_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
   const setApp = <K extends keyof ReturnType<typeof loadAppearance>>(key: K, value: string) => {
     if (key === 'theme') {
       applyTheme(value as Theme);
@@ -262,15 +261,20 @@ export default function SettingsPage() {
       localStorage.setItem('lh_lang', value);
       i18n.changeLanguage(value);
       set('uiLanguage', value);
+      // Auto-save language immediately so backend stays in sync without requiring the Save button
+      settingsApi.update({ uiLanguage: value }).catch(() => { /* silent — preference is already applied locally */ });
     } else {
       localStorage.setItem(`app_${key}`, value);
     }
     setAppearance((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Sincronizar idioma do backend quando as definições carregam
+  // Sincronizar idioma do backend quando as definições carregam.
+  // Só aplica o valor do backend se o localStorage ainda não tiver uma preferência explícita
+  // (ex: primeiro uso num dispositivo novo). Caso contrário, o valor local tem prioridade.
   useEffect(() => {
-    if (settings?.uiLanguage && settings.uiLanguage !== i18n.language) {
+    const localLang = localStorage.getItem('lh_lang');
+    if (!localLang && settings?.uiLanguage && settings.uiLanguage !== i18n.language) {
       localStorage.setItem('lh_lang', settings.uiLanguage);
       i18n.changeLanguage(settings.uiLanguage);
     }
@@ -353,57 +357,6 @@ export default function SettingsPage() {
 
           {/* Content */}
           <main className="min-w-0 flex-1">
-            {/* ── IA ── */}
-            {activeSection === 'ai' && (
-              <SectionPanel title={t('settings.ai.title')} icon={Sparkles}>
-                <SectionItem>
-                  <SettingRow label={t('settings.ai.responseDetail')} description={t('settings.ai.responseDetailDesc')}>
-                    <SelectField
-                      value={aiPrefs.aiResponseDetail}
-                      options={[
-                        { value: 'concise', label: t('settings.ai.concise') },
-                        { value: 'detailed', label: t('settings.ai.detailed') },
-                      ]}
-                      onChange={(v) => setAiPref('aiResponseDetail', v)}
-                    />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <SettingRow label={t('settings.ai.responseLanguage')}>
-                    <SelectField
-                      value={aiPrefs.aiResponseLanguage}
-                      options={[
-                        { value: 'pt', label: t('settings.ai.portuguese') },
-                        { value: 'en', label: t('settings.ai.english') },
-                      ]}
-                      onChange={(v) => setAiPref('aiResponseLanguage', v)}
-                    />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <SettingRow
-                    label={t('settings.ai.explainReasoning')}
-                    description={t('settings.ai.explainReasoningDesc')}
-                  >
-                    <Toggle checked={aiPrefs.aiExplainReasoning} onChange={(v) => setAiPref('aiExplainReasoning', v)} />
-                  </SettingRow>
-                </SectionItem>
-                <SectionItem>
-                  <div className="py-4">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-3">{t('settings.ai.recommendationMode')}</p>
-                    <RadioGroup
-                      value={aiPrefs.aiRecommendationMode}
-                      options={[
-                        { value: 'conservative', label: t('settings.ai.conservative'), description: t('settings.ai.conservativeDesc') },
-                        { value: 'exploratory', label: t('settings.ai.exploratory'), description: t('settings.ai.exploratoryDesc') },
-                      ]}
-                      onChange={(v) => setAiPref('aiRecommendationMode', v)}
-                    />
-                  </div>
-                </SectionItem>
-              </SectionPanel>
-            )}
-
             {/* ── Notificações ── */}
             {activeSection === 'notifications' && (
               <SectionPanel title={t('settings.notifications.title')} icon={Bell}>
@@ -450,24 +403,14 @@ export default function SettingsPage() {
                     <Toggle checked={current.notifyProgress} onChange={(v) => set('notifyProgress', v)} />
                   </SettingRow>
                 </SectionItem>
-              </SectionPanel>
-            )}
 
-            {/* ── Privacidade ── */}
-            {activeSection === 'privacy' && (
-              <SectionPanel title={t('settings.privacy.title')} icon={Shield}>
+                <SubLabel>{t('settings.notifications.pushLabel')}</SubLabel>
                 <SectionItem>
                   <SettingRow
-                    label={t('settings.privacy.downloadData')}
-                    description={t('settings.privacy.downloadDataDesc')}
+                    label={t('settings.notifications.push')}
+                    description={t('settings.notifications.pushDesc')}
                   >
-                    <button
-                      type="button"
-                      onClick={() => toast.info(t('common.featureInDev'))}
-                      className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
-                    >
-                      {t('common.export')}
-                    </button>
+                    <PushToggle />
                   </SettingRow>
                 </SectionItem>
               </SectionPanel>

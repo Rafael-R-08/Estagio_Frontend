@@ -43,7 +43,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       url: r.url,
     };
   }
-  if (r.status === 'ongoing' && r.startedAt) {
+  if (r.status === 'ongoing') {
     return {
       id: r.id,
       title: r.title,
@@ -53,7 +53,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       icon: PlayCircle,
       iconColor: 'text-blue-600 dark:text-blue-400',
       iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-      date: new Date(r.startedAt),
+      date: new Date(r.startedAt ?? r.createdAt ?? Date.now()),
       url: r.url,
     };
   }

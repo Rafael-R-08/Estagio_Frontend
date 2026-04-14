@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Globe, Search, Check, X, KeyRound, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { Plus, Pencil, Globe, Search, Check, X, KeyRound, Eye, EyeOff, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { platformsApi } from '@/services/api';
@@ -302,31 +302,6 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
   );
 }
 
-// ─── Delete confirm ───────────────────────────────────────────────────────────
-
-function DeleteConfirm({ open, name, onConfirm, onCancel }: { open: boolean; name: string; onConfirm: () => void; onCancel: () => void }) {
-  const { t } = useTranslation();
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-xl">
-      <div className="w-full max-w-sm rounded-[2rem] border border-border/60 bg-background/60 p-6 shadow-2xl backdrop-blur-2xl">
-        <h3 className="text-lg font-bold text-foreground">{t('admin.platforms.confirmDelete', { name })}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('admin.platforms.confirmDeleteDesc')}
-        </p>
-        <div className="mt-5 flex gap-3 justify-end">
-          <button onClick={onCancel} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors">
-            {t('admin.users.cancel')}
-          </button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors">
-            {t('admin.platforms.delete')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function PlatformsTab() {
@@ -335,7 +310,6 @@ export function PlatformsTab() {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LearningPlatform | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<LearningPlatform | null>(null);
 
   const { data: platforms = [], isLoading } = useQuery({
     queryKey: ['admin', 'platforms'],
@@ -359,12 +333,6 @@ export function PlatformsTab() {
     mutationFn: ({ id, data }: { id: string; data: UpdateAdminPlatformPayload }) => platformsApi.update(id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success(t('admin.platforms.toastUpdated')); setEditing(null); setModalOpen(false); },
     onError: () => toast.error(t('admin.platforms.toastUpdateError')),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => platformsApi.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'platforms'] }); toast.success(t('admin.platforms.toastDeleted')); setDeleteTarget(null); },
-    onError: () => toast.error(t('admin.platforms.toastDeleteError')),
   });
 
   function handleSave(data: PlatformFormData) {
@@ -397,9 +365,9 @@ export function PlatformsTab() {
     }
   }
 
-  const filtered = platforms.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = platforms
+    .filter((p) => p.isActive)
+    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
@@ -503,13 +471,6 @@ export function PlatformsTab() {
                           <Pencil className="h-3.5 w-3.5" />
                           {t('admin.platforms.edit')}
                         </button>
-                        <button
-                          onClick={() => setDeleteTarget(p)}
-                          className="flex items-center gap-1.5 rounded-lg border border-red-200 dark:border-red-900/40 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          {t('admin.platforms.delete')}
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -532,14 +493,6 @@ export function PlatformsTab() {
         onClose={() => { setModalOpen(false); setEditing(null); }}
         onSave={handleSave}
         saving={isSaving}
-      />
-
-      {/* Delete confirm */}
-      <DeleteConfirm
-        open={deleteTarget !== null}
-        name={deleteTarget?.name ?? ''}
-        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

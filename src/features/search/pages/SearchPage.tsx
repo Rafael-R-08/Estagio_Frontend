@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, AlertCircle, LayoutGrid, List, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Search, AlertCircle, LayoutGrid, List, ChevronLeft, ChevronRight, Sparkles, GitCompareArrows, X } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +13,7 @@ import type { CourseSearchResult } from '@/types';
 import { SearchBar } from '../components/SearchBar';
 import { FilterSidebar, type Filters } from '../components/FilterSidebar';
 import { SearchResultCard, SearchResultCardSkeleton } from '../components/SearchResultCard';
+import { CourseCompareModal } from '../components/CourseCompareModal';
 
 // ─── Empty / Error states ─────────────────────────────────────────────────────
 
@@ -65,8 +67,10 @@ export default function SearchPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [inputValue, setInputValue] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const _initialQuery = (location.state as { initialQuery?: string } | null)?.initialQuery ?? '';
+  const [inputValue, setInputValue] = useState(_initialQuery);
+  const [searchQuery, setSearchQuery] = useState(_initialQuery);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<Filters>({
     platforms: [],
@@ -78,6 +82,23 @@ export default function SearchPage() {
     language: undefined
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [compareQueue, setCompareQueue] = useState<CourseSearchResult[]>([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+
+  const MAX_COMPARE = 3;
+
+  const handleToggleCompare = (course: CourseSearchResult) => {
+    setCompareQueue((prev) => {
+      const exists = prev.find((c) => c.externalId === course.externalId);
+      if (exists) return prev.filter((c) => c.externalId !== course.externalId);
+      if (prev.length >= MAX_COMPARE) return prev;
+      return [...prev, course];
+    });
+  };
+
+  const handleRemoveFromCompare = (externalId: string) => {
+    setCompareQueue((prev) => prev.filter((c) => c.externalId !== externalId));
+  };
 
   // Reset page when search or filters change
   const handleFilterChange = (newFilters: Filters) => {
@@ -309,6 +330,9 @@ export default function SearchPage() {
                   alreadyAttended={attendedUrls.has(course.url)}
                   savedExternalIds={savedExternalIds}
                   onSave={handleSave}
+                  compareSelected={compareQueue.some((c) => c.externalId === course.externalId)}
+                  onToggleCompare={handleToggleCompare}
+                  compareDisabled={compareQueue.length >= MAX_COMPARE}
                 />
               ))}
             </div>
@@ -344,6 +368,46 @@ export default function SearchPage() {
           )}
         </div>
       </div>
+
+      {/* ── Floating compare bar ────────────────────────────────────── */}
+      {compareQueue.length >= 2 && (
+        <div className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 animate-in slide-in-from-bottom-4 md:bottom-6">
+          <div className="flex items-center gap-3 rounded-full border border-violet-500/30 bg-card/95 px-5 py-3 shadow-2xl backdrop-blur-xl ring-1 ring-violet-500/10">
+            <div className="flex items-center gap-2">
+              <GitCompareArrows className="h-4 w-4 text-violet-500" />
+              <span className="text-xs font-black text-foreground">
+                {t('compare.selected', { count: compareQueue.length })}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowCompareModal(true)}
+              className="flex items-center gap-2 rounded-full bg-violet-600 px-5 py-2 text-xs font-black text-white shadow-lg shadow-violet-600/30 transition hover:opacity-90 active:scale-95"
+            >
+              <GitCompareArrows className="h-3.5 w-3.5" />
+              {t('compare.compare')}
+            </button>
+            <button
+              onClick={() => setCompareQueue([])}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/70 text-muted-foreground transition hover:bg-muted"
+              title={t('compare.clear')}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Compare modal ───────────────────────────────────────────── */}
+      {showCompareModal && compareQueue.length >= 2 && (
+        <CourseCompareModal
+          courses={compareQueue}
+          onClose={() => setShowCompareModal(false)}
+          onRemove={(id) => {
+            handleRemoveFromCompare(id);
+            if (compareQueue.length <= 2) setShowCompareModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

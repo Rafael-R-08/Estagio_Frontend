@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ import {
   ChevronRight,
   BarChart3,
   Users,
+  FolderPlus,
 } from 'lucide-react';
 
 import { searchApi, trainingApi } from '@/services/api';
@@ -28,6 +30,7 @@ import { cn } from '@/lib/utils';
 import type { CourseSearchResult } from '@/types';
 
 import { SearchResultCard } from '../components/SearchResultCard';
+import { AddToCollectionModal } from '@/features/collections/components/AddToCollectionModal';
 
 // ─── Level config ─────────────────────────────────────────────────────────────
 
@@ -195,6 +198,7 @@ export default function CourseDetailPage() {
   };
 
   const isPending = createTraining.isPending || updateTraining.isPending;
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   if (isLoading) {
     return <DetailSkeleton />;
@@ -408,6 +412,11 @@ export default function CourseDetailPage() {
                   active={existingRecord?.status === 'completed'}
                   loading={isPending}
                 />
+                <ActionButton
+                  icon={FolderPlus}
+                  label={t('collections.addButton')}
+                  onClick={() => setShowCollectionModal(true)}
+                />
               </div>
             </div>
 
@@ -460,6 +469,13 @@ export default function CourseDetailPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {showCollectionModal && course && (
+        <AddToCollectionModal
+          course={{ externalId: course.externalId, title: course.title, url: course.url, platformName: course.platformName, platformId: course.platformId }}
+          onClose={() => setShowCollectionModal(false)}
+        />
       )}
     </div>
   );

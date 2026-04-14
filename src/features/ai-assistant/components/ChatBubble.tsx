@@ -143,7 +143,15 @@ export function ChatBubble({ message }: { message: AiMessage }) {
                     {children}
                   </ul>
                 ),
-                li: ({ children }) => <li className="pl-1 text-[13px]">{children}</li>,
+                ol: ({ children }) => (
+                  <ol
+                    style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }}
+                    className="mb-4 space-y-1.5 last:mb-0 font-medium text-slate-700 dark:text-slate-300"
+                  >
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => <li style={{ display: 'list-item' }} className="pl-1 text-[13px]">{children}</li>,
                 code: ({ children }) => (
                   <code className="rounded-md bg-muted px-1.5 py-0.5 text-xs font-mono font-black text-primary border border-border/40">
                     {children}

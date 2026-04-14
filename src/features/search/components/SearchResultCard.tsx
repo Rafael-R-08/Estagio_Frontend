@@ -11,6 +11,8 @@ import {
   User,
   Globe,
   Users,
+  GitCompareArrows,
+  FolderPlus,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { trainingApi } from '@/services/api';
 import type { CourseSearchResult } from '@/types';
+import { AddToCollectionModal } from '@/features/collections/components/AddToCollectionModal';
 
 // ─── Level badge ──────────────────────────────────────────────────────────────
 
@@ -87,6 +90,9 @@ interface SearchResultCardProps {
   alreadyAttended?: boolean;
   onSave?: (c: CourseSearchResult) => void;
   savedExternalIds?: Set<string>;
+  compareSelected?: boolean;
+  onToggleCompare?: (c: CourseSearchResult) => void;
+  compareDisabled?: boolean;
 }
 
 export function SearchResultCard({
@@ -94,10 +100,14 @@ export function SearchResultCard({
   alreadyAttended = false,
   onSave,
   savedExternalIds = new Set(),
+  compareSelected = false,
+  onToggleCompare,
+  compareDisabled = false,
 }: SearchResultCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [localSaved, setLocalSaved] = useState(savedExternalIds.has(course.externalId));
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   const levelStyle = course.level ? LEVEL_STYLES[course.level] : undefined;
   const levelLabel = course.level ? t(`searchCard.level${course.level.charAt(0).toUpperCase() + course.level.slice(1)}`) : undefined;
@@ -274,6 +284,20 @@ export function SearchResultCard({
             active={localSaved}
             activeClass="bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/20"
           />
+          {onToggleCompare && (
+            <ActionBtn
+              icon={GitCompareArrows}
+              label={compareSelected ? t('compare.removing') : compareDisabled ? t('compare.maxReached') : t('compare.button')}
+              onClick={() => !compareDisabled || compareSelected ? onToggleCompare(course) : undefined}
+              active={compareSelected}
+              activeClass="bg-violet-600 text-white border-transparent shadow-lg shadow-violet-500/20"
+            />
+          )}
+          <ActionBtn
+            icon={FolderPlus}
+            label={t('collections.addButton')}
+            onClick={() => setShowCollectionModal(true)}
+          />
         </div>
 
         <a
@@ -287,6 +311,13 @@ export function SearchResultCard({
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>
+
+      {showCollectionModal && (
+        <AddToCollectionModal
+          course={{ externalId: course.externalId, title: course.title, url: course.url, platformName: course.platformName, platformId: course.platformId }}
+          onClose={() => setShowCollectionModal(false)}
+        />
+      )}
     </div>
   );
 }

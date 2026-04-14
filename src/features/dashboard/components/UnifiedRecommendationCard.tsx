@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, RefreshCw, AlertCircle, ExternalLink, TrendingUp, Lightbulb, Target, Clock, BookOpen, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, RefreshCw, AlertCircle, ExternalLink, TrendingUp, Lightbulb, Target, Clock, BookOpen, Zap, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { RecommendationResponse, RecommendedCourse } from '@/types';
@@ -68,21 +69,34 @@ function RecommendationSkeleton() {
 
 function CourseCard({ course }: { course: RecommendedCourse }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const cfg = CATEGORY_CONFIG[course.category];
   const Icon = cfg.icon;
   const levelLabel = course.level ? t(`dashboard.recommendations.levels.${course.level.toLowerCase()}`, { defaultValue: course.level }) : null;
 
+  const handleClick = () => {
+    navigate('/search', { state: { initialQuery: course.title } });
+  };
+
   return (
-    <div className={cn(
-      'flex flex-col gap-3 rounded-2xl border-2 p-5 transition-all duration-300 hover:shadow-md',
-      cfg.borderColor, cfg.bgColor,
-    )}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      className={cn(
+        'flex flex-col gap-3 rounded-2xl border-2 p-5 transition-all duration-300 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.99] group/card',
+        cfg.borderColor, cfg.bgColor,
+      )}
+      title={t('dashboard.recommendations.searchCourse', 'Pesquisar esta formação')}
+    >
       <div className="flex items-start justify-between gap-3">
         <p className="text-[14px] font-black tracking-tight text-foreground leading-snug flex-1">
           {course.title}
         </p>
-        <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-background/80 shadow-sm', cfg.iconColor)}>
-          <Icon className="h-4 w-4" />
+        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-background/80 shadow-sm">
+          <Icon className={cn('h-4 w-4 transition-all duration-200 group-hover/card:opacity-0', cfg.iconColor)} />
+          <Search className="absolute h-4 w-4 text-muted-foreground opacity-0 transition-all duration-200 group-hover/card:opacity-100" />
         </div>
       </div>
 

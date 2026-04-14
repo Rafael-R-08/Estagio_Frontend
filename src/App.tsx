@@ -28,6 +28,8 @@ const SettingsPage = lazy(() => import('./features/settings/pages/SettingsPage')
 const AdminPage = lazy(() => import('./features/admin/pages/AdminPage'));
 const SlManagerPage = lazy(() => import('./features/sl-manager/pages/SlManagerPage'));
 const SlManagerUserDetailPage = lazy(() => import('./features/sl-manager/pages/SlManagerUserDetailPage'));
+const CollectionsPage = lazy(() => import('./features/collections/pages/CollectionsPage'));
+const ProgressReportPage = lazy(() => import('./features/reports/pages/ProgressReportPage'));
 
 import { InstallPrompt } from './components/ui/InstallPrompt';
 import { ErrorBoundary } from './app/ErrorBoundary';
@@ -64,6 +66,8 @@ function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/portfolio" element={<PortfolioPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/collections" element={<CollectionsPage />} />
+                  <Route path="/reports/progress" element={<ProgressReportPage />} />
                 </Route>
               </Route>
 

@@ -1,14 +1,16 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, AlertTriangle,
-  CheckCircle2, Clock, TrendingUp, Activity,
+  CheckCircle2, Clock, TrendingUp, Activity, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
 import { slManagerApi } from '../../../services/api';
 import { cn } from '../../../lib/utils';
+import TeamActivityFeed from '../components/TeamActivityFeed';
 import { SERVICE_LINE_LABELS } from '../../../types';
 import type { ServiceLine } from '../../../types';
 
@@ -57,10 +59,15 @@ export default function SlManagerPage() {
 
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'pt' ? pt : enUS;
+  const PAGE_SIZE = 8;
+  const [page, setPage] = useState(0);
 
   const lineLabel = overview?.serviceLine
     ? (SERVICE_LINE_LABELS[overview.serviceLine as ServiceLine] ?? overview.serviceLine)
     : null;
+
+  const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const paginatedUsers = users.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -70,12 +77,16 @@ export default function SlManagerPage() {
           <Users className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            {t('slManager.title')}
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+              {t('slManager.title')}
+            </h1>
             {lineLabel && (
-              <span className="ml-3 text-base font-medium text-muted-foreground opacity-70">{lineLabel}</span>
+              <span className="inline-flex items-center rounded-full bg-blue-600/10 border border-blue-600/20 px-3 py-1 text-sm font-bold text-blue-600 dark:text-blue-400">
+                {lineLabel}
+              </span>
             )}
-          </h1>
+          </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             {t('slManager.subtitle')}
           </p>
@@ -148,7 +159,7 @@ export default function SlManagerPage() {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => (
+                paginatedUsers.map((u) => (
                   <tr key={u.id} className={cn('border-b border-border last:border-0 hover:bg-muted/30 transition-colors', !u.isActive && 'opacity-60')}>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -212,7 +223,35 @@ export default function SlManagerPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {!loadingUsers && totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-border/40 px-6 py-3">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="flex items-center gap-1 rounded-full border border-border/60 px-3 py-1.5 text-xs font-bold text-muted-foreground hover:bg-muted/50 transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              {t('common.back')}
+            </button>
+            <span className="text-[11px] text-muted-foreground">
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              className="flex items-center gap-1 rounded-full border border-border/60 px-3 py-1.5 text-xs font-bold text-muted-foreground hover:bg-muted/50 transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {t('common.next')}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Activity feed */}
+      <TeamActivityFeed />
     </div>
   );
 }

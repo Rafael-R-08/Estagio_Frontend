@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import logoIcon from '../../../assets/logo2.icon.png';
 import mobileScreenshot from '../../../assets/mobile2.png';
 import pcScreenshot from '../../../assets/pc.png';
-import { Moon, Sun, Sparkles, BadgeCheck, MessageSquare, X, Smartphone, Monitor, Apple } from 'lucide-react';
+import { Moon, Sun, Sparkles, BadgeCheck, MessageSquare, X, Smartphone, Apple } from 'lucide-react';
 import { applyTheme } from '../../../utils/theme';
 import LoginCard from '../../auth/components/LoginCard';
+import 'flag-icons/css/flag-icons.min.css';
 
 export default function LandingPage() {
   const location = useLocation();
@@ -78,9 +79,9 @@ export default function LandingPage() {
               onClick={toggleLang}
               className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground/70 hover:text-foreground transition-colors"
               aria-label={lang === 'pt' ? 'Switch to English' : 'Mudar para Português'}
-              title={lang === 'pt' ? '🇬🇧 English' : '🇵🇹 Português'}
+              title={lang === 'pt' ? 'English' : 'Português'}
             >
-              <span className="text-base leading-none select-none">{lang === 'pt' ? '🇬🇧' : '🇵🇹'}</span>
+              <span className={`fi fi-${lang === 'pt' ? 'gb' : 'pt'} text-base`} />
             </button>
             <button
               onClick={toggleTheme}
@@ -321,7 +322,6 @@ export default function LandingPage() {
                 {[
                   { icon: Apple, label: 'iOS', desc: t('landing.iosDesc') },
                   { icon: Smartphone, label: 'Android', desc: t('landing.androidDesc') },
-                  { icon: Monitor, label: 'Desktop', desc: t('landing.desktopDesc') },
                 ].map(({ icon: Icon, label, desc }) => (
                   <div key={label} className="flex items-center gap-3 rounded-xl border border-border/60 px-4 py-3 bg-muted/20">
                     <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Save, User as UserIcon, Edit2,
-  Download, Briefcase, Link2, LayoutTemplate, ClipboardCopy, Award,
+  Download, Briefcase, Link2, LayoutTemplate, ClipboardCopy, Award, FileBarChart2,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine,
 import { TagInput } from '../components/TagInput';
 import { LearningImpactCard } from '../components/LearningImpactCard';
 import { SkillsSection } from '../components/SkillsSection';
+
 
 // ─── UserAvatar ───────────────────────────────────────────────────────────────
 
@@ -390,7 +391,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
           </div>
 
           {/* Secondary actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-8 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-8 pt-4">
             <button
               type="button"
               onClick={() => navigate('/portfolio?print=1')}
@@ -434,6 +435,19 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
               <div className="space-y-0.5">
                 <span className="text-[13px] font-bold text-foreground">{t('profile.copySummary')}</span>
                 <p className="text-[10px] font-medium text-muted-foreground">{t('profile.copySummaryDesc')}</p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/reports/progress')}
+              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
+            >
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                <FileBarChart2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[13px] font-bold text-foreground">{t('report.viewReport')}</span>
+                <p className="text-[10px] font-medium text-muted-foreground">{t('report.viewReportDesc')}</p>
               </div>
             </button>
           </div>

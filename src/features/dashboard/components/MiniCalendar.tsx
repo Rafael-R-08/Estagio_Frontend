@@ -12,7 +12,7 @@ import {
 } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarDays, X, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, CalendarDays, X, Loader2, Download } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { calendarApi } from '@/services/api';
@@ -93,6 +93,21 @@ export function MiniCalendar() {
     setShowForm(false);
   };
 
+  const handleExportIcs = async () => {
+    try {
+      const response = await calendarApi.exportIcs();
+      const blob = new Blob([response.data as BlobPart], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'learning-hub-calendar.ics';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm p-5">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -101,8 +116,15 @@ export function MiniCalendar() {
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
           {t('dashboard.calendar.title')}
         </p>
-        {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/30 ml-auto" />}
-      </div>
+        {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/30 ml-auto" />}        {!isLoading && events.length > 0 && (
+          <button
+            onClick={handleExportIcs}
+            title={t('dashboard.calendar.exportIcs')}
+            className="ml-auto flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground/40 hover:text-primary hover:bg-muted/40 transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </button>
+        )}      </div>
 
       {/* ── Month navigation ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-3">

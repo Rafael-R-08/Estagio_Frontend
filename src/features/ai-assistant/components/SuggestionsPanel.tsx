@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Award, BookOpen, Brain, Clock, X, MessageSquare, Trash2, PlusCircle } from 'lucide-react';
+import { Sparkles, Award, BookOpen, Brain, MessageSquare, Trash2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User, AiConversation } from '@/types';
 
@@ -17,8 +17,6 @@ const SHORTCUT_ICONS = [
 interface Props {
   onSelect: (query: string) => void;
   user?: User;
-  recentQueries: string[];
-  onClearRecent: () => void;
   conversations: AiConversation[];
   onSelectConversation: (conv: AiConversation) => void;
   onDeleteConversation: (id: string) => void;
@@ -31,8 +29,6 @@ interface Props {
 export function SuggestionsPanel({ 
   onSelect, 
   user, 
-  recentQueries, 
-  onClearRecent,
   conversations,
   onSelectConversation,
   onDeleteConversation,
@@ -149,38 +145,7 @@ export function SuggestionsPanel({
         </section>
       )}
 
-      {/* Recent queries */}
-      {recentQueries.length > 0 && (
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-              {t('dashboard.panel.recent')}
-            </h3>
-            <button
-              onClick={onClearRecent}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 transition hover:text-foreground"
-            >
-              <X className="h-3 w-3" />
-              {t('dashboard.panel.clear')}
-            </button>
-          </div>
-          <ul className="space-y-2">
-            {recentQueries.map((q, i) => (
-              <li key={i}>
-                <button
-                  onClick={() => onSelect(q)}
-                  className="flex w-full items-center gap-3 rounded-full px-4 py-2 text-left text-xs font-bold text-muted-foreground transition hover:bg-background/80 hover:text-foreground border border-transparent hover:border-border/60"
-                >
-                  <Clock className="h-4 w-4 shrink-0" />
-                  <span className="line-clamp-1">{q}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {skills.length === 0 && recentQueries.length === 0 && (
+      {skills.length === 0 && (
         <p className="text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 py-10">
           {t('dashboard.panel.emptyHint')}
         </p>

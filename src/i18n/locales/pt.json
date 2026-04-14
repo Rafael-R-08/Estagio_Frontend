@@ -17,7 +17,8 @@
     "logout": "Terminar sessão",
     "expandSidebar": "Expandir sidebar",
     "collapseSidebar": "Colapsar sidebar",
-    "myTeam": "A minha Linha"
+    "myTeam": "A minha Linha",
+    "collections": "Coleções"
   },
   "common": {
     "save": "Guardar alterações",
@@ -27,7 +28,9 @@
     "more": "Ver mais",
     "less": "Ver menos",
     "close": "Fechar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "next": "Seguinte"
   },
   "settings": {
     "title": "Definições",
@@ -73,7 +76,19 @@
       "emailDesc": "Receber alertas importantes e recomendações no teu email institucional.",
       "inAppDesc": "Receber alertas diretamente na plataforma.",
       "emailPrefsLabel": "Preferências de Email",
-      "contentAlertsLabel": "Conteúdo e Alertas"
+      "contentAlertsLabel": "Conteúdo e Alertas",
+      "pushLabel": "Notificações Push",
+      "push": "Notificações Push no browser",
+      "pushDesc": "Recebe alertas mesmo quando não tens a plataforma aberta.",
+      "pushSubscribed": "Notificações push ativadas!",
+      "pushUnsubscribed": "Notificações push desativadas.",
+      "pushError": "Não foi possível gerir as notificações push.",
+      "pushLabel": "Notificações Push",
+      "push": "Notificações Push no browser",
+      "pushDesc": "Recebe alertas mesmo quando não tens a plataforma aberta.",
+      "pushSubscribed": "Notificações push ativadas!",
+      "pushUnsubscribed": "Notificações push desativadas.",
+      "pushError": "Não foi possível gerir as notificações push."
     },
     "privacy": {
       "title": "Privacidade",
@@ -734,6 +749,7 @@
       "addButton": "Novo lembrete",
       "cancelAria": "Cancelar",
       "selectedDateFormat": "d 'de' MMMM",
+      "exportIcs": "Exportar calendário (.ics)",
       "weekdays": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
     },
     "pendingFeedback": {
@@ -1173,6 +1189,26 @@
   "slManager": {
     "title": "A minha Equipa",
     "subtitle": "Gere o progresso e certificações dos membros da tua Service Line.",
+    "activity": {
+      "title": "Feed de Atividade",
+      "subtitle": "{{count}} ações recentes",
+      "empty": "Sem atividade recente na equipa.",
+      "action": {
+        "completed": "Concluiu",
+        "enrolled": "Inscreveu-se em",
+        "certificate": "Obteve certificado em"
+      }
+    },
+    "activity": {
+      "title": "Feed de Atividade",
+      "subtitle": "{{count}} ações recentes",
+      "empty": "Sem atividade recente na equipa.",
+      "action": {
+        "completed": "Concluiu",
+        "enrolled": "Inscreveu-se em",
+        "certificate": "Obteve certificado em"
+      }
+    },
     "kpi": {
       "activeMembers": "Membros ativos",
       "completedTrainings": "Formações concluídas",
@@ -1243,6 +1279,75 @@
         "expiresOn": "Expira {{date}}",
         "noName": "Sem nome"
       }
+    }
+  },
+  "collections": {
+    "title": "Coleções",
+    "subtitle": "Organiza os teus cursos favoritos em coleções personalizadas.",
+    "new": "Nova Coleção",
+    "createTitle": "Criar coleção",
+    "editTitle": "Editar coleção",
+    "nameLabel": "Nome",
+    "namePlaceholder": "ex: Fundamentos de Cloud",
+    "descLabel": "Descrição",
+    "descPlaceholder": "Opcional — Uma breve descrição…",
+    "courseCount_one": "{{count}} curso",
+    "courseCount_other": "{{count}} cursos",
+    "emptyTitle": "Ainda não tens coleções",
+    "emptyDesc": "Cria a tua primeira coleção para organizar os cursos que queres fazer.",
+    "createFirst": "Criar primeira coleção",
+    "emptyCourses": "Esta coleção ainda não tem cursos.",
+    "emptyCoursesHint": "Adiciona cursos a partir da página de pesquisa.",
+    "confirmDelete": "Tens a certeza que queres eliminar \"{{name}}\"?",
+    "toastCreated": "Coleção criada com sucesso!",
+    "toastCreateError": "Não foi possível criar a coleção.",
+    "toastUpdated": "Coleção atualizada.",
+    "toastUpdateError": "Não foi possível atualizar a coleção.",
+    "toastDeleted": "Coleção eliminada.",
+    "toastDeleteError": "Não foi possível eliminar a coleção.",
+    "addButton": "Guardar em coleção",
+    "addToTitle": "Adicionar a Coleção",
+    "addSuccess": "Curso adicionado à coleção!",
+    "addError": "Não foi possível adicionar o curso.",
+    "addDuplicate": "Este curso já se encontra nesta coleção.",
+    "newAndAdd": "Nova coleção e adicionar",
+    "createAndAdd": "Criar e adicionar",
+    "emptyForAdd": "Ainda não tens coleções. Cria uma em baixo.",
+    "coursesCount": "cursos"
+  },
+  "report": {
+    "title": "Relatório de Progressão",
+    "generated": "Gerado em {{date}}",
+    "memberSince": "Membro desde {{date}}",
+    "print": "Imprimir / Exportar PDF",
+    "viewReport": "Relatório de Progressão",
+    "viewReportDesc": "Exporta ou imprime o teu relatório detalhado",
+    "completedTitle": "Formações Concluídas",
+    "ongoingTitle": "Formações em Curso",
+    "certsTitle": "Certificados",
+    "skillsTitle": "Competências",
+    "expired": "Expirado",
+    "active": "Ativo",
+    "stats": {
+      "completed": "Concluídas",
+      "hours": "Horas totais",
+      "avgRating": "Avaliação média",
+      "avgRelevance": "Relevância média",
+      "certificates": "Certificados",
+      "ongoing": "Em curso"
+    },
+    "col": {
+      "title": "Formação",
+      "platform": "Plataforma",
+      "hours": "Horas",
+      "rating": "Avaliação",
+      "completedAt": "Concluído em",
+      "cert": "Cert.",
+      "certName": "Certificado",
+      "provider": "Emissor",
+      "issued": "Emitido",
+      "expires": "Expira",
+      "status": "Estado"
     }
   },
   "header": {
@@ -1335,5 +1440,28 @@
     "installDesc": "Instala a LearningHub no teu dispositivo para um acesso mais rápido e uma experiência nativa.",
     "installDescNotAvail": "Abre esta página no Chrome para Android ou Edge para instalar a app.",
     "installButton": "Instalar"
+  },
+  "compare": {
+    "button": "Comparar",
+    "removing": "Remover da comparação",
+    "selected_one": "{{count}} curso selecionado",
+    "selected_other": "{{count}} cursos selecionados",
+    "compare": "Comparar",
+    "clear": "Limpar",
+    "maxReached": "Máx. 3 cursos",
+    "modalTitle": "Comparar Cursos",
+    "modalSubtitle": "Comparação",
+    "rowLevel": "Nível",
+    "rowDuration": "Duração",
+    "rowRating": "Avaliação (plataforma)",
+    "rowInternalRating": "Avaliação (interna)",
+    "rowColleagues": "Colegas",
+    "rowRelevance": "Relevância",
+    "rowPrice": "Custo",
+    "rowTags": "Tópicos",
+    "free": "Grátis",
+    "paid": "Pago",
+    "na": "—",
+    "viewCourse": "Ver Curso"
   }
 }

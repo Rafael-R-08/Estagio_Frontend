@@ -8,6 +8,39 @@ import { notificationsApi } from '../services/api';
 import type { AppNotification } from '../types';
 import { cn } from '../lib/utils';
 
+// ─── Calendar reminder title correction ──────────────────────────────────────
+// The backend generates notification text using the stored reminderMinutesBefore
+// value, but the job may fire at a slightly different time. We recalculate the
+// real minutes from createdAt → event time so the displayed number is always
+// accurate.
+function resolveCalendarNotif(n: AppNotification): { title: string; body: string } {
+  if (n.type !== 'CALENDAR_REMINDER') return { title: n.title, body: n.body };
+
+  // Extract HH:MM from the body, e.g. "começa em 30 minutos (12:00)."
+  const timeMatch = n.body.match(/\((\d{2}:\d{2})\)/);
+  if (!timeMatch) return { title: n.title, body: n.body };
+
+  const [hStr, mStr] = timeMatch[1].split(':');
+  const createdAt = new Date(n.createdAt);
+  const eventDate = new Date(createdAt);
+  eventDate.setHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
+
+  // If the calculated event time is in the past relative to createdAt it may
+  // have rolled over midnight — add one day as fallback.
+  if (eventDate <= createdAt) eventDate.setDate(eventDate.getDate() + 1);
+
+  const diffMs = eventDate.getTime() - createdAt.getTime();
+  const diffMin = Math.round(diffMs / 60_000);
+
+  if (diffMin <= 0) return { title: n.title, body: n.body };
+
+  // Replace the number in title ("Em 30 min: …") and body ("… 30 minutos …")
+  const newTitle = n.title.replace(/Em \d+ min:/, `Em ${diffMin} min:`);
+  const newBody = n.body.replace(/\d+ minutos/, `${diffMin} minutos`);
+
+  return { title: newTitle, body: newBody };
+}
+
 interface HeaderProps {
   onMenuToggle?: () => void;
 }
@@ -169,7 +202,9 @@ export function Header({ onMenuToggle }: HeaderProps) {
                     {t('header.notifications.empty')}
                   </p>
                 ) : (
-                  notifications.map((n: AppNotification) => (
+                  notifications.map((n: AppNotification) => {
+                    const { title: notifTitle, body: notifBody } = resolveCalendarNotif(n);
+                    return (
                     <div
                       key={n.id}
                       className={cn(
@@ -186,8 +221,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
                         )}
                         {n.isRead && <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground/30" />}
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-foreground truncate">{n.title}</p>
-                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{n.body}</p>
+                          <p className="text-xs font-semibold text-foreground truncate">{notifTitle}</p>
+                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{notifBody}</p>
                           <p className="text-[10px] text-muted-foreground/40 mt-1">
                             {new Date(n.createdAt).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </p>
@@ -202,7 +237,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 

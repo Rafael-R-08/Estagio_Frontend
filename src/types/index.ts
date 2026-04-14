@@ -192,6 +192,8 @@ export interface CourseSearchResult {
   internalRelevance?: number;
   /** Número de vezes que foi concluído na Softinsa */
   completedCount?: number;
+  /** Estado do curso para o utilizador autenticado (devolvido pelo backend quando autenticado) */
+  userStatus?: TrainingStatus;
 }
 
 export interface CourseDetail extends CourseSearchResult {
@@ -736,4 +738,97 @@ export interface SlManagerAlerts {
   certExpiryAlerts: SlManagerCertExpiryAlert[];
   inactiveUsers: SlManagerInactiveUser[];
   usersWithNoTrainings: SlManagerInactiveUser[];
+}
+
+export interface SlManagerActivityItem {
+  userId: string;
+  userName: string;
+  action: 'completed' | 'enrolled' | 'certificate';
+  courseTitle: string;
+  date: string;
+}
+
+// ─── Collections ──────────────────────────────────────────────────────────────
+
+export interface CollectionCourse {
+  id: string;
+  collectionId: string;
+  externalId: string;
+  title: string;
+  url: string;
+  platformId?: string;
+  platformName?: string;
+  addedAt: string;
+}
+
+export interface Collection {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  courses: CollectionCourse[];
+  courseCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCollectionDto {
+  name: string;
+  description?: string;
+}
+
+export interface AddCourseToCollectionDto {
+  externalId: string;
+  title: string;
+  url: string;
+  platformId?: string;
+  platformName?: string;
+}
+
+// ─── Progress Report ──────────────────────────────────────────────────────────
+
+export interface ProgressReport {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    serviceLine: string | null;
+    userFunction?: string;
+    experienceLevel?: string;
+    skills: UserSkill[];
+    interests: string[];
+    memberSince?: string;
+  };
+  stats: {
+    totalCompleted: number;
+    totalHours: number;
+    avgRating: number;
+    avgRelevance: number;
+    totalCertificates: number;
+    activeCertificates: number;
+  };
+  completedTrainings: Array<{
+    id: string;
+    title: string;
+    platform?: string;
+    completedAt?: string;
+    durationHours?: number;
+    rating?: number;
+    hasCertificate: boolean;
+  }>;
+  ongoingTrainings: Array<{
+    id: string;
+    title: string;
+    platform?: string;
+    startedAt?: string;
+  }>;
+  certificates: Array<{
+    id: string;
+    courseName?: string;
+    provider?: string;
+    completionDate?: string;
+    expirationDate?: string;
+    isExpired?: boolean;
+  }>;
+  generatedAt: string;
 }

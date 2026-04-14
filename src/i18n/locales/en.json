@@ -17,7 +17,8 @@
     "logout": "Logout",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
-    "myTeam": "My Line"
+    "myTeam": "My Line",
+    "collections": "Collections"
   },
   "common": {
     "save": "Save changes",
@@ -27,7 +28,9 @@
     "more": "See more",
     "less": "See less",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next"
   },
   "settings": {
     "title": "Settings",
@@ -73,7 +76,13 @@
       "emailDesc": "Receive important alerts and recommendations in your institutional email.",
       "inAppDesc": "Receive alerts directly on the platform.",
       "emailPrefsLabel": "Email Preferences",
-      "contentAlertsLabel": "Content and Alerts"
+      "contentAlertsLabel": "Content and Alerts",
+      "pushLabel": "Push Notifications",
+      "push": "Browser Push Notifications",
+      "pushDesc": "Receive alerts even when you don't have the platform open.",
+      "pushSubscribed": "Push notifications enabled!",
+      "pushUnsubscribed": "Push notifications disabled.",
+      "pushError": "Could not manage push notifications."
     },
     "privacy": {
       "title": "Privacy",
@@ -734,6 +743,7 @@
       "addButton": "New reminder",
       "cancelAria": "Cancel",
       "selectedDateFormat": "MMMM d",
+      "exportIcs": "Export calendar (.ics)",
       "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     },
     "pendingFeedback": {
@@ -1168,11 +1178,51 @@
     "tagInput": {
       "placeholder": "Add...",
       "hint": "Enter or comma to add \u00b7 Backspace to remove the last"
+    },
+    "skillsChart": {
+      "section": "Skills Map",
+      "title": "Skills Distribution",
+      "needMore": "Add at least 3 skills to see the map.",
+      "proficiency": "Proficiency",
+      "level": "Level"
     }
+  },
+  "compare": {
+    "button": "Compare",
+    "removing": "Remove from comparison",
+    "selected_one": "{{count}} course selected",
+    "selected_other": "{{count}} courses selected",
+    "compare": "Compare",
+    "clear": "Clear",
+    "maxReached": "Max. 3 courses",
+    "modalTitle": "Compare Courses",
+    "modalSubtitle": "Comparison",
+    "rowLevel": "Level",
+    "rowDuration": "Duration",
+    "rowRating": "Rating (platform)",
+    "rowInternalRating": "Rating (internal)",
+    "rowColleagues": "Colleagues",
+    "rowRelevance": "Relevance",
+    "rowPrice": "Cost",
+    "rowTags": "Topics",
+    "free": "Free",
+    "paid": "Paid",
+    "na": "\u2014",
+    "viewCourse": "View Course"
   },
   "slManager": {
     "title": "My Team",
     "subtitle": "Manage the progress and certifications of your Service Line members.",
+    "activity": {
+      "title": "Activity Feed",
+      "subtitle": "{{count}} recent actions",
+      "empty": "No recent activity in the team.",
+      "action": {
+        "completed": "completed",
+        "enrolled": "enrolled in",
+        "certificate": "earned a certificate in"
+      }
+    },
     "kpi": {
       "activeMembers": "Active members",
       "completedTrainings": "Completed trainings",
@@ -1243,6 +1293,75 @@
         "expiresOn": "Expires {{date}}",
         "noName": "Unnamed"
       }
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "subtitle": "Organise your favourite courses into custom collections.",
+    "new": "New Collection",
+    "createTitle": "Create collection",
+    "editTitle": "Edit collection",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Cloud Fundamentals",
+    "descLabel": "Description",
+    "descPlaceholder": "Optional \u2014 A brief description\u2026",
+    "courseCount_one": "{{count}} course",
+    "courseCount_other": "{{count}} courses",
+    "emptyTitle": "No collections yet",
+    "emptyDesc": "Create your first collection to organise the courses you want to do.",
+    "createFirst": "Create first collection",
+    "emptyCourses": "This collection has no courses yet.",
+    "emptyCoursesHint": "Add courses from the search page.",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "toastCreated": "Collection created successfully!",
+    "toastCreateError": "Could not create the collection.",
+    "toastUpdated": "Collection updated.",
+    "toastUpdateError": "Could not update the collection.",
+    "toastDeleted": "Collection deleted.",
+    "toastDeleteError": "Could not delete the collection.",
+    "addButton": "Save to collection",
+    "addToTitle": "Add to Collection",
+    "addSuccess": "Course added to collection!",
+    "addError": "Could not add the course.",
+    "addDuplicate": "This course is already in this collection.",
+    "newAndAdd": "New collection & add",
+    "createAndAdd": "Create & add",
+    "emptyForAdd": "No collections yet. Create one below.",
+    "coursesCount": "courses"
+  },
+  "report": {
+    "title": "Progression Report",
+    "generated": "Generated on {{date}}",
+    "memberSince": "Member since {{date}}",
+    "print": "Print / Export PDF",
+    "viewReport": "Progression Report",
+    "viewReportDesc": "Export or print your detailed report",
+    "completedTitle": "Completed Trainings",
+    "ongoingTitle": "Ongoing Trainings",
+    "certsTitle": "Certificates",
+    "skillsTitle": "Skills",
+    "expired": "Expired",
+    "active": "Active",
+    "stats": {
+      "completed": "Completed",
+      "hours": "Total hours",
+      "avgRating": "Avg rating",
+      "avgRelevance": "Avg relevance",
+      "certificates": "Certificates",
+      "ongoing": "Ongoing"
+    },
+    "col": {
+      "title": "Training",
+      "platform": "Platform",
+      "hours": "Hours",
+      "rating": "Rating",
+      "completedAt": "Completed on",
+      "cert": "Cert.",
+      "certName": "Certificate",
+      "provider": "Issuer",
+      "issued": "Issued",
+      "expires": "Expires",
+      "status": "Status"
     }
   },
   "header": {

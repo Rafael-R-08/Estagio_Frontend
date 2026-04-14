@@ -12,26 +12,6 @@ import { ChatBubble } from '../components/ChatBubble';
 import { ChatInput } from '../components/ChatInput';
 import { SuggestionsPanel } from '../components/SuggestionsPanel';
 
-// ─── localStorage helpers ─────────────────────────────────────────────────────
-
-const RECENT_KEY_PREFIX = 'ai-assistant:recent-queries:';
-const MAX_RECENT = 8;
-
-function loadRecent(userId?: string): string[] {
-  if (!userId) return [];
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY_PREFIX + userId) ?? '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveRecent(userId: string, q: string, current: string[]): string[] {
-  const next = [q, ...current.filter((x) => x !== q)].slice(0, MAX_RECENT);
-  localStorage.setItem(RECENT_KEY_PREFIX + userId, JSON.stringify(next));
-  return next;
-}
-
 // ─── Message factory ──────────────────────────────────────────────────────────
 
 function makeId() {
@@ -47,7 +27,6 @@ export default function AiAssistantPage() {
 
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [recentQueries, setRecentQueries] = useState<string[]>([]);
   const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -72,7 +51,6 @@ export default function AiAssistantPage() {
 
   useEffect(() => {
     if (user?.id) {
-      setRecentQueries(loadRecent(user.id));
       void fetchConversations();
       chatApi.getMentionableCourses()
         .then((res) => setMentionableCourses(Array.isArray(res.data) ? res.data : []))
@@ -163,10 +141,6 @@ export default function AiAssistantPage() {
           isStreaming: true
         },
       ]);
-
-      if (user?.id) {
-        setRecentQueries((prev) => saveRecent(user.id, text, prev));
-      }
 
       setIsTyping(true);
       setMentionedIds([]);
@@ -415,12 +389,6 @@ export default function AiAssistantPage() {
     [sendQuery],
   );
 
-  function handleClearRecent() {
-    if (!user?.id) return;
-    localStorage.removeItem(RECENT_KEY_PREFIX + user.id);
-    setRecentQueries([]);
-  }
-
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
@@ -506,8 +474,6 @@ export default function AiAssistantPage() {
           <SuggestionsPanel
             onSelect={handleSelectSuggestion}
             user={user ?? undefined}
-            recentQueries={recentQueries}
-            onClearRecent={handleClearRecent}
             conversations={conversations}
             onSelectConversation={handleSelectConversation}
             onDeleteConversation={handleDeleteConversation}
@@ -527,8 +493,6 @@ export default function AiAssistantPage() {
                   setSidebarOpen(false);
                 }}
                 user={user ?? undefined}
-                recentQueries={recentQueries}
-                onClearRecent={handleClearRecent}
                 conversations={conversations}
                 onSelectConversation={(c) => {
                   handleSelectConversation(c);

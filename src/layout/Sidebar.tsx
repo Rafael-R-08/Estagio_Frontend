@@ -16,6 +16,7 @@ import {
   Globe,
   BarChart2,
   ClipboardList,
+  Library,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -29,6 +30,7 @@ const MAIN_NAV = [
   { labelKey: 'nav.ai', href: '/ai', icon: Sparkles },
   { labelKey: 'nav.certificates', href: '/certificates', icon: Award },
   { labelKey: 'nav.myLearning', href: '/my-learning', icon: BookOpen },
+  { labelKey: 'nav.collections', href: '/collections', icon: Library },
 ] as const;
 
 const ACCOUNT_NAV = [
