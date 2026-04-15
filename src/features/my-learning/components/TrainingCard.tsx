@@ -272,15 +272,20 @@ export function TrainingCard({
             )}
 
             {(training.status !== 'ongoing' && training.status !== 'completed') && (
-              <>
-                <StatusBadge status={training.status} />
-                {training.certificate && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                    <Trophy className="h-3 w-3" />
-                    {t('myLearning.trainingCard.certificate')}
-                  </span>
-                )}
-              </>
+              <StatusBadge status={training.status} />
+            )}
+
+            {/* Certificate Indicator (For Completed and Saved courses) */}
+            {training.certificate ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-tight text-amber-700 border border-amber-500/20 shadow-sm transition-all hover:bg-amber-500/20">
+                <Trophy className="h-3 w-3 text-amber-600" />
+                {t('myLearning.trainingCard.certificate')}
+              </span>
+            ) : isCompleted && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/40 px-3 py-1 text-[10px] font-black uppercase tracking-tight text-muted-foreground/60 border border-border/40">
+                <FileText className="h-3 w-3 opacity-40" />
+                {t('myLearning.trainingCard.noCertificate')}
+              </span>
             )}
             {isOngoing && (
               <div className="ml-auto sm:ml-0">

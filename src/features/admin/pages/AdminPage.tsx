@@ -1,6 +1,7 @@
 import { Users, Globe, BarChart2, ShieldCheck, ClipboardList } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../../lib/utils';
 import { UsersTab } from '../components/UsersTab';
 import { PlatformsTab } from '../components/PlatformsTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
@@ -52,6 +53,32 @@ export default function AdminPage() {
             {t('admin.subtitle')}
           </p>
         </div>
+      </div>
+
+      {/* Internal Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-border/50 pb-px mb-6 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        {TABS.map((tab) => {
+          const isActive = active === tab.id;
+          const TabIcon = tab.icon;
+          return (
+            <Link
+              key={tab.id}
+              to={`/admin?tab=${tab.id}`}
+              className={cn(
+                "group relative flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-sm font-semibold transition-colors shrink-0",
+                isActive
+                  ? "text-blue-600 dark:text-blue-500"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <TabIcon className="h-4 w-4" />
+              <span>{t(tab.labelKey, tab.labelFallback)}</span>
+              {isActive && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500 rounded-t-full" />
+              )}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Tab content */}

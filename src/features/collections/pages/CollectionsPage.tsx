@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus, Trash2, X, BookMarked, ExternalLink, FolderOpen,
-  Edit2, BookOpen, ChevronRight,
+  Edit2, BookOpen, ChevronRight, Share2,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
-import { collectionsApi } from '@/services/api';
 import { cn } from '@/lib/utils';
-import type { Collection } from '@/types';
+import { trainingApi, collectionsApi } from '@/services/api';
+import { toList } from '@/lib/api';
+import { copyCollectionToClipboard } from '@/lib/collection-export';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
+import type { Collection, CollectionCourse } from '@/types';
 
 // ─── Create/Edit Modal ────────────────────────────────────────────────────────
 
@@ -90,17 +94,51 @@ function CollectionDetailPanel({
   collectionId,
   onClose,
   onDeleteCourse,
+  completedUrls = new Set(),
 }: {
   collectionId: string;
   onClose: () => void;
   onDeleteCourse: (externalId: string) => void;
+  completedUrls?: Set<string>;
 }) {
   const { t } = useTranslation();
+  const [orderedCourses, setOrderedCourses] = useState<CollectionCourse[]>([]);
+
   const { data: collection, isLoading: isLoadingDetail } = useQuery({
     queryKey: ['collections', collectionId],
     queryFn: () => collectionsApi.getOne(collectionId).then((r) => r.data),
   });
-  const courses = collection?.courses ?? [];
+
+  useEffect(() => {
+    if (collection?.courses) {
+      const saved = localStorage.getItem(`collection_order_${collectionId}`);
+      if (saved) {
+        const orderIds = JSON.parse(saved);
+        const sorted = [...collection.courses].sort((a, b) => {
+          const idxA = orderIds.indexOf(a.externalId);
+          const idxB = orderIds.indexOf(b.externalId);
+          if (idxA === -1 && idxB === -1) return 0;
+          if (idxA === -1) return 1;
+          if (idxB === -1) return -1;
+          return idxA - idxB;
+        });
+        setOrderedCourses(sorted);
+      } else {
+        setOrderedCourses(collection.courses);
+      }
+    }
+  }, [collection?.courses, collectionId]);
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const newItems = Array.from(orderedCourses);
+    const [removed] = newItems.splice(result.source.index, 1);
+    newItems.splice(result.destination.index, 0, removed);
+    setOrderedCourses(newItems);
+    localStorage.setItem(`collection_order_${collectionId}`, JSON.stringify(newItems.map(c => c.externalId)));
+  };
+
+  const courses = orderedCourses;
 
   return (
     <div
@@ -122,17 +160,29 @@ function CollectionDetailPanel({
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{collection.description}</p>
             )}
           </div>
+          {collection && (
+            <button
+              onClick={() => copyCollectionToClipboard(collection, t)}
+              title={t('collections.sharePlanBtn')}
+              className="flex h-8 items-center gap-1.5 rounded-full bg-blue-600/10 px-3 text-[10px] font-black uppercase tracking-wider text-blue-600 transition hover:bg-blue-600/20 active:scale-95"
+            >
+              <Share2 className="h-3 w-3" />
+              <span className="hidden sm:inline">{t('collections.sharePlanBtnShort')}</span>
+            </button>
+          )}
           <button onClick={onClose} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground hover:bg-muted">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Course list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-4">
           {isLoadingDetail ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse h-12 rounded-2xl bg-muted/30" />
-            ))
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse h-12 rounded-2xl bg-muted/30" />
+              ))}
+            </div>
           ) : courses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
               <BookOpen className="h-10 w-10 text-muted-foreground/30" />
@@ -140,37 +190,73 @@ function CollectionDetailPanel({
               <p className="text-xs text-muted-foreground/60">{t('collections.emptyCoursesHint')}</p>
             </div>
           ) : (
-            courses.map((c) => (
-              <div
-                key={c.externalId}
-                className="flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/20 px-4 py-3 group hover:bg-muted/30 transition-colors"
-              >
-                <BookMarked className="h-4 w-4 shrink-0 text-primary" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{c.title}</p>
-                  {c.platformName && (
-                    <p className="text-[10px] text-muted-foreground">{c.platformName}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a
-                    href={c.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition"
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="courses">
+                {(provided) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef} 
+                    className="space-y-3"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDeleteCourse(c.externalId); }}
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))
+                    {courses.map((c, index) => {
+                      const isCompleted = completedUrls.has(c.url);
+                      return (
+                        <Draggable key={c.externalId} draggableId={c.externalId} index={index}>
+                          {(draggableProvided, snapshot) => (
+                            <div
+                              ref={draggableProvided.innerRef}
+                              {...draggableProvided.draggableProps}
+                              {...draggableProvided.dragHandleProps}
+                              className={cn(
+                                "flex items-center gap-3 rounded-2xl border px-4 py-3 group transition-all",
+                                snapshot.isDragging ? "shadow-2xl border-primary scale-[1.02] bg-card z-50" : "",
+                                isCompleted 
+                                  ? "border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10" 
+                                  : "border-border/40 bg-muted/20 hover:bg-muted/30"
+                              )}
+                            >
+                              <div className={cn(
+                                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+                                isCompleted ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                              )}>
+                                <BookMarked className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={cn(
+                                  "text-sm font-bold truncate",
+                                  isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"
+                                )}>{c.title}</p>
+                                {c.platformName && (
+                                  <p className="text-[10px] text-muted-foreground">{c.platformName}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a
+                                  href={c.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </a>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onDeleteCourse(c.externalId); }}
+                                  className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           )}
         </div>
 
@@ -188,11 +274,13 @@ function CollectionDetailPanel({
 
 function CollectionCard({
   collection,
+  progress = 0,
   onOpen,
   onEdit,
   onDelete,
 }: {
   collection: Collection;
+  progress?: number;
   onOpen: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -228,8 +316,24 @@ function CollectionCard({
       <div className="flex-1 min-w-0">
         <p className="font-black text-foreground tracking-tight group-hover:text-primary transition-colors">{collection.name}</p>
         {collection.description && (
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{collection.description}</p>
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{collection.description}</p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+          <span>{t('myLearning.title')}</span>
+          <span className={cn(progress === 100 ? "text-emerald-500" : "")}>{Math.round(progress)}%</span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/40">
+          <div 
+            className={cn(
+              "h-full transition-all duration-500 rounded-full",
+              progress === 100 ? "bg-emerald-500" : "bg-blue-600"
+            )}
+            style={{ width: `${progress}%` }} 
+          />
+        </div>
       </div>
 
       <div className="flex items-center justify-between border-t border-border/40 pt-3">
@@ -251,22 +355,40 @@ export default function CollectionsPage() {
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
   const [openCollectionId, setOpenCollectionId] = useState<string | null>(null);
 
-  const { data: collections = [], isLoading } = useQuery({
+  const { data: completedTrainings = [] } = useQuery({
+    queryKey: ['trainings', 'completed'],
+    queryFn: () => trainingApi.getAll({ status: 'completed' }).then((r) => toList(r.data)),
+  });
+
+  const completedUrls = new Set(completedTrainings.map(t => t.url));
+
+  const { data: rawCollections = [], isLoading } = useQuery({
     queryKey: ['collections'],
     queryFn: () => collectionsApi.getAll().then((r) => r.data),
-    // Merge incoming data with cached courseCount so server returning 0 doesn't overwrite real counts
-    select: (incoming) => {
-      const cached = qc.getQueryData<Collection[]>(['collections']);
-      if (!cached) return incoming;
-      return incoming.map((col) => {
-        const cachedCol = cached.find((c) => c.id === col.id);
-        // Prefer cached courseCount if server returns 0 (server bug)
-        const serverCount = col.courseCount ?? col.courses?.length ?? 0;
-        const cachedCount = cachedCol?.courseCount ?? 0;
-        return { ...col, courseCount: serverCount > 0 ? serverCount : cachedCount };
-      });
-    },
   });
+
+  const collections = useMemo(() => {
+    return rawCollections.map((col: any) => {
+      // 1. Get detailed data from cache if available (from detail panel)
+      const detailData = qc.getQueryData<Collection>(['collections', col.id]);
+      
+      // 2. Determine best courses array and count
+      const colCourses = detailData?.courses ?? col.courses ?? [];
+      const serverCount = col._count?.courses ?? col.courseCount ?? col.courses?.length ?? 0;
+      const detailCount = detailData?.courseCount ?? detailData?.courses?.length ?? 0;
+      
+      // 3. Calculate progress
+      const completedCount = colCourses.filter((c: any) => completedUrls.has(c.url)).length;
+      const progress = colCourses.length > 0 ? (completedCount / colCourses.length) * 100 : 0;
+
+      return { 
+        ...col, 
+        courseCount: Math.max(serverCount, detailCount),
+        courses: colCourses,
+        progress 
+      };
+    });
+  }, [rawCollections, completedUrls, qc]);
 
   const createMutation = useMutation({
     mutationFn: (dto: { name: string; description?: string }) => collectionsApi.create(dto),
@@ -302,8 +424,27 @@ export default function CollectionsPage() {
   const removeCourseMutation = useMutation({
     mutationFn: ({ collectionId, externalId }: { collectionId: string; externalId: string }) =>
       collectionsApi.removeCourse(collectionId, externalId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['collections'] });
+    onSuccess: (_, { collectionId, externalId }) => {
+      // Update individual details cache
+      let updatedCourses: any[] | undefined = undefined;
+      qc.setQueryData<any>(['collections', collectionId], (old: any) => {
+        if (!old) return old;
+        const newCourses = old.courses?.filter((c: any) => c.externalId !== externalId) ?? [];
+        updatedCourses = newCourses;
+        return { ...old, courses: newCourses, courseCount: newCourses.length };
+      });
+      
+      // Update main list cache
+      qc.setQueryData<import('@/types').Collection[]>(['collections'], (old) => {
+        if (!old) return old;
+        return old.map(col => {
+          if (col.id === collectionId) {
+             const newCourses = updatedCourses ?? col.courses?.filter((c: any) => c.externalId !== externalId) ?? [];
+             return { ...col, courses: newCourses, courseCount: newCourses.length };
+          }
+          return col;
+        });
+      });
     },
     onError: () => toast.error(t('collections.toastUpdateError')),
   });
@@ -367,6 +508,7 @@ export default function CollectionsPage() {
             <CollectionCard
               key={collection.id}
               collection={collection}
+              progress={(collection as any).progress}
               onOpen={() => setOpenCollectionId(collection.id)}
               onEdit={() => setEditingCollection(collection)}
               onDelete={() => {
@@ -404,6 +546,7 @@ export default function CollectionsPage() {
       {openCollectionId && (
         <CollectionDetailPanel
           collectionId={openCollectionId}
+          completedUrls={completedUrls}
           onClose={() => setOpenCollectionId(null)}
           onDeleteCourse={handleDeleteCourse}
         />

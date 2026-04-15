@@ -86,7 +86,7 @@ export function SearchBar({
         onKeyDown={handleKeyDown}
         placeholder={resolvedPlaceholder}
         className={cn(
-          'flex-1 bg-transparent py-4 text-base font-medium text-foreground placeholder:text-muted-foreground/50',
+          'flex-1 bg-transparent py-4 pr-6 text-base font-medium text-foreground placeholder:text-muted-foreground/50',
           'outline-none',
         )}
       />
@@ -95,26 +95,12 @@ export function SearchBar({
       {localValue && (
         <button
           onClick={handleClear}
-          className="mr-3 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted-foreground/20"
+          className="mr-5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted-foreground/20"
           aria-label={t('search.clearAria')}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-
-      {/* Search button */}
-      <button
-        onClick={() => localValue.trim() && onSearch(localValue.trim())}
-        className={cn(
-          'mr-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all',
-          localValue.trim()
-            ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-md shadow-blue-600/20'
-            : 'cursor-default bg-muted text-muted-foreground',
-        )}
-        disabled={!localValue.trim()}
-      >
-        {t('search.searchBtn')}
-      </button>
     </div>
   );
 }

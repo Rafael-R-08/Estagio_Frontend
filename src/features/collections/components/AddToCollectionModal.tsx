@@ -28,6 +28,18 @@ export function AddToCollectionModal({ course, onClose }: Props) {
   const { data: collections = [], isLoading } = useQuery({
     queryKey: ['collections'],
     queryFn: () => collectionsApi.getAll().then((r) => r.data),
+    select: (incoming) => {
+      const cached = qc.getQueryData<Collection[]>(['collections']);
+      return incoming.map((col: any) => {
+        const cachedCol = cached?.find((c) => c.id === col.id);
+        const serverCount = col._count?.courses ?? col.courseCount ?? col.courses?.length ?? 0;
+        const cachedCount = cachedCol?.courseCount ?? 0;
+        return { 
+          ...col, 
+          courseCount: serverCount > 1 ? serverCount : Math.max(serverCount, cachedCount)
+        };
+      });
+    },
   });
 
   const addMutation = useMutation({
@@ -48,7 +60,7 @@ export function AddToCollectionModal({ course, onClose }: Props) {
         qc.setQueryData<import('@/types').Collection[]>(['collections'], (old) =>
           old?.map((col) =>
             col.id === collectionId
-              ? { ...col, courseCount: realCount }
+              ? { ...col, courseCount: realCount, courses: updated.courses }
               : col
           )
         );
@@ -57,11 +69,13 @@ export function AddToCollectionModal({ course, onClose }: Props) {
       } catch {
         // Fallback: optimistic increment if getOne fails
         qc.setQueryData<import('@/types').Collection[]>(['collections'], (old) =>
-          old?.map((col) =>
-            col.id === collectionId
-              ? { ...col, courseCount: (col.courseCount ?? 0) + 1 }
-              : col
-          )
+          old?.map((col) => {
+            if (col.id === collectionId) {
+              const newCourses = [...(col.courses ?? []), { externalId: course.externalId } as any];
+              return { ...col, courseCount: newCourses.length, courses: newCourses };
+            }
+            return col;
+          })
         );
       }
       toast.success(t('collections.addSuccess'));
@@ -87,9 +101,20 @@ export function AddToCollectionModal({ course, onClose }: Props) {
         platformName: course.platformName,
         platformId: course.platformId,
       });
+      return newCollection;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['collections'] });
+    onSuccess: (newCollection) => {
+      qc.setQueryData<import('@/types').Collection[]>(['collections'], (old) => {
+        const fakeCol = { ...newCollection, courseCount: 1, courses: [{ externalId: course.externalId } as any] };
+        return old ? [fakeCol, ...old] : [fakeCol];
+      });
+      // Fetch real detail in background
+      collectionsApi.getOne(newCollection.id).then((res) => {
+        qc.setQueryData(['collections', newCollection.id], res.data);
+        qc.setQueryData<import('@/types').Collection[]>(['collections'], (old) =>
+            old?.map(c => c.id === newCollection.id ? { ...c, courseCount: res.data.courses?.length ?? 1, courses: res.data.courses } : c)
+        );
+      });
       toast.success(t('collections.addSuccess'));
       onClose();
     },
@@ -169,7 +194,7 @@ export function AddToCollectionModal({ course, onClose }: Props) {
                   </div>
                   <span className="flex-1 min-w-0 text-sm font-bold text-foreground truncate">{col.name}</span>
                   <span className="text-[10px] text-muted-foreground shrink-0">
-                    {(col.courseCount ?? col.courses?.length ?? 0)} {t('collections.coursesCount')}
+                    {t('collections.courseCount', { count: col.courseCount ?? 0 })}
                   </span>
                 </button>
               );

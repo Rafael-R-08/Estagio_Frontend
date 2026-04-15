@@ -6,7 +6,6 @@ import {
   PlayCircle,
   CheckCircle2,
   Bookmark,
-  Timer,
   XCircle,
   Star,
   Activity,
@@ -77,20 +76,7 @@ function deriveEvent(r: TrainingRecord): ActivityEvent {
       url: r.url,
     };
   }
-  if (r.status === 'accessed' && r.createdAt) {
-    return {
-      id: r.id,
-      title: r.title,
-      platform: r.platform?.name,
-      action: 'dashboard.recentActivity.actionAccessed',
-      actionColor: 'text-indigo-600 dark:text-indigo-400',
-      icon: Timer,
-      iconColor: 'text-indigo-600 dark:text-indigo-400',
-      iconBg: 'bg-indigo-100 dark:bg-indigo-900/30',
-      date: new Date(r.createdAt),
-      url: r.url,
-    };
-  }
+
   // cancelled or fallback
   return {
     id: r.id,

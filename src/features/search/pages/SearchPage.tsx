@@ -371,7 +371,7 @@ export default function SearchPage() {
 
       {/* ── Floating compare bar ────────────────────────────────────── */}
       {compareQueue.length >= 2 && (
-        <div className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 animate-in slide-in-from-bottom-4 md:bottom-6">
+        <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 animate-in slide-in-from-bottom-4 lg:bottom-8 lg:left-auto lg:right-8 lg:translate-x-0">
           <div className="flex items-center gap-3 rounded-full border border-violet-500/30 bg-card/95 px-5 py-3 shadow-2xl backdrop-blur-xl ring-1 ring-violet-500/10">
             <div className="flex items-center gap-2">
               <GitCompareArrows className="h-4 w-4 text-violet-500" />

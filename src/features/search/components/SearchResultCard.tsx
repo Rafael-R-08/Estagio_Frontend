@@ -18,9 +18,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { trainingApi } from '@/services/api';
-import type { CourseSearchResult } from '@/types';
-import { AddToCollectionModal } from '@/features/collections/components/AddToCollectionModal';
+ 
+ import type { CourseSearchResult } from '@/types';
+ import { AddToCollectionModal } from '@/features/collections/components/AddToCollectionModal';
+ 
+ // ─── Helpers ──────────────────────────────────────────────────────────────────
+ 
+ const cleanTitle = (title: string) => {
+   return title
+     .replace(/PROVEDOR:.*?(?= -|$)/gi, '') // Remove common provider prefixes
+     .replace(/PLATAFORMA EXTERNA:?/gi, '')
+     .replace(/\s{2,}/g, ' ')
+     .trim();
+ };
 
 // ─── Level badge ──────────────────────────────────────────────────────────────
 
@@ -128,13 +138,6 @@ export function SearchResultCard({
 
   const handleViewCourse = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation();
-    // Fire-and-forget tracking
-    trainingApi.trackAccess({
-      externalId: course.externalId,
-      title: course.title,
-      url: course.url,
-      platformId: course.platformId,
-    }).catch(err => console.error('Failed to track course access', err));
   };
 
   return (
@@ -159,7 +162,7 @@ export function SearchResultCard({
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h3 className="line-clamp-2 text-xl font-black text-foreground leading-[1.2] group-hover:text-primary transition-colors tracking-tight">
-            {course.title}
+            {cleanTitle(course.title)}
           </h3>
         </div>
         {levelStyle && (
@@ -275,14 +278,14 @@ export function SearchResultCard({
       )}
 
       {/* Actions footer */}
-      <div className="flex items-center justify-between gap-4 pt-2 mt-auto border-t border-border/40">
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-4 mt-auto border-t border-border/40">
+        <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
           <ActionBtn
             icon={Bookmark}
             label={localSaved ? t('searchCard.saved') : t('searchCard.save')}
             onClick={handleSave}
             active={localSaved}
-            activeClass="bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/20"
+            activeClass="bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/10"
           />
           {onToggleCompare && (
             <ActionBtn
@@ -305,7 +308,7 @@ export function SearchResultCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleViewCourse}
-          className="flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-xl shadow-foreground/10"
+          className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em] text-background transition-all duration-300 hover:opacity-90 active:scale-95 shadow-lg shadow-foreground/5"
         >
           {t('searchCard.viewCourse')}
           <ExternalLink className="h-3.5 w-3.5" />

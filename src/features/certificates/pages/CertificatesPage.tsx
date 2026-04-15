@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Award, Search } from 'lucide-react';
+import { Plus, Award, Search, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/lib/toast-store';
+import { exportCertificatesToZip } from '@/lib/zip';
 
 import { certificatesApi, trainingApi } from '@/services/api';
 import { toList } from '@/lib/api';
@@ -119,16 +121,37 @@ export default function CertificatesPage() {
             {t('certificates.subtitle')}
           </p>
         </div>
-        <button
-          onClick={() => {
-            setReplaceTarget(null);
-            setUploadOpen(true);
-          }}
-          className="shrink-0 flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-2xl transition active:scale-95 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          {t('certificates.uploadBtn')}
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          {certs.length > 0 && (
+            <button
+              onClick={async () => {
+                const toastId = toast.loading(t('certificates.exportingZip'));
+                try {
+                  await exportCertificatesToZip(certs, (p) => {
+                    // Update progress if toast supports it, otherwise quiet
+                  });
+                  toast.success(t('certificates.exportZipSuccess'), { id: toastId });
+                } catch (e) {
+                  toast.error(t('certificates.exportZipError'), { id: toastId });
+                }
+              }}
+              className="flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-6 py-3 text-sm font-bold text-foreground shadow-sm transition active:scale-95 hover:bg-background/80"
+            >
+              <Download className="h-4 w-4" />
+              {t('certificates.exportAllBtn')}
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setReplaceTarget(null);
+              setUploadOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-2xl transition active:scale-95 hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            {t('certificates.uploadBtn')}
+          </button>
+        </div>
       </div>
 
       {/* ── Search + filter bar ── */}

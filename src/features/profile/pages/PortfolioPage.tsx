@@ -1,12 +1,11 @@
 import { useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Award, BookOpen, Clock, Download, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Award, BookOpen, Clock, Download, User as UserIcon, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { profileApi, certificatesApi, trainingApi } from '@/services/api';
 import { toList } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import { SERVICE_LINE_LABELS } from '@/types';
 import type { Certificate } from '@/types';
 
@@ -20,74 +19,6 @@ function certIsActive(cert: Certificate): boolean {
 function formatDate(iso?: string, locale?: string): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString(locale ?? 'en-GB', { month: 'short', year: 'numeric' });
-}
-
-// ─── Avatar ───────────────────────────────────────────────────────────────────
-
-function Avatar({ name, size = 'lg' }: { name: string; size?: 'sm' | 'lg' }) {
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('');
-  return (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center rounded-[1.25rem] bg-blue-600 font-black text-white shadow-xl',
-        size === 'lg' ? 'h-20 w-20 text-2xl' : 'h-10 w-10 text-sm',
-      )}
-    >
-      {initials || <UserIcon className="h-6 w-6" />}
-    </div>
-  );
-}
-
-// ─── CertBadge ────────────────────────────────────────────────────────────────
-
-function CertBadge({ cert, locale }: { cert: Certificate; locale: string }) {
-  const { t } = useTranslation();
-  const active = certIsActive(cert);
-  const name = cert.courseName || cert.training?.title || t('profile.portfolio.certsSection');
-  const provider = cert.provider || '—';
-  return (
-    <div
-      className={cn(
-        'flex flex-col gap-2 rounded-2xl border p-4 transition-colors print:break-inside-avoid',
-        active
-          ? 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-800/40 dark:bg-emerald-900/10'
-          : 'border-border/40 bg-muted/30 opacity-60',
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-            active
-              ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-              : 'bg-muted text-muted-foreground',
-          )}
-        >
-          <Award className="h-4 w-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-foreground leading-tight">{name}</p>
-          <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{provider}</p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>{t('profile.portfolio.certCompleted', { date: formatDate(cert.completionDate || cert.createdAt, locale) })}</span>
-        {cert.expirationDate && (
-          <span className={cn(active ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500')}>
-            {active ? t('profile.portfolio.certValidUntil', { date: formatDate(cert.expirationDate, locale) }) : t('profile.portfolio.certExpired')}
-          </span>
-        )}
-        {!cert.expirationDate && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t('profile.portfolio.certPermanent')}</span>
-        )}
-      </div>
-    </div>
-  );
 }
 
 // ─── PortfolioPage ────────────────────────────────────────────────────────────
@@ -120,12 +51,11 @@ export default function PortfolioPage() {
 
   const user = profile ?? authUser;
 
-  // Auto-print when navigated with ?print=1
   const autoPrint = searchParams.get('print') === '1';
   const dataReady = !!user && !!stats;
   useEffect(() => {
     if (autoPrint && dataReady) {
-      const t = setTimeout(() => window.print(), 400);
+      const t = setTimeout(() => window.print(), 800);
       return () => clearTimeout(t);
     }
   }, [autoPrint, dataReady]);
@@ -140,8 +70,6 @@ export default function PortfolioPage() {
   );
 
   const activeCerts = useMemo(() => certs.filter(certIsActive), [certs]);
-  const expiredCerts = useMemo(() => certs.filter((c) => !certIsActive(c)), [certs]);
-
   const skills = user?.skills ?? [];
   const interests = user?.interests ?? [];
 
@@ -150,196 +78,201 @@ export default function PortfolioPage() {
   }
 
   const generatedAt = new Date().toLocaleDateString(locale, {
-    day: '2-digit', month: 'long', year: 'numeric',
+    day: '2-digit', month: 'short', year: 'numeric',
   });
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Top bar — hidden on print */}
-      <div className="print:hidden sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-6 py-3">
-        <button
-          onClick={() => navigate('/profile')}
-          className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('profile.portfolio.backToProfile')}
-        </button>
+  if (!user) return null;
 
-        <div className="flex items-center gap-2">
+  return (
+    <div className="min-h-screen bg-muted/20 print:bg-white text-foreground print:text-black font-sans">
+      
+      {/* ── Top Bar (Screen Only) ── */}
+      <div className="print:hidden sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
+        <div className="flex items-center gap-4">
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground transition hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20"
+            onClick={() => navigate('/profile')}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted/30 transition hover:bg-muted"
+            title={t('profile.portfolio.backToProfile')}
           >
-            <Download className="h-4 w-4" />
-            {t('profile.portfolio.exportPDF')}
+            <ArrowLeft className="h-4 w-4" />
           </button>
+          <div>
+            <h2 className="text-sm font-bold tracking-tight">Curriculum Preview</h2>
+            <p className="text-[11px] text-muted-foreground hidden sm:block">Print or export to PDF</p>
+          </div>
         </div>
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground transition hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20"
+        >
+          <Download className="h-4 w-4" />
+          {t('profile.portfolio.exportPDF')}
+        </button>
       </div>
 
-      {/* Portfolio content */}
-      <div className="mx-auto max-w-3xl px-6 py-10 print:py-6 print:px-8">
+      {/* ── Document Container ── */}
+      <div className="mx-auto max-w-5xl py-12 px-6 print:py-0 print:px-0">
+        <div className="relative overflow-hidden bg-background print:bg-white shadow-2xl print:shadow-none ring-1 ring-border/50 print:ring-0 rounded-2xl print:rounded-none">
+          
+          {/* Header Strip */}
+          <div className="h-4 bg-blue-600 print:bg-blue-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }} />
 
-        {/* ── Header ── */}
-        <div className="flex items-center gap-5 pb-8 border-b border-border/40 print:pb-5">
-          {user && <Avatar name={user.name || 'U'} size="lg" />}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-black tracking-tight text-foreground">{user?.name ?? '—'}</h1>
-            <p className="text-sm font-medium text-primary mt-0.5">
-              {user?.userFunction || (user?.role === 'ADMIN' ? t('profile.portfolio.role.admin') : t('profile.portfolio.role.collaborator'))}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              {user?.serviceLine && (
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                  {SERVICE_LINE_LABELS[user.serviceLine]}
-                </span>
-              )}
-              {user?.experienceLevel && (
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {user.experienceLevel}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="text-right shrink-0 print:block hidden">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">
-              {t('profile.portfolio.generatedOn')}
-            </p>
-            <p className="text-[11px] font-medium text-muted-foreground">{generatedAt}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50 mt-1">
-              {t('nav.appName', 'LearningHub Softinsa')}
-            </p>
-          </div>
-        </div>
-
-        {/* ── Stats ── */}
-        <div className="mt-8 grid grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 text-center">
-            <div className="flex justify-center mb-1.5">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
-            <p className="text-2xl font-black text-foreground">{stats?.totalHours ?? 0}h</p>
-            <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              {t('profile.portfolio.totalHours')}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 text-center">
-            <div className="flex justify-center mb-1.5">
-              <BookOpen className="h-5 w-5 text-blue-500" />
-            </div>
-            <p className="text-2xl font-black text-foreground">{stats?.completed ?? 0}</p>
-            <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              {t('profile.portfolio.coursesCompleted')}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 text-center">
-            <div className="flex justify-center mb-1.5">
-              <Award className="h-5 w-5 text-emerald-500" />
-            </div>
-            <p className="text-2xl font-black text-foreground">{activeCerts.length}</p>
-            <p className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground mt-0.5">
-              {t('profile.portfolio.activeCerts')}
-            </p>
-          </div>
-        </div>
-
-        {/* ── Skills ── */}
-        {skills.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-              {t('profile.portfolio.skillsSection')}
-            </h2>
-            <h3 className="font-black text-foreground tracking-tight mb-4">{t('profile.portfolio.skillsTitle')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((s) => (
-                <div
-                  key={s.skillName}
-                  className="flex items-center gap-1.5 rounded-xl border border-border/50 bg-muted/30 px-3 py-1.5"
-                >
-                  <span className="text-sm font-bold text-foreground">{s.skillName}</span>
-                  {s.level && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                      {s.level}
-                    </span>
-                  )}
+          <div className="p-10 sm:p-14 print:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 print:grid-cols-12">
+              
+              {/* ── Left Column: Identity & Skills ── */}
+              <div className="md:col-span-4 print:col-span-4 space-y-10">
+                {/* Identity */}
+                <div className="space-y-4">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-[1.5rem] bg-blue-600/10 text-3xl font-black text-blue-600 ring-1 ring-blue-600/20" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                    {user.name.split(' ').slice(0, 2).map((w) => w[0].toUpperCase()).join('')}
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-black tracking-tight leading-none print:text-black text-foreground">{user.name}</h1>
+                    <p className="text-sm font-bold text-blue-600 print:text-blue-700 mt-2">
+                      {user.userFunction || (user.role === 'ADMIN' ? 'Administrador' : 'Colaborador')}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2 pt-2">
+                    <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground print:text-gray-600">
+                      <Mail className="h-3.5 w-3.5" />
+                      {user.email}
+                    </p>
+                    {user.serviceLine && (
+                      <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground print:text-gray-600">
+                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded bg-primary/10 text-[8px] font-bold text-primary" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>SL</span>
+                        {SERVICE_LINE_LABELS[user.serviceLine]}
+                      </p>
+                    )}
+                    {user.experienceLevel && (
+                      <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground print:text-gray-600 capitalize">
+                        <UserIcon className="h-3.5 w-3.5" />
+                        {user.experienceLevel}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* ── Interests ── */}
-        {interests.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-              {t('profile.portfolio.interestsSection')}
-            </h2>
-            <h3 className="font-black text-foreground tracking-tight mb-4">{t('profile.portfolio.interestsTitle')}</h3>
-            <div className="flex flex-wrap gap-1.5">
-              {interests.map((interest) => (
-                <span
-                  key={interest}
-                  className="rounded-md bg-violet-100/80 px-2.5 py-1 text-[11px] font-bold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200/50 dark:border-violet-800/30"
-                >
-                  {interest}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+                {/* Skills */}
+                {skills.length > 0 && (
+                  <div>
+                    <h3 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground print:text-gray-500">
+                      {t('profile.portfolio.skillsTitle')}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((s) => (
+                        <span
+                          key={s.skillName}
+                          className="rounded-md bg-muted/50 print:bg-gray-100 print:border-gray-200 border border-border px-2 py-1 text-[11px] font-bold text-foreground print:text-gray-800 tracking-tight"
+                          style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+                        >
+                          {s.skillName}
+                          {s.level && <span className="ml-1.5 opacity-50 font-medium tracking-normal">({s.level})</span>}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-        {/* ── Active Certificates ── */}
-        <div className="mt-8">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60 mb-1">
-            {t('profile.portfolio.certsSection')}
-          </h2>
-          <h3 className="font-black text-foreground tracking-tight mb-4">
-            {t('profile.portfolio.certsTitle')}
-            <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 align-middle">
-              {t('profile.portfolio.certsActive', { count: activeCerts.length })}
-            </span>
-          </h3>
-
-          {activeCerts.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border/50 bg-muted/20 py-10 text-center">
-              <Award className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">{t('profile.portfolio.certsEmpty')}</p>
-            </div>
-          )}
-
-          {activeCerts.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {activeCerts.map((cert) => (
-                <CertBadge key={cert.id} cert={cert} locale={locale} />
-              ))}
-            </div>
-          )}
-
-          {expiredCerts.length > 0 && (
-            <div className="mt-5">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/50">
-                {t('profile.portfolio.certsExpiredLabel', { count: expiredCerts.length })}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {expiredCerts.map((cert) => (
-                  <CertBadge key={cert.id} cert={cert} locale={locale} />
-                ))}
+                {/* Interests */}
+                {interests.length > 0 && (
+                  <div>
+                    <h3 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground print:text-gray-500">
+                      {t('profile.portfolio.interestsTitle')}
+                    </h3>
+                    <div className="flex flex-col gap-1.5">
+                      {interests.map((interest) => (
+                        <span
+                          key={interest}
+                          className="text-[12px] font-medium text-foreground print:text-gray-700 before:content-['•'] before:mr-2 before:text-primary print:before:text-blue-600"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* ── Right Column: Metrics & Certs ── */}
+              <div className="md:col-span-8 print:col-span-8 pb-10">
+                {/* Stats Summary */}
+                <div className="mb-10 rounded-2xl bg-muted/20 print:bg-gray-50 p-6 border border-border/50 print:border-gray-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                  <div className="grid grid-cols-3 gap-6 divide-x divide-border/50 print:divide-gray-300">
+                    <div className="text-center px-4">
+                      <p className="text-3xl font-black text-foreground print:text-gray-900">{stats?.totalHours ?? 0}</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-500 flex items-center justify-center gap-1">
+                        <Clock className="h-3 w-3" /> Horas
+                      </p>
+                    </div>
+                    <div className="text-center px-4">
+                      <p className="text-3xl font-black text-foreground print:text-gray-900">{stats?.completed ?? 0}</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-500 flex items-center justify-center gap-1">
+                        <BookOpen className="h-3 w-3" /> Cursos
+                      </p>
+                    </div>
+                    <div className="text-center px-4">
+                      <p className="text-3xl font-black text-foreground print:text-gray-900">{activeCerts.length}</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-500 flex items-center justify-center gap-1">
+                        <Award className="h-3 w-3" /> Certificados
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Certifications List */}
+                {activeCerts.length > 0 ? (
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <h3 className="text-lg font-black tracking-tight text-foreground print:text-gray-900">
+                        {t('profile.portfolio.certsTitle', 'Certificações Principais')}
+                      </h3>
+                      <div className="h-px flex-1 bg-border print:bg-gray-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }} />
+                    </div>
+                    
+                    <div className="space-y-5">
+                      {activeCerts.map((cert) => {
+                        const name = cert.courseName || cert.training?.title || 'Certificação';
+                        const provider = cert.provider || '—';
+                        return (
+                          <div key={cert.id} className="group relative pl-4 print:pl-0 border-l-2 border-border print:border-none hover:border-primary print:mb-4 transition-colors">
+                            <div className="print:hidden absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4 border-background bg-border group-hover:bg-primary transition-colors" />
+                            <div className="flex justify-between items-start gap-4 flex-col sm:flex-row print:flex-row">
+                              <div>
+                                <p className="text-sm font-bold text-foreground print:text-black leading-tight">{name}</p>
+                                <p className="text-xs font-medium text-muted-foreground print:text-gray-600 mt-0.5">{provider}</p>
+                              </div>
+                              <div className="sm:text-right print:text-right shrink-0">
+                                <p className="inline-block text-[10px] font-bold text-emerald-600 print:text-emerald-700 bg-emerald-100 print:bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-wider" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                  Válido
+                                </p>
+                                <p className="text-[10px] text-muted-foreground print:text-gray-500 mt-1 whitespace-nowrap">
+                                  {formatDate(cert.completionDate || cert.createdAt, locale)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center p-8 border border-dashed rounded-xl border-border print:border-gray-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-widest">{t('profile.portfolio.certsEmpty')}</p>
+                  </div>
+                )}
+              </div>
+
             </div>
-          )}
-        </div>
-
-        {/* ── Footer (print only) ── */}
-        <div className="hidden print:block mt-12 border-t border-border/30 pt-6 text-center">
-          <p className="text-[11px] text-muted-foreground">
-            {t('profile.portfolio.footerText', { date: generatedAt })}
-          </p>
-        </div>
-
-        {/* ── Generated date (screen only) ── */}
-        <div className="print:hidden mt-10 text-center">
-          <p className="text-[11px] text-muted-foreground/50">
-            LearningHub Softinsa • {generatedAt}
-          </p>
+          </div>
+          
+          {/* Footer Strip */}
+          <div className="border-t border-border print:border-gray-200 bg-muted/10 print:bg-white px-10 py-4 text-[10px] font-medium text-muted-foreground print:text-gray-500 flex justify-between items-center" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+            <p>Gerado pelo {t('nav.appName', 'LearningHub Softinsa')}</p>
+            <p>Data de Emissão: {generatedAt}</p>
+          </div>
+          
         </div>
       </div>
     </div>

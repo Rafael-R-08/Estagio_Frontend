@@ -11,10 +11,12 @@ import {
   Sparkles,
   ExternalLink,
   Loader2,
+  Linkedin,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { certificatesApi } from '@/services/api';
 import type { Certificate, UpdateCertificateDto } from '@/types';
+import { getLinkedInCertificationUrl } from '@/lib/social';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -140,6 +142,13 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
               <Download className="h-4 w-4" />
               {t('certDetail.download')}
             </a>
+            <button
+              onClick={() => window.open(getLinkedInCertificationUrl(cert), '_blank')}
+              className="flex items-center justify-center gap-2 rounded-lg border border-[#0077B5]/30 bg-[#0077B5]/5 px-3 py-2 text-sm font-bold text-[#0077B5] transition hover:bg-[#0077B5] hover:text-white"
+            >
+              <Linkedin className="h-4 w-4" />
+              {t('certificates.shareLinkedIn')}
+            </button>
             <a
               href={cert.fileUrl}
               target="_blank"
@@ -172,18 +181,6 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
                   {t('certDetail.reExtract')}
                 </>
               )}
-            </button>
-            <button
-              onClick={() => {
-                if (confirm(t('certDetail.confirmDelete'))) {
-                  deleteMutation.mutate();
-                }
-              }}
-              disabled={isLoading}
-              className="flex items-center justify-center gap-2 rounded-lg border border-destructive/40 px-3 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/10 disabled:opacity-60"
-            >
-              <Trash2 className="h-4 w-4" />
-              {t('certDetail.delete')}
             </button>
           </div>
 
@@ -247,8 +244,23 @@ export function CertificateDetailModal({ cert, onClose, onReplace }: Props) {
                   onChange={(e) => setField('durationHours', e.target.value ? Number(e.target.value) : undefined)}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
-              </div>
             </div>
+
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  if (confirm(t('certDetail.confirmDelete'))) {
+                    deleteMutation.mutate();
+                  }
+                }}
+                disabled={isLoading}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-destructive transition hover:bg-destructive/10 disabled:opacity-60"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {t('certDetail.delete')}
+              </button>
+            </div>
+          </div>
 
             {/* Save footer */}
             {dirty && (

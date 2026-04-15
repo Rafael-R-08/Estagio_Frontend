@@ -82,7 +82,8 @@
       "pushDesc": "Receive alerts even when you don't have the platform open.",
       "pushSubscribed": "Push notifications enabled!",
       "pushUnsubscribed": "Push notifications disabled.",
-      "pushError": "Could not manage push notifications."
+      "pushError": "Could not manage push notifications.",
+      "pushBlocked": "Notifications are blocked in your browser. Change permissions to continue."
     },
     "privacy": {
       "title": "Privacy",
@@ -108,48 +109,15 @@
     "pt": "Portuguese",
     "en": "English"
   },
-  "myLearning": {
-    "title": "Progress Panel",
-    "subtitle": "Track your learning progress.",
-    "hello": "Hello",
-    "discover": "Discover training",
-    "tabs": {
-      "ongoing": "In Progress",
-      "completed": "Completed",
-      "later": "Saved",
-      "priority": "Plans"
-    },
-    "stats": {
-      "ongoing": "In Progress",
-      "completed": "Completed",
-      "later": "Saved",
-      "priority": "Plans"
-    },
-    "empty": {
-      "ongoingTitle": "No courses in progress",
-      "ongoingDesc": "Start a saved course or search for training on the platform.",
-      "completedTitle": "No completed courses",
-      "completedDesc": "Completed courses will appear here with their date and certificate.",
-      "laterTitle": "No saved courses",
-      "laterDesc": "Save courses from search to consult later.",
-      "priorityTitle": "Empty training plan",
-      "priorityDesc": "Mark courses as priority to structure your learning plan."
-    },
-    "statusMoved": {
-      "ongoing": "moved to In Progress.",
-      "completed": "marked as completed.",
-      "priority": "added to plan.",
-      "later": "saved for later."
-    },
-    "coursePrefix": "Course",
-    "errorUpdate": "Error updating record.",
-    "errorDelete": "Error deleting record.",
-    "deleted": "Course removed."
-  },
   "certificates": {
     "title": "Certificates",
     "subtitle": "Manage your training certificates and credentials.",
     "uploadBtn": "Upload certificate",
+    "shareLinkedIn": "Add to LinkedIn",
+    "exportAllBtn": "Export All (.zip)",
+    "exportingZip": "Packing certificates into ZIP...",
+    "exportZipSuccess": "ZIP downloaded successfully!",
+    "exportZipError": "Failed to generate ZIP",
     "search": "Search certificate...",
     "filters": {
       "all": "All",
@@ -279,18 +247,6 @@
     "mentionCourse": "Mention course",
     "attachFileTitle": "Attach file",
     "sendTitle": "Send message"
-  },
-  "header": {
-    "aiActive": "AI Active",
-    "tips": [
-      "Complete a course today and keep your streak active.",
-      "Are your certificates expiring? Check in Certificates.",
-      "Use the AI Assistant to request personalized recommendations.",
-      "Add skills to your profile for better suggestions.",
-      "Short 1h courses are ideal for daily learning.",
-      "Search by topic and filter by platform for better results.",
-      "Mark trainings as Priority to find them quickly."
-    ]
   },
   "admin": {
     "title": "Admin Backoffice",
@@ -744,17 +700,16 @@
       "cancelAria": "Cancel",
       "selectedDateFormat": "MMMM d",
       "exportIcs": "Export calendar (.ics)",
-      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      "reminderTimeOptions": {
+        "atEvent": "At event time",
+        "15m": "15 min before",
+        "30m": "30 min before",
+        "1h": "1 hour before",
+        "1d": "Day before"
+      }
     },
-    "pendingFeedback": {
-      "title": "Pending Feedback",
-      "description": "We noticed you recently accessed these trainings. Please confirm your status to keep your history up to date:",
-      "started": "I started doing it",
-      "alreadyDone": "I had already done it",
-      "afterSuggestion": "I did it after suggestion",
-      "toastSuccess": "Feedback recorded successfully!",
-      "toastError": "Error recording feedback."
-    },
+
     "progressCard": {
       "statusOngoing": "In progress",
       "statusCompleted": "Completed",
@@ -806,7 +761,7 @@
       "actionOngoing": "In progress",
       "actionPriority": "Priority",
       "actionSaved": "Saved",
-      "actionAccessed": "Accessed",
+
       "actionCancelled": "Cancelled",
       "justNow": "just now",
       "minutesAgo": "{{n}}min ago",
@@ -998,6 +953,7 @@
       "remove": "Remove",
       "reactivate": "Reactivate",
       "certificate": "Certificate",
+      "noCertificate": "No certificate",
       "startedOn": "Started {{date}}",
       "completedOn": "Completed {{date}}",
       "actions": "Actions",
@@ -1179,6 +1135,8 @@
       "placeholder": "Add...",
       "hint": "Enter or comma to add \u00b7 Backspace to remove the last"
     },
+    "skillsAnalysisSection": "Analysis",
+    "skillsAnalysisTitle": "Skills Expertise Map",
     "skillsChart": {
       "section": "Skills Map",
       "title": "Skills Distribution",
@@ -1327,7 +1285,11 @@
     "newAndAdd": "New collection & add",
     "createAndAdd": "Create & add",
     "emptyForAdd": "No collections yet. Create one below.",
-    "coursesCount": "courses"
+    "coursesCount": "courses",
+    "sharePlanBtn": "Share Study Plan",
+    "sharePlanBtnShort": "Share Plan",
+    "planCopied": "Study plan copied to clipboard!",
+    "planCopyError": "Failed to copy plan."
   },
   "report": {
     "title": "Progression Report",

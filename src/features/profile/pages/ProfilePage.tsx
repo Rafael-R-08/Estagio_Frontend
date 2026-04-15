@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Save, User as UserIcon, Edit2,
-  Download, Briefcase, Link2, LayoutTemplate, ClipboardCopy, Award, FileBarChart2,
+  Download, Briefcase,
 } from 'lucide-react';
 import { toast } from '@/lib/toast-store';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ import type { ExperienceLevel, User, TrainingRecord, TrainingStats, ServiceLine,
 import { TagInput } from '../components/TagInput';
 import { LearningImpactCard } from '../components/LearningImpactCard';
 import { SkillsSection } from '../components/SkillsSection';
+import { SkillsRadarChart } from '../components/SkillsRadarChart';
 
 
 // ─── UserAvatar ───────────────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ function ProfileSidebar({
   onUserFunctionChange, onServiceLineChange,
 }: SidebarProps) {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
+  const locale = (i18n.language || 'pt').startsWith('pt') ? 'pt-PT' : 'en-US';
   return (
     <div className="space-y-4">
       {/* Identity card */}
@@ -258,7 +259,6 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
   const { setUser: setAuthUser } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -346,112 +346,18 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
         {/* Learning Impact */}
         <LearningImpactCard stats={stats} timeline={timeline} />
 
-        {/* Portfólio & Partilha */}
-        <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl overflow-hidden">
-          <div className="border-b border-border/40 px-8 py-6 bg-muted/10">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">{t('profile.portfolioSection')}</h2>
-            <p className="font-black text-foreground tracking-tight">{t('profile.portfolioTitle')}</p>
-          </div>
-
-          {/* Featured — portfolio card */}
-          <div className="px-8 pt-6 pb-2">
-            <div className="flex items-center gap-5 rounded-2xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 dark:from-emerald-900/10 dark:to-teal-900/10 dark:border-emerald-800/30 px-6 py-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <Award className="h-6 w-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-black text-foreground tracking-tight">{t('profile.portfolioCardTitle')}</p>
-                <p className="text-xs font-medium text-muted-foreground mt-0.5">
-                  {t('profile.portfolioCardDesc')}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => navigate('/portfolio')}
-                  className="flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:opacity-90 active:scale-95 shadow-lg shadow-emerald-600/20"
-                >
-                  <LayoutTemplate className="h-3.5 w-3.5" />
-                  {t('profile.viewPortfolio')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const url = `${window.location.origin}/portfolio`;
-                    navigator.clipboard.writeText(url);
-                    toast.success(t('profile.copyLinkSuccess'));
-                  }}
-                  className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/60 dark:bg-emerald-900/20 dark:border-emerald-800/40 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition hover:bg-emerald-50 dark:hover:bg-emerald-900/30 active:scale-95"
-                >
-                  <Link2 className="h-3.5 w-3.5" />
-                  {t('profile.copyLink')}
-                </button>
-              </div>
+        {/* Competence Radar Chart */}
+        {initialValues.skills && initialValues.skills.length > 0 && (
+          <div className="rounded-[2.5rem] border border-border/60 bg-card/40 shadow-xl backdrop-blur-2xl overflow-hidden p-6 lg:p-8">
+            <div className="mb-4">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">{t('profile.skillsAnalysisSection', 'Análise')}</h2>
+              <p className="font-black text-foreground tracking-tight">{t('profile.skillsAnalysisTitle', 'Mapeamento de Competências')}</p>
+            </div>
+            <div className="relative z-10 w-full bg-background/50 rounded-3xl border border-border/40 p-4 shadow-inner">
+              <SkillsRadarChart skills={initialValues.skills} />
             </div>
           </div>
-
-          {/* Secondary actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-8 pt-4">
-            <button
-              type="button"
-              onClick={() => navigate('/portfolio?print=1')}
-              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
-            >
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-                <Download className="h-5 w-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">{t('profile.exportPDF')}</span>
-                <p className="text-[10px] font-medium text-muted-foreground">{t('profile.exportPDFDesc')}</p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const skillsText = (initialValues.skills ?? [])
-                  .map((s) => `${s.skillName}${s.level ? ` (${s.level})` : ''}`)
-                  .join(', ');
-                const resumo = [
-                  `📊 Portfólio de Aprendizagem — ${initialValues.name ?? ''}`,
-                  `──────────────────────────────`,
-                  `📈 ${stats?.completed ?? 0} cursos concluídos | ${stats?.totalHours ?? 0}h de formação`,
-                  skillsText ? `🏅 Competências: ${skillsText}` : null,
-                  (initialValues.interests ?? []).length > 0
-                    ? `💡 Interesses: ${(initialValues.interests ?? []).join(', ')}`
-                    : null,
-                  ``,
-                  `Gerado por LearningHub Softinsa`,
-                ]
-                  .filter(Boolean)
-                  .join('\n');
-                navigator.clipboard.writeText(resumo);
-                toast.success(t('profile.copySummarySuccess'));
-              }}
-              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
-            >
-              <div className="p-2 rounded-xl bg-violet-500/10 text-violet-500 group-hover:scale-110 transition-transform">
-                <ClipboardCopy className="h-5 w-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">{t('profile.copySummary')}</span>
-                <p className="text-[10px] font-medium text-muted-foreground">{t('profile.copySummaryDesc')}</p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/reports/progress')}
-              className="flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/10 px-5 py-4 text-left transition hover:bg-muted/30 group"
-            >
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-                <FileBarChart2 className="h-5 w-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[13px] font-bold text-foreground">{t('report.viewReport')}</span>
-                <p className="text-[10px] font-medium text-muted-foreground">{t('report.viewReportDesc')}</p>
-              </div>
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -462,6 +368,7 @@ function ProfileFormBody({ initialValues, timeline, stats }: FormBodyProps) {
 export default function ProfilePage() {
   const { user: authUser } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -505,13 +412,25 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <div className="px-2">
-        <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-5xl">
-          {t('profile.title')}
-        </h1>
-        <p className="mt-2 text-base font-medium text-muted-foreground max-w-2xl">
-          {t('profile.subtitle')}
-        </p>
+      <div className="px-2 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-5xl">
+            {t('profile.title')}
+          </h1>
+          <p className="mt-2 text-base font-medium text-muted-foreground max-w-2xl">
+            {t('profile.subtitle')}
+          </p>
+        </div>
+        <div className="flex shrink-0">
+          <button
+              type="button"
+              onClick={() => navigate('/portfolio?print=1')}
+              className="flex items-center gap-2 rounded-full border border-border/50 bg-background/80 backdrop-blur px-5 py-2.5 text-sm font-bold text-foreground transition hover:bg-muted active:scale-95 shadow-sm"
+            >
+              <Download className="h-4 w-4 text-blue-500" />
+              {t('profile.exportPDF')}
+          </button>
+        </div>
       </div>
       {formSource && (
         <ProfileFormBody

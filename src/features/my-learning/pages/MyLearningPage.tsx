@@ -158,6 +158,7 @@ export default function MyLearningPage() {
       trainingApi.update(id, dto),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
       // When a training is marked completed, backend fires the notification async —
       // schedule a refetch after 3s to pick it up without waiting the full polling cycle
       if (variables.status === 'completed') {

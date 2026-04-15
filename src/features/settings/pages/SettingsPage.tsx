@@ -7,7 +7,6 @@ import {
   Save,
   Smartphone,
   Share,
-  BellRing,
   Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -154,18 +153,47 @@ function SubLabel({ children }: { children: React.ReactNode }) {
 
 function PushToggle() {
   const { t } = useTranslation();
-  const [subscribed, setSubscribed] = useState<boolean>(() => !!localStorage.getItem('lh_push_sub'));
-  const [loading, setLoading] = useState(false);
+  const [subscribed, setSubscribed] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   const supported = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window;
+
+  useEffect(() => {
+    async function checkSubscription() {
+      if (!supported) {
+        setLoading(false);
+        return;
+      }
+      try {
+        // Sync with browser's actual state
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setSubscribed(!!sub);
+        if (sub) {
+          localStorage.setItem('lh_push_sub', '1');
+        } else {
+          localStorage.removeItem('lh_push_sub');
+        }
+      } catch (err) {
+        console.error('[Push] Initialization error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkSubscription();
+  }, [supported]);
 
   if (!supported) return null;
 
   async function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = atob(base64);
-    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 
   async function handleToggle() {
@@ -181,17 +209,40 @@ function PushToggle() {
         setSubscribed(false);
         toast.success(t('settings.notifications.pushUnsubscribed'));
       } else {
-        // Subscribe
-        const { data } = await pushApi.getVapidPublicKey();
+        // Check notification permission first
+        if (Notification.permission === 'denied') {
+          toast.error(t('settings.notifications.pushBlocked'));
+          setLoading(false);
+          return;
+        }
+
+        // 1. Check for key in .env first, then fallback to API
+        let publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+
+        if (!publicKey) {
+          const { data } = await pushApi.getVapidPublicKey();
+          publicKey = data?.publicKey || (data as any)?.key || (typeof data === 'string' ? data : null);
+        }
+
+        if (!publicKey) {
+          throw new Error('VAPID public key not found (check .env or backend)');
+        }
+
         const reg = await navigator.serviceWorker.ready;
-        const applicationServerKey = await urlBase64ToUint8Array(data.publicKey);
-        const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
+        const applicationServerKey = await urlBase64ToUint8Array(publicKey);
+
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+
         await pushApi.subscribe(sub.toJSON());
         localStorage.setItem('lh_push_sub', '1');
         setSubscribed(true);
         toast.success(t('settings.notifications.pushSubscribed'));
       }
-    } catch {
+    } catch (err) {
+      console.error('[Push] Toggle error:', err);
       toast.error(t('settings.notifications.pushError'));
     } finally {
       setLoading(false);
@@ -206,16 +257,18 @@ function PushToggle() {
       disabled={loading}
       onClick={handleToggle}
       className={cn(
-        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-foreground/10 disabled:opacity-50',
-        subscribed ? 'bg-foreground' : 'bg-muted',
+        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-foreground/10 disabled:opacity-30',
+        subscribed ? 'bg-foreground shadow-lg shadow-foreground/10' : 'bg-muted',
       )}
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-background shadow-xl ring-0 transition duration-200',
+          'pointer-events-none flex h-6 w-6 items-center justify-center transform rounded-full bg-background shadow-xl ring-0 transition duration-300 ease-in-out',
           subscribed ? 'translate-x-5' : 'translate-x-0',
         )}
-      />
+      >
+        {loading && <div className="h-3 w-3 animate-spin rounded-full border border-primary border-t-transparent" />}
+      </span>
     </button>
   );
 }

@@ -159,12 +159,18 @@ export default function CourseDetailPage() {
   // Create/Update training mutation
   const createTraining = useMutation({
     mutationFn: trainingApi.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+    },
   });
   const updateTraining = useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: Parameters<typeof trainingApi.update>[1] }) =>
       trainingApi.update(id, dto),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+    },
   });
 
   const handleAction = (status: 'ongoing' | 'completed' | 'later') => {
@@ -459,7 +465,7 @@ export default function CourseDetailPage() {
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1.5" />
             </button>
           </div>
-          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {related.slice(0, 3).map((r: CourseSearchResult) => (
               <SearchResultCard
                 key={r.externalId}

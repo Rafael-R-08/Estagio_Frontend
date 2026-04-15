@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
-import { X, ChevronRight, ChevronLeft, Check, Bell, User, LayoutDashboard, Search, Sparkles, BookOpen, Award, Settings } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Check, Bell, User, LayoutDashboard, Search, Sparkles, BookOpen, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../../components/ui/button';
 import { cn } from '../../../lib/utils';
@@ -12,13 +12,12 @@ interface TourStep {
 }
 
 const TOUR_STEPS_CONFIG: TourStep[] = [
-  { targetId: 'tour-dashboard', tourKey: 'dashboard', icon: LayoutDashboard, position: 'right' },
-  { targetId: 'tour-search', tourKey: 'search', icon: Search, position: 'right' },
-  { targetId: 'tour-ai', tourKey: 'ai', icon: Sparkles, position: 'right' },
-  { targetId: 'tour-certificates', tourKey: 'certificates', icon: Award, position: 'right' },
-  { targetId: 'tour-mylearning', tourKey: 'myLearning', icon: BookOpen, position: 'right' },
-  { targetId: 'tour-profile', tourKey: 'profile', icon: User, position: 'right' },
-  { targetId: 'tour-settings', tourKey: 'settings', icon: Settings, position: 'right' },
+  { targetId: 'tour-dashboard', tourKey: 'dashboard', icon: LayoutDashboard, position: 'top' },
+  { targetId: 'tour-search', tourKey: 'search', icon: Search, position: 'top' },
+  { targetId: 'tour-ai', tourKey: 'ai', icon: Sparkles, position: 'top' },
+  { targetId: 'tour-certificates', tourKey: 'certificates', icon: Award, position: 'top' },
+  { targetId: 'tour-mylearning', tourKey: 'myLearning', icon: BookOpen, position: 'top' },
+  { targetId: 'tour-profile', tourKey: 'profile', icon: User, position: 'top' },
   { targetId: 'tour-notifications', tourKey: 'notifications', icon: Bell, position: 'bottom' },
 ];
 
@@ -93,6 +92,24 @@ export function ProductTour() {
     const spacing = 16;
     const cardWidth = 320;
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+
+    if (activeStep.position === 'top') {
+      const centerX = targetRect.left + targetRect.width / 2;
+      const hHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+      const bottomPos = hHeight - targetRect.top + spacing;
+
+      if (centerX + cardWidth / 2 > screenWidth - spacing) {
+        return { bottom: bottomPos, right: spacing, transform: 'none' };
+      }
+      if (centerX - cardWidth / 2 < spacing) {
+        return { bottom: bottomPos, left: spacing, transform: 'none' };
+      }
+      return {
+        bottom: bottomPos,
+        left: centerX,
+        transform: 'translateX(-50%)',
+      };
+    }
 
     if (activeStep.position === 'right') {
       return {

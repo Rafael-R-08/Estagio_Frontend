@@ -31,7 +31,7 @@ export function BottomNav() {
   const { t } = useTranslation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t bg-background/80 px-2 backdrop-blur-md lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav className="fixed bottom-4 left-4 right-4 z-40 flex h-16 items-center justify-around rounded-3xl border border-border/50 bg-background/40 px-2 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] lg:hidden" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) * 0.5)' }}>
       {navItems.map((item) => {
         const isActive = location.pathname.startsWith(item.to);
         const Icon = item.icon;

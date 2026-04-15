@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Layers, Wrench } from 'lucide-react';
 
@@ -9,12 +8,11 @@ import { toList } from '@/lib/api';
 import { UnifiedRecommendationCard } from '../components/UnifiedRecommendationCard';
 import { QuickActions } from '../components/QuickActions';
 import { AlertBanner } from '../components/AlertBanner';
-import { PendingFeedbackModal } from '../components/PendingFeedbackModal';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { RecentActivity } from '../components/RecentActivity';
 import { cn } from '@/lib/utils';
 
-import type { TrainingRecord, ExperienceLevel } from '@/types';
+import type { ExperienceLevel } from '@/types';
 import { SERVICE_LINE_LABELS } from '@/types';
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
@@ -25,22 +23,6 @@ const LEVEL_ORDER: ExperienceLevel[] = ['junior', 'intermedio', 'senior', 'espec
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [pendingFeedback, setPendingFeedback] = useState<TrainingRecord[]>([]);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    trainingApi.getPendingFeedback()
-      .then((res) => {
-        if (mounted && res.data && res.data.length > 0) {
-          setPendingFeedback(res.data);
-          setShowFeedbackModal(true);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch pending feedback', err));
-    return () => { mounted = false; };
-  }, []);
-
   // 1. Data Fetching
   const {
     data: recs,
@@ -208,14 +190,6 @@ export default function DashboardPage() {
         </div>
 
       </div>
-
-      {/* Pending Feedback Modal */}
-      {showFeedbackModal && pendingFeedback.length > 0 && (
-        <PendingFeedbackModal
-          courses={pendingFeedback}
-          onClose={() => setShowFeedbackModal(false)}
-        />
-      )}
     </div>
   );
 }

@@ -64,6 +64,21 @@ export default {
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
 				}
+			},
+			animation: {
+				marquee: 'marquee 150s linear infinite',
+				'marquee-fast': 'marquee 75s linear infinite',
+				'typing': 'typing 3s steps(20, end) infinite',
+			},
+			keyframes: {
+				marquee: {
+					'0%': { transform: 'translateX(0%)' },
+					'100%': { transform: 'translateX(-50%)' },
+				},
+				typing: {
+					'0%, 100%': { width: '0%' },
+					'50%, 70%': { width: '100%' },
+				}
 			}
 		}
 	},

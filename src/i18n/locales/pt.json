@@ -83,12 +83,7 @@
       "pushSubscribed": "Notificações push ativadas!",
       "pushUnsubscribed": "Notificações push desativadas.",
       "pushError": "Não foi possível gerir as notificações push.",
-      "pushLabel": "Notificações Push",
-      "push": "Notificações Push no browser",
-      "pushDesc": "Recebe alertas mesmo quando não tens a plataforma aberta.",
-      "pushSubscribed": "Notificações push ativadas!",
-      "pushUnsubscribed": "Notificações push desativadas.",
-      "pushError": "Não foi possível gerir as notificações push."
+      "pushBlocked": "As notificações estão bloqueadas no teu browser. Altera as permissões para continuar."
     },
     "privacy": {
       "title": "Privacidade",
@@ -113,48 +108,15 @@
     "pt": "Português",
     "en": "Inglês"
   },
-  "myLearning": {
-    "title": "Painel de Progresso",
-    "subtitle": "Acompanha o teu progresso de aprendizagem.",
-    "hello": "Olá",
-    "discover": "Descobrir formação",
-    "tabs": {
-      "ongoing": "Em Progresso",
-      "completed": "Concluídos",
-      "later": "Guardados",
-      "priority": "Planos"
-    },
-    "stats": {
-      "ongoing": "Em Progresso",
-      "completed": "Concluídos",
-      "later": "Guardados",
-      "priority": "Planos"
-    },
-    "empty": {
-      "ongoingTitle": "Sem cursos em progresso",
-      "ongoingDesc": "Inicia um curso guardado ou procura formação na plataforma.",
-      "completedTitle": "Nenhum curso concluído",
-      "completedDesc": "Os cursos concluídos aparecerão aqui com a respetiva data e certificado.",
-      "laterTitle": "Nenhum curso guardado",
-      "laterDesc": "Guarda cursos da pesquisa para consultar mais tarde.",
-      "priorityTitle": "Plano de formação vazio",
-      "priorityDesc": "Marca cursos como prioritários para estruturar o teu plano de aprendizagem."
-    },
-    "statusMoved": {
-      "ongoing": "movido para Em Progresso.",
-      "completed": "marcado como concluído.",
-      "priority": "adicionado ao plano.",
-      "later": "guardado para mais tarde."
-    },
-    "coursePrefix": "Curso",
-    "errorUpdate": "Erro ao actualizar registo.",
-    "errorDelete": "Erro ao remover registo.",
-    "deleted": "Curso removido."
-  },
   "certificates": {
     "title": "Certificados",
     "subtitle": "Gere os teus certificados de formação e credenciais.",
     "uploadBtn": "Carregar certificado",
+    "shareLinkedIn": "Adicionar ao LinkedIn",
+    "exportAllBtn": "Exportar Tudo (.zip)",
+    "exportingZip": "A preparar os certificados no ZIP...",
+    "exportZipSuccess": "ZIP descarregado com sucesso!",
+    "exportZipError": "Falha ao gerar o ZIP",
     "search": "Pesquisar certificado...",
     "filters": {
       "all": "Todos",
@@ -285,18 +247,6 @@
     "mentionCourse": "Mencionar curso",
     "attachFileTitle": "Anexar ficheiro",
     "sendTitle": "Enviar mensagem"
-  },
-  "header": {
-    "aiActive": "IA Ativa",
-    "tips": [
-      "Completa um curso hoje e mantém o teu streak ativo.",
-      "Os teus certificados expiram? Verifica em Certificados.",
-      "Usa o Assistente IA para pedir recomendações personalizadas.",
-      "Adiciona skills ao teu perfil para melhores sugestões.",
-      "Cursos curtos de 1h são ideais para aprendizagem diária.",
-      "Pesquisa por tema e filtra por plataforma para melhores resultados.",
-      "Marca formações como Prioridade para as encontrar rapidamente."
-    ]
   },
   "admin": {
     "title": "Backoffice Admin",
@@ -750,17 +700,16 @@
       "cancelAria": "Cancelar",
       "selectedDateFormat": "d 'de' MMMM",
       "exportIcs": "Exportar calendário (.ics)",
-      "weekdays": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+      "weekdays": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+      "reminderTimeOptions": {
+        "atEvent": "No momento",
+        "15m": "15 min antes",
+        "30m": "30 min antes",
+        "1h": "1 hora antes",
+        "1d": "Véspera"
+      }
     },
-    "pendingFeedback": {
-      "title": "Feedback Pendente",
-      "description": "Notámos que acedeste recentemente a estas formações. Confirma o teu estado para mantermos o teu histórico atualizado:",
-      "started": "Comecei a fazer",
-      "alreadyDone": "Já tinha feito no passado",
-      "afterSuggestion": "Fiz após sugestão",
-      "toastSuccess": "Feedback registado com sucesso!",
-      "toastError": "Erro ao registar feedback."
-    },
+
     "progressCard": {
       "statusOngoing": "Em progresso",
       "statusCompleted": "Concluído",
@@ -812,7 +761,7 @@
       "actionOngoing": "Em progresso",
       "actionPriority": "Prioritário",
       "actionSaved": "Guardado",
-      "actionAccessed": "Acedido",
+
       "actionCancelled": "Cancelado",
       "justNow": "agora mesmo",
       "minutesAgo": "há {{n}}min",
@@ -1004,6 +953,7 @@
       "remove": "Remover",
       "reactivate": "Reativar",
       "certificate": "Certificado",
+      "noCertificate": "Sem certificado",
       "startedOn": "Iniciado {{date}}",
       "completedOn": "Concluído {{date}}",
       "actions": "Ações",
@@ -1169,6 +1119,13 @@
       "levelIntermediate": "Intermédio",
       "levelExperienced": "Experiente"
     },
+    "skillsAnalysisSection": "Análise",
+    "skillsAnalysisTitle": "Mapeamento de Competências",
+    "skillsChart": {
+      "level": "Nível",
+      "proficiency": "Proficiência",
+      "needMore": "Adiciona pelo menos 3 skills para visualizar."
+    },
     "impact": {
       "section": "Impacto e Progresso",
       "title": "Learning Impact",
@@ -1189,16 +1146,6 @@
   "slManager": {
     "title": "A minha Equipa",
     "subtitle": "Gere o progresso e certificações dos membros da tua Service Line.",
-    "activity": {
-      "title": "Feed de Atividade",
-      "subtitle": "{{count}} ações recentes",
-      "empty": "Sem atividade recente na equipa.",
-      "action": {
-        "completed": "Concluiu",
-        "enrolled": "Inscreveu-se em",
-        "certificate": "Obteve certificado em"
-      }
-    },
     "activity": {
       "title": "Feed de Atividade",
       "subtitle": "{{count}} ações recentes",
@@ -1313,7 +1260,11 @@
     "newAndAdd": "Nova coleção e adicionar",
     "createAndAdd": "Criar e adicionar",
     "emptyForAdd": "Ainda não tens coleções. Cria uma em baixo.",
-    "coursesCount": "cursos"
+    "coursesCount": "cursos",
+    "sharePlanBtn": "Partilhar Plano de Estudos",
+    "sharePlanBtnShort": "Partilhar",
+    "planCopied": "Plano copiado para a área de transferência!",
+    "planCopyError": "Erro ao copiar o plano."
   },
   "report": {
     "title": "Relatório de Progressão",

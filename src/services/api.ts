@@ -303,9 +303,6 @@ export const trainingApi = {
   getStats: () =>
     api.get<TrainingStats>('/trainings/stats'),
 
-  getPendingFeedback: () =>
-    api.get<TrainingRecord[]>('/trainings/pending-feedback'),
-
   create: (dto: CreateTrainingRecordDto) =>
     api.post<TrainingRecord>('/trainings', dto),
 
@@ -314,9 +311,6 @@ export const trainingApi = {
 
   delete: (id: string) =>
     api.delete(`/trainings/${id}`),
-
-  trackAccess: (data: { externalId: string; title: string; url: string; platformId: string }) =>
-    api.post('/trainings/track-access', data),
 
   uploadDocument: (trainingId: string, file: File) => {
     const form = new FormData();

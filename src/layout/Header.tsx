@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bell, Menu, Sparkles, Check, CheckCheck, Trash2, X } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Bell, Sparkles, Check, CheckCheck, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import logoIcon from '../assets/logo2.icon.png';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { notificationsApi } from '../services/api';
@@ -41,11 +42,7 @@ function resolveCalendarNotif(n: AppNotification): { title: string; body: string
   return { title: newTitle, body: newBody };
 }
 
-interface HeaderProps {
-  onMenuToggle?: () => void;
-}
-
-export function Header({ onMenuToggle }: HeaderProps) {
+export function Header() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -124,27 +121,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border/60 bg-background/40 backdrop-blur-2xl px-6 sticky top-0 z-30">
-      {/* Mobile menu toggle */}
-      <button
-        onClick={onMenuToggle}
-        className="lg:hidden rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {/* Logo isolado */}
+      <Link to="/dashboard" className="flex items-center mr-6 hover:opacity-90 transition-opacity">
+        <img src={logoIcon} alt="Softinsa Learning Hub" className="h-8 w-8 shrink-0 object-contain" />
+      </Link>
 
-      {/* IA status + dica rotativa */}
-      <div className="hidden sm:flex items-center gap-2.5 min-w-0">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-          </span>
-          <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{t('header.aiActive')}</span>
-        </div>
-        <span className="text-muted-foreground/40 text-xs">·</span>
+      {/* Dica rotativa minimalista */}
+      <div className="hidden sm:flex items-center min-w-0 flex-1 bg-blue-500/5 px-3 py-1.5 rounded-full border border-blue-500/10 w-max">
+        <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mr-2 shrink-0" />
         <span
-          className="text-xs text-muted-foreground truncate max-w-xs transition-opacity duration-400"
+          className="text-xs font-medium text-blue-600/80 dark:text-blue-400/80 truncate transition-opacity duration-400"
           style={{ opacity: visible ? 1 : 0 }}
         >
           {AI_TIPS[tipIndex]}

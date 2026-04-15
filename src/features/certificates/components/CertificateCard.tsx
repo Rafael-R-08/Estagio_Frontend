@@ -1,7 +1,8 @@
-import { Award, Clock, Calendar, ExternalLink } from 'lucide-react';
+import { Award, Clock, Calendar, ExternalLink, Linkedin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { Certificate } from '@/types';
+import { getLinkedInCertificationUrl } from '@/lib/social';
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
@@ -86,9 +87,21 @@ export function CertificateCard({ cert, onClick }: Props) {
             )}
           </div>
         </div>
-        <span className={cn('shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm', className)}>
-          {label}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className={cn('shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm', className)}>
+            {label}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(getLinkedInCertificationUrl(cert), '_blank');
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0077B5]/10 text-[#0077B5] hover:bg-[#0077B5] hover:text-white transition-all shadow-sm"
+            title={t('certificates.shareLinkedIn')}
+          >
+            <Linkedin className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Meta row */}

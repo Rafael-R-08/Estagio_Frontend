@@ -47,7 +47,7 @@ export function SkillsRadarChart({ skills }: { skills: UserSkill[] }) {
             tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 700 }}
           />
           <Radar
-            name={t('profile.skillsChart.proficiency')}
+            name={t('profile.skillsChart.proficiency', 'Proficiência')}
             dataKey="value"
             stroke="hsl(var(--primary))"
             fill="hsl(var(--primary))"
@@ -56,14 +56,15 @@ export function SkillsRadarChart({ skills }: { skills: UserSkill[] }) {
             dot={{ r: 3, fill: 'hsl(var(--primary))' } as object}
           />
           <Tooltip
-            formatter={(val: number) => {
+            formatter={(val: any) => {
+              const numVal = Number(val) || 0;
               const label =
-                val <= 33
-                  ? t('profile.skillsSection.levelBeginner')
-                  : val <= 66
-                  ? t('profile.skillsSection.levelIntermediate')
-                  : t('profile.skillsSection.levelExperienced');
-              return [label, t('profile.skillsChart.level')];
+                numVal <= 33
+                  ? t('profile.skillsSection.levelBeginner', 'Iniciante')
+                  : numVal <= 66
+                  ? t('profile.skillsSection.levelIntermediate', 'Intermédio')
+                  : t('profile.skillsSection.levelExperienced', 'Experiente');
+              return [label, t('profile.skillsChart.level', 'Nível')];
             }}
             contentStyle={{
               background: 'hsl(var(--card))',
