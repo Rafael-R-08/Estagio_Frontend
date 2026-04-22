@@ -12,7 +12,8 @@ import {
   Layers,
   ArrowDownUp,
   Clock,
-  Search
+  Search,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/lib/toast-store';
@@ -159,8 +160,19 @@ export default function MyLearningPage() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
       queryClient.invalidateQueries({ queryKey: ['collections'] });
-      // When a training is marked completed, backend fires the notification async —
-      // schedule a refetch after 3s to pick it up without waiting the full polling cycle
+      // When a training is marked completed or started, backend fires the notification async —
+      // schedule a refetch after 3s to pick it up without waiting the full polling cycle.
+      // Also optimistically set startedAt so RecentActivity sorts it to the top immediately.
+      if (variables.status === 'ongoing') {
+        queryClient.setQueryData<any[]>(['trainings', 'all'], (old) =>
+          old ? old.map((t: any) =>
+            t.id === variables.id ? { ...t, startedAt: new Date().toISOString() } : t
+          ) : old
+        );
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }, 3000);
+      }
       if (variables.status === 'completed') {
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -234,7 +246,7 @@ export default function MyLearningPage() {
     <div className="space-y-5">
 
       {/* ── Page header ── */}
-      <div className="flex items-start justify-between gap-4 px-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t('myLearning.title')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -242,13 +254,25 @@ export default function MyLearningPage() {
             {' '}{t('myLearning.greetingSubtitle')}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/search')}
-          className="shrink-0 flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20"
-        >
-          <Plus className="h-4 w-4" />
-          {t('myLearning.discoverBtn')}
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            onClick={() => navigate('/reports/progress')}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full border border-border/60 bg-background/50 px-5 py-3 text-sm font-semibold text-foreground transition-all hover:bg-muted active:scale-[0.98] shadow-sm"
+            title={t('report.viewReportDesc')}
+          >
+            <FileText className="h-4 w-4 text-primary" />
+            <span className="hidden lg:inline">{t('report.viewReport')}</span>
+            <span className="lg:hidden">{t('report.title').split(' ')[1]}</span> {/* "Progressão" or similar short text */}
+          </button>
+          
+          <button
+            onClick={() => navigate('/search')}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20"
+          >
+            <Plus className="h-4 w-4" />
+            {t('myLearning.discoverBtn')}
+          </button>
+        </div>
       </div>
 
       {/* ── Status Navigation ── */}

@@ -6,6 +6,7 @@ import logoIcon from '../assets/logo2.icon.png';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { notificationsApi } from '../services/api';
+import { storage } from '../lib/storage';
 import type { AppNotification } from '../types';
 import { cn } from '../lib/utils';
 
@@ -64,8 +65,61 @@ export function Header() {
   const { data: notifData } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => notificationsApi.getAll({ limit: 20 }).then((r) => r.data),
-    refetchInterval: 15_000,
+    // SSE handles real-time; poll every 60 s as fallback only
+    refetchInterval: 60_000,
   });
+
+  // ─── SSE: real-time notification push ─────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+
+    const apiBase = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
+    let closed = false;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    async function connectSSE() {
+      const token = storage.getToken();
+      try {
+        const res = await fetch(`${apiBase}/notifications/stream`, {
+          headers: { Authorization: `Bearer ${token || ''}` },
+        });
+
+        if (!res.ok || !res.body) return;
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (!closed) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const frames = buffer.split('\n\n');
+          buffer = frames.pop() ?? '';
+
+          for (const frame of frames) {
+            if (frame.includes('data:')) {
+              qc.invalidateQueries({ queryKey: ['notifications'] });
+            }
+          }
+        }
+      } catch {
+        // connection error — will retry below
+      }
+
+      if (!closed) {
+        retryTimeout = setTimeout(connectSSE, 5_000);
+      }
+    }
+
+    connectSSE();
+
+    return () => {
+      closed = true;
+      if (retryTimeout) clearTimeout(retryTimeout);
+    };
+  }, [user, qc]);
 
   const markReadMutation = useMutation({
     mutationFn: (id: string) => notificationsApi.markAsRead(id),

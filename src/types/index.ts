@@ -91,6 +91,7 @@ export type UpdateUserSettingsDto = Partial<Omit<UserSettings, 'id' | 'userId'>>
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 export type NotificationType =
+  | 'TRAINING_STARTED'
   | 'TRAINING_COMPLETED'
   | 'CERTIFICATE_PROCESSED'
   | 'CERTIFICATE_EXPIRING'

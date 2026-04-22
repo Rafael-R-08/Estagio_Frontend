@@ -1416,5 +1416,23 @@
     "installDesc": "Install LearningHub on your device for faster access and a native experience.",
     "installDescNotAvail": "Open this page in Chrome for Android or Edge to install the app.",
     "installButton": "Install"
+  },
+  "coursePlan": {
+    "triggerButton": "Generate Study Plan",
+    "modalSubtitle": "AI Study Plan",
+    "description": "The AI assistant will analyse this training's metadata and generate a structured plan with modules, learning objectives and suggested resources.",
+    "focusLabel": "Plan focus",
+    "focusBalanced": "Balanced",
+    "focusPractical": "Practical",
+    "focusTheoretical": "Theoretical",
+    "generate": "Generate Plan",
+    "generating": "Generating plan…",
+    "regenerate": "Generate new plan",
+    "error": "Could not generate the plan. Check your connection and try again.",
+    "prerequisites": "Prerequisites",
+    "learningPath": "Learning Path",
+    "keyObjectives": "Key Objectives",
+    "studyTips": "Study Tips",
+    "afterCompletion": "After completion"
   }
 }

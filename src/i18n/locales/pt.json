@@ -1414,5 +1414,23 @@
     "paid": "Pago",
     "na": "—",
     "viewCourse": "Ver Curso"
+  },
+  "coursePlan": {
+    "triggerButton": "Gerar Plano de Estudo",
+    "modalSubtitle": "Plano de Estudo com IA",
+    "description": "O assistente IA vai analisar os metadados desta formação e gerar um plano estruturado com módulos, objetivos de aprendizagem e recursos sugeridos.",
+    "focusLabel": "Enfoque do plano",
+    "focusBalanced": "Equilibrado",
+    "focusPractical": "Prático",
+    "focusTheoretical": "Teórico",
+    "generate": "Gerar Plano",
+    "generating": "A gerar plano…",
+    "regenerate": "Gerar novo plano",
+    "error": "Não foi possível gerar o plano. Verifica a tua ligação e tenta novamente.",
+    "prerequisites": "Pré-requisitos",
+    "learningPath": "Caminho de Aprendizagem",
+    "keyObjectives": "Objetivos-Chave",
+    "studyTips": "Dicas de Estudo",
+    "afterCompletion": "Após a conclusão"
   }
 }

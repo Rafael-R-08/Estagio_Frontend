@@ -12,13 +12,15 @@ import {
   FileText,
   RotateCcw,
   XCircle,
-  Timer
+  Timer,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import type { TrainingRecord, TrainingStatus } from '@/types';
 import { TrainingResourcesInline } from './TrainingResourcesInline';
 import { CompletionModal } from './CompletionModal';
+import { CoursePlanModal } from './CoursePlanModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -142,6 +144,7 @@ export function TrainingCard({
 }: TrainingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [completionModalOpen, setCompletionModalOpen] = useState(false);
+  const [coursePlanOpen, setCoursePlanOpen] = useState(false);
 
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
@@ -325,25 +328,38 @@ export function TrainingCard({
         </div>
 
         {/* Actions menu */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
-
-          {menuOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-border bg-popover py-1.5 shadow-lg">
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground opacity-60">
-                  {t('myLearning.trainingCard.actions')}
-                </p>
-                {menuItems}
-              </div>
-            </>
+        <div className="flex items-center gap-1 shrink-0 relative">
+          {isOngoing && (
+            <button
+              onClick={() => setCoursePlanOpen(true)}
+              className="group relative flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500/5 text-violet-500 transition-all hover:bg-violet-500/10 hover:text-violet-600 active:scale-90"
+              title={t('coursePlan.triggerButton')}
+            >
+              <Sparkles className="h-4 w-4" />
+              <div className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
           )}
+
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-border bg-popover py-1.5 shadow-lg">
+                  <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground opacity-60">
+                    {t('myLearning.trainingCard.actions')}
+                  </p>
+                  {menuItems}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -371,7 +387,9 @@ export function TrainingCard({
       )}
 
       {/* Footer Buttons */}
-      <div className={cn("mt-5 flex items-center justify-between gap-2", (isSaved || isCancelled) && "mt-6")}>
+      <div className={cn("mt-5 flex flex-col gap-2", (isSaved || isCancelled) && "mt-6")}>
+
+        <div className="flex items-center gap-2">
         {/* Notes button: Ongoing, Completed or Cancelled */}
         {(isOngoing || isCompleted || isCancelled) && (
           <button
@@ -426,6 +444,7 @@ export function TrainingCard({
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
+        </div>
       </div>
 
       {/* Expanded Inline Resources */}
@@ -444,6 +463,14 @@ export function TrainingCard({
           onClose={() => setCompletionModalOpen(false)}
           onConfirm={handleCompleteConfirm}
           isSubmitting={isUpdating}
+        />
+      )}
+
+      {coursePlanOpen && (
+        <CoursePlanModal
+          trainingId={training.id}
+          courseTitle={training.title}
+          onClose={() => setCoursePlanOpen(false)}
         />
       )}
     </div>

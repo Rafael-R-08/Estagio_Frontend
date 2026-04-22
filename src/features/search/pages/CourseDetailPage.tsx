@@ -159,17 +159,41 @@ export default function CourseDetailPage() {
   // Create/Update training mutation
   const createTraining = useMutation({
     mutationFn: trainingApi.create,
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      if (variables.status === 'ongoing') {
+        // Optimistically stamp startedAt so RecentActivity sorts to top
+        queryClient.setQueryData<any[]>(['trainings', 'all'], (old) =>
+          old ? [...old, { ...data.data, startedAt: new Date().toISOString() }] : old
+        );
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }, 3000);
+      }
     },
   });
   const updateTraining = useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: Parameters<typeof trainingApi.update>[1] }) =>
       trainingApi.update(id, dto),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trainings'] });
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      if (variables.dto.status === 'ongoing') {
+        queryClient.setQueryData<any[]>(['trainings', 'all'], (old) =>
+          old ? old.map((t: any) =>
+            t.id === variables.id ? { ...t, startedAt: new Date().toISOString() } : t
+          ) : old
+        );
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }, 3000);
+      }
+      if (variables.dto.status === 'completed') {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }, 3000);
+      }
     },
   });
 
