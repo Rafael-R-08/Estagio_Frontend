@@ -44,15 +44,18 @@ export default function PortfolioPage() {
     },
   });
 
-  const { data: stats } = useQuery({
-    queryKey: ['portfolio-stats'],
-    queryFn: async () => (await trainingApi.getStats()).data,
+  const { data: completedTrainings = [] } = useQuery({
+    queryKey: ['portfolio-trainings-completed'],
+    queryFn: async () => {
+      const res = await trainingApi.getAll({ status: 'completed' });
+      return toList(res.data);
+    },
   });
 
   const user = profile ?? authUser;
 
   const autoPrint = searchParams.get('print') === '1';
-  const dataReady = !!user && !!stats;
+  const dataReady = !!user;
   useEffect(() => {
     if (autoPrint && dataReady) {
       const t = setTimeout(() => window.print(), 800);
@@ -73,6 +76,12 @@ export default function PortfolioPage() {
   const skills = user?.skills ?? [];
   const interests = user?.interests ?? [];
 
+  // Calculate stats from actual completed trainings, not from the endpoint
+  const portfolioStats = useMemo(() => ({
+    totalHours: completedTrainings.reduce((sum, t) => sum + (t.durationHours || 0), 0),
+    completed: completedTrainings.length,
+  }), [completedTrainings]);
+
   function handlePrint() {
     window.print();
   }
@@ -85,7 +94,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="min-h-screen bg-muted/20 print:bg-white text-foreground print:text-black font-sans">
-      
+
       {/* ── Top Bar (Screen Only) ── */}
       <div className="print:hidden sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
         <div className="flex items-center gap-4">
@@ -113,13 +122,13 @@ export default function PortfolioPage() {
       {/* ── Document Container ── */}
       <div className="mx-auto max-w-5xl py-12 px-6 print:py-0 print:px-0">
         <div className="relative overflow-hidden bg-background print:bg-white shadow-2xl print:shadow-none ring-1 ring-border/50 print:ring-0 rounded-2xl print:rounded-none">
-          
+
           {/* Header Strip */}
           <div className="h-4 bg-blue-600 print:bg-blue-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }} />
 
           <div className="p-10 sm:p-14 print:p-10">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 print:grid-cols-12">
-              
+
               {/* ── Left Column: Identity & Skills ── */}
               <div className="md:col-span-4 print:col-span-4 space-y-10">
                 {/* Identity */}
@@ -133,7 +142,7 @@ export default function PortfolioPage() {
                       {user.userFunction || (user.role === 'ADMIN' ? 'Administrador' : 'Colaborador')}
                     </p>
                   </div>
-                  
+
                   <div className="space-y-2 pt-2">
                     <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground print:text-gray-600">
                       <Mail className="h-3.5 w-3.5" />
@@ -201,13 +210,13 @@ export default function PortfolioPage() {
                 <div className="mb-10 rounded-2xl bg-muted/20 print:bg-gray-50 p-6 border border-border/50 print:border-gray-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                   <div className="grid grid-cols-3 gap-6 divide-x divide-border/50 print:divide-gray-300">
                     <div className="text-center px-4">
-                      <p className="text-3xl font-black text-foreground print:text-gray-900">{stats?.totalHours ?? 0}</p>
+                      <p className="text-3xl font-black text-foreground print:text-gray-900">{portfolioStats.totalHours}</p>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-500 flex items-center justify-center gap-1">
                         <Clock className="h-3 w-3" /> Horas
                       </p>
                     </div>
                     <div className="text-center px-4">
-                      <p className="text-3xl font-black text-foreground print:text-gray-900">{stats?.completed ?? 0}</p>
+                      <p className="text-3xl font-black text-foreground print:text-gray-900">{portfolioStats.completed}</p>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-500 flex items-center justify-center gap-1">
                         <BookOpen className="h-3 w-3" /> Cursos
                       </p>
@@ -230,7 +239,7 @@ export default function PortfolioPage() {
                       </h3>
                       <div className="h-px flex-1 bg-border print:bg-gray-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }} />
                     </div>
-                    
+
                     <div className="space-y-5">
                       {activeCerts.map((cert) => {
                         const name = cert.courseName || cert.training?.title || 'Certificação';
@@ -266,13 +275,13 @@ export default function PortfolioPage() {
 
             </div>
           </div>
-          
+
           {/* Footer Strip */}
           <div className="border-t border-border print:border-gray-200 bg-muted/10 print:bg-white px-10 py-4 text-[10px] font-medium text-muted-foreground print:text-gray-500 flex justify-between items-center" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
             <p>Gerado pelo {t('nav.appName', 'LearningHub Softinsa')}</p>
             <p>Data de Emissão: {generatedAt}</p>
           </div>
-          
+
         </div>
       </div>
     </div>

@@ -139,7 +139,7 @@ export function QuickActions() {
           const Icon = action.icon;
           return (
             <button
-              key={action.href}
+              key={action.labelKey}
               onClick={() => navigate(action.href)}
               className={cn(
                 'group/btn flex flex-col gap-3 rounded-xl border border-border/50 bg-background/50 p-4',

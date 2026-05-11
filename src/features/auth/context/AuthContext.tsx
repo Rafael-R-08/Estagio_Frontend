@@ -44,6 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(({ data }) => {
         setUser(data);
         storage.setUser(data);
+        if (data.onboardingDone) {
+          storage.setOnboardingSeen();
+        }
       })
       .catch(() => {
         // Token inválido ou expirado
@@ -64,6 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storage.setUser(data.user);
     setToken(data.access_token);
     setUser(data.user);
+    if (data.user.onboardingDone) {
+      storage.setOnboardingSeen();
+    }
     // Restore app language (landing page toggle is session-only)
     const savedLang = (localStorage.getItem('lh_lang') as 'pt' | 'en') ?? 'pt';
     i18n.changeLanguage(savedLang);

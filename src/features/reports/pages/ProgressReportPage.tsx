@@ -216,20 +216,6 @@ export default function ProgressReportPage() {
         </div>
       )}
 
-      {/* ── Skills ── */}
-      {report.user.skills && report.user.skills.length > 0 && (
-        <div className="rounded-[2.5rem] border border-border/60 bg-background/40 backdrop-blur-md p-6 print:rounded-xl print:border">
-          <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-4">{t('report.skillsTitle')}</h2>
-          <div className="flex flex-wrap gap-2">
-            {report.user.skills.map((skill) => (
-              <span key={skill.name} className="rounded-full border border-border/60 bg-muted/30 px-3 py-1 text-xs font-medium text-foreground">
-                {skill.name}
-                {skill.level && <span className="ml-1 opacity-60">· {skill.level}</span>}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

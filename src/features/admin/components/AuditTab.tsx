@@ -13,11 +13,9 @@ import { useTranslation } from 'react-i18next';
 const MOCK_LOGS: AuditLog[] = [
   { id: '1', actorId: 'a1', actorName: 'Ana Ferreira', action: 'ROLE_UPDATED', targetId: 'u2', targetName: 'Bruno Costa', details: 'USER → ADMIN', createdAt: '2026-04-08T10:22:00Z' },
   { id: '2', actorId: 'a1', actorName: 'Ana Ferreira', action: 'USER_DEACTIVATED', targetId: 'u3', targetName: 'Carla Mendes', details: undefined, createdAt: '2026-04-07T15:10:00Z' },
-  { id: '3', actorId: 'a1', actorName: 'Ana Ferreira', action: 'PLATFORM_CREATED', targetId: 'p5', targetName: 'Pluralsight', details: 'type=custom', createdAt: '2026-04-06T09:45:00Z' },
   { id: '4', actorId: 'a1', actorName: 'Ana Ferreira', action: 'ROLE_UPDATED', targetId: 'u4', targetName: 'David Sousa', details: 'USER → SERVICE_LINE_MANAGER', createdAt: '2026-04-05T11:30:00Z' },
   { id: '5', actorId: 'a1', actorName: 'Ana Ferreira', action: 'PLATFORM_UPDATED', targetId: 'p1', targetName: 'Udemy', details: 'isActive: true → false', createdAt: '2026-04-04T14:00:00Z' },
   { id: '6', actorId: 'a1', actorName: 'Ana Ferreira', action: 'USER_ACTIVATED', targetId: 'u3', targetName: 'Carla Mendes', details: undefined, createdAt: '2026-04-03T08:55:00Z' },
-  { id: '7', actorId: 'a1', actorName: 'Ana Ferreira', action: 'PLATFORM_DELETED', targetId: 'p3', targetName: 'Coursera', details: undefined, createdAt: '2026-04-02T16:20:00Z' },
   { id: '8', actorId: 'a1', actorName: 'Ana Ferreira', action: 'ROLE_UPDATED', targetId: 'u5', targetName: 'Eva Lopes', details: 'ADMIN → USER', createdAt: '2026-04-01T13:10:00Z' },
 ];
 

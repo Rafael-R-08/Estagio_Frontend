@@ -223,8 +223,8 @@ export function UsersTab() {
   const filtered = sortUsers(
     users.filter((u) => {
       const matchesSearch =
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase());
+        (u.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (u.email?.toLowerCase() || '').includes(search.toLowerCase());
       const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
       const matchesStatus =
         statusFilter === 'ALL' ||
@@ -255,17 +255,19 @@ export function UsersTab() {
     setSlmLine('');
   }
 
+  const userName = confirm?.user.name || t('admin.users.noName', 'Sem Nome');
+
   const confirmMeta = {
-    promote: { title: t('admin.users.confirmMakeAdmin', { name: confirm?.user.name }), description: t('admin.users.confirmMakeAdminDesc'), label: t('admin.users.promote'), danger: false },
-    promote_slm: { title: t('admin.users.confirmMakeSlManager', { name: confirm?.user.name }), description: t('admin.users.confirmMakeSlManagerDesc'), label: t('admin.users.makeSlManager'), danger: false },
+    promote: { title: t('admin.users.confirmMakeAdmin', { name: userName }), description: t('admin.users.confirmMakeAdminDesc'), label: t('admin.users.promote'), danger: false },
+    promote_slm: { title: t('admin.users.confirmMakeSlManager', { name: userName }), description: t('admin.users.confirmMakeSlManagerDesc'), label: t('admin.users.makeSlManager'), danger: false },
     demote: {
-      title: t('admin.users.confirmDemote', { name: confirm?.user.name }),
+      title: t('admin.users.confirmDemote', { name: userName }),
       description: t('admin.users.confirmDemoteDesc'),
       label: t('admin.users.demote'),
       danger: true,
     },
-    deactivate: { title: t('admin.users.confirmDeactivate', { name: confirm?.user.name }), description: t('admin.users.confirmDeactivateDesc'), label: t('admin.users.deactivate'), danger: true },
-    activate: { title: t('admin.users.confirmActivate', { name: confirm?.user.name }), description: t('admin.users.confirmActivateDesc'), label: t('admin.users.activate'), danger: false },
+    deactivate: { title: t('admin.users.confirmDeactivate', { name: userName }), description: t('admin.users.confirmDeactivateDesc'), label: t('admin.users.deactivate'), danger: true },
+    activate: { title: t('admin.users.confirmActivate', { name: userName }), description: t('admin.users.confirmActivateDesc'), label: t('admin.users.activate'), danger: false },
   };
 
   return (
@@ -366,9 +368,9 @@ export function UsersTab() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-softinsa-blue/10 text-softinsa-blue text-xs font-bold">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <span className="font-medium text-foreground">{user.name}</span>
+                        <span className="font-medium text-foreground">{user.name || t('admin.users.noName', 'Sem Nome')}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{user.email}</td>

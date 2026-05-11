@@ -5,8 +5,6 @@ import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { storage } from '../../../lib/storage';
-import OnboardingModal from '../components/OnboardingModal';
 
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -24,7 +22,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const {
     register,
@@ -36,11 +33,7 @@ export default function LoginPage() {
     try {
       setServerError('');
       await login(data.email, data.password);
-      if (!storage.getOnboardingSeen()) {
-        setShowOnboarding(true);
-      } else {
-        window.location.replace('/dashboard');
-      }
+      window.location.replace('/dashboard');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string | string[] } }; message?: string };
       const msg = axiosErr?.response?.data?.message;
@@ -55,10 +48,7 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      <OnboardingModal open={showOnboarding} />
-
-      <div className="relative min-h-screen bg-background text-foreground font-sans antialiased overflow-hidden flex flex-col items-center justify-center p-6 sm:p-10">
+    <div className="relative min-h-screen bg-background text-foreground font-sans antialiased overflow-hidden flex flex-col items-center justify-center p-6 sm:p-10">
         
         {/* Modern Background Elements */}
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
@@ -193,6 +183,5 @@ export default function LoginPage() {
           </p>
         </footer>
       </div>
-    </>
   );
 }

@@ -76,9 +76,6 @@ const MOCK_ANALYTICS: AdminAnalytics = {
   ],
   platformUsage: [
     { name: 'Udemy', count: 45 },
-    { name: 'LinkedIn Learning', count: 30 },
-    { name: 'Coursera', count: 15 },
-    { name: 'Pluralsight', count: 10 },
   ],
   userGrowth: [
     { month: '2025-10', count: 20 },
@@ -523,7 +520,7 @@ export function AnalyticsTab() {
                     .sort((a, b) => a.daysLeft - b.daysLeft)
                     .map((cert, i) => (
                       <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 font-medium text-foreground">{cert.userName}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">{cert.userName || t('admin.users.noName', 'Sem Nome')}</td>
                         <td className="px-4 py-3 text-muted-foreground">{cert.courseName}</td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">
                           {format(parseISO(cert.expirationDate), 'dd MMM yyyy', { locale: dateLocale })}
@@ -565,9 +562,9 @@ export function AnalyticsTab() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-softinsa-blue/10 text-softinsa-blue text-xs font-bold">
-                            {u.name.charAt(0).toUpperCase()}
+                            {u.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
-                          <span className="font-medium text-foreground">{u.name}</span>
+                          <span className="font-medium text-foreground">{u.name || t('admin.users.noName', 'Sem Nome')}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{u.email}</td>

@@ -31,7 +31,7 @@ Plataforma inteligente de agregação e recomendação de formações para os co
 
 O **LearningHub Softinsa** é uma Single Page Application (SPA) construída com React 19 e TypeScript. Funciona como o frontend de uma plataforma corporativa de aprendizagem que:
 
-- Agrega cursos de múltiplas plataformas externas (Udemy, Coursera, etc.) através de uma API de pesquisa unificada.
+- Agrega cursos de múltiplas plataformas externas (Udemy, etc.) através de uma API de pesquisa unificada.
 - Fornece recomendações personalizadas de cursos usando IA (RAG + LLM).
 - Permite gerir o progresso de formações e o ciclo de vida de certificados.
 - Oferece um assistente de IA conversacional para suporte à aprendizagem.

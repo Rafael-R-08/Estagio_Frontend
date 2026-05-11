@@ -24,7 +24,7 @@ export function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.onboardingDone) {
+  if (user && !user.onboardingDone && user.role !== 'ADMIN') {
     return <OnboardingModal />;
   }
 

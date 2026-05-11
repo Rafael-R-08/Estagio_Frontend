@@ -12,9 +12,6 @@ import { cn } from '@/lib/utils';
 
 const MOCK_PLATFORMS: LearningPlatform[] = [
   { id: '1', name: 'Udemy', type: 'udemy', apiEndpoint: 'https://www.udemy.com/api-2.0', apiKeyRequired: true, isActive: true, isSearchEnabled: true, totalCourses: 312 },
-  { id: '2', name: 'LinkedIn Learning', type: 'linkedin', apiEndpoint: 'https://learn.microsoft.com/api', apiKeyRequired: false, isActive: true, isSearchEnabled: true, totalCourses: 128 },
-  { id: '3', name: 'Coursera', type: 'coursera', apiEndpoint: 'https://api.coursera.org/api', apiKeyRequired: true, isActive: false, isSearchEnabled: false, totalCourses: 0 },
-  { id: '4', name: 'Pluralsight', type: 'custom', apiEndpoint: undefined, apiKeyRequired: false, isActive: true, isSearchEnabled: false, totalCourses: 54 },
 ];
 
 // ─── Platform form modal ──────────────────────────────────────────────────────

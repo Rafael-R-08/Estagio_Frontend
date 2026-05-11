@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Paperclip, AtSign } from 'lucide-react';
+import { Send, Paperclip, AtSign, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MentionableCourse } from '@/types';
 
@@ -8,6 +8,7 @@ interface Props {
   value: string;
   onChange: (v: string) => void;
   onSend: () => void;
+  onStop?: () => void;
   onAttach?: (file: File) => void;
   loading: boolean;
   mentionableCourses?: MentionableCourse[];
@@ -21,6 +22,7 @@ export function ChatInput({
   value,
   onChange,
   onSend,
+  onStop,
   onAttach,
   loading,
   mentionableCourses = [],
@@ -156,6 +158,32 @@ export function ChatInput({
         </div>
       )}
 
+      {/* Mentioned courses badges — moved above for better visual stability */}
+      {mentionedIds.length > 0 && (
+        <div className="mb-2.5 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-bottom-1 duration-200">
+          {mentionedIds.map((id) => {
+            const course = mentionableCourses.find((c) => c.id === id);
+            if (!course) return null;
+            return (
+              <span
+                key={id}
+                className="flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary ring-1 ring-primary/20"
+              >
+                <AtSign className="h-2.5 w-2.5" />
+                {course.title}
+                <button
+                  type="button"
+                  onClick={() => onMentionedIdsChange?.(mentionedIds.filter((x) => x !== id))}
+                  className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+
       <div className="flex items-end gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm ring-0 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
         {/* Attach button — disabled until backend supports file uploads */}
         <button
@@ -194,49 +222,34 @@ export function ChatInput({
           style={{ lineHeight: '1.5' }}
         />
 
-        {/* Send button */}
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={!canSend}
-          title={t('aiChat.sendTitle')}
-          className={cn(
-            'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition',
-            canSend
-              ? 'bg-primary text-primary-foreground hover:opacity-90'
-              : 'bg-muted text-muted-foreground/40',
-            'disabled:pointer-events-none',
-          )}
-        >
-          <Send className="h-4 w-4" />
-        </button>
+        {/* Stop button (during streaming) or Send button */}
+        {loading && onStop ? (
+          <button
+            type="button"
+            onClick={onStop}
+            title={t('aiChat.stopTitle')}
+            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-destructive text-destructive-foreground shadow-lg shadow-destructive/20 transition hover:opacity-90 active:scale-90"
+          >
+            <Square className="h-4 w-4 fill-current" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={!canSend}
+            title={t('aiChat.sendTitle')}
+            className={cn(
+              'mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition',
+              canSend
+                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 active:scale-90'
+                : 'bg-muted text-muted-foreground/40',
+              'disabled:pointer-events-none',
+            )}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
       </div>
-
-      {/* Mentioned courses badges */}
-      {mentionedIds.length > 0 && (
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {mentionedIds.map((id) => {
-            const course = mentionableCourses.find((c) => c.id === id);
-            if (!course) return null;
-            return (
-              <span
-                key={id}
-                className="flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold text-primary"
-              >
-                <AtSign className="h-2.5 w-2.5" />
-                {course.title}
-                <button
-                  type="button"
-                  onClick={() => onMentionedIdsChange?.(mentionedIds.filter((x) => x !== id))}
-                  className="ml-0.5 opacity-60 hover:opacity-100"
-                >
-                  ×
-                </button>
-              </span>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

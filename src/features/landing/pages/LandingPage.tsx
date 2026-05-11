@@ -38,8 +38,10 @@ function TypewriterEffect() {
 
     if (isDeleting) {
       if (text === "") {
-        setIsDeleting(false);
-        setPhraseIndex((prev) => (prev + 1) % searchPhrases.length);
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+          setPhraseIndex((prev) => (prev + 1) % searchPhrases.length);
+        }, 0);
       } else {
         timeout = setTimeout(() => setText(text.slice(0, -1)), 35);
       }

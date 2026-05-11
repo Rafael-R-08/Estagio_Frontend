@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { recommendationsApi, chatApi } from '@/services/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { storage } from '@/lib/storage';
 import type { AiMessage, AiConversation, MentionableCourse } from '@/types';
+import { useAiStream } from '../hooks/useAiStream';
 
 import { ChatBubble } from '../components/ChatBubble';
 import { ChatInput } from '../components/ChatInput';
@@ -32,9 +32,10 @@ export default function AiAssistantPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const initializedRef = useRef(false);
   const [isTyping, setIsTyping] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const [mentionableCourses, setMentionableCourses] = useState<MentionableCourse[]>([]);
   const [mentionedIds, setMentionedIds] = useState<string[]>([]);
+
+  const { stream, stop: stopStream, isStreaming } = useAiStream();
 
   // ─── Fetch History ────────────────────────────────────────────────────────
   const fetchConversations = useCallback(async () => {
@@ -99,9 +100,7 @@ export default function AiAssistantPage() {
     return () => {
       cancelled = true;
       clearTimeout(fallbackTimer);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      stopStream();
     };
     // run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,195 +108,79 @@ export default function AiAssistantPage() {
 
   // ── Auto-scroll during streaming ──────────────────────────────────────────
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    bottomRef.current?.scrollIntoView({ 
+      behavior: isStreaming ? 'auto' : 'smooth' 
+    });
+  }, [messages, isStreaming]);
 
   // ─── Stream handler ────────────────────────────────────────────────────────
   const sendQuery = useCallback(
-    async (text: string, overrideMentionedIds?: string[]) => {
-      if (!text.trim() || isTyping) return;
+    (text: string, overrideMentionedIds?: string[]) => {
+      if (!text.trim() || isTyping || isStreaming) return;
 
       const activeMentionedIds = overrideMentionedIds ?? mentionedIds;
-
-      // Cancel previous if any
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      const ctrl = new AbortController();
-      abortControllerRef.current = ctrl;
-
-      const msgUserId = makeId();
-      const assistantMsgId = makeId();
-
-      setMessages((prev) => [
-        ...prev,
-        { id: msgUserId, role: 'user', content: text, timestamp: new Date().toISOString() },
-        {
-          id: assistantMsgId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date().toISOString(),
-          isStreaming: true
-        },
-      ]);
-
       setIsTyping(true);
       setMentionedIds([]);
 
-      try {
-        const token = storage.getToken();
-        const apiBase = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
-
-        const response = await fetch(`${apiBase}/ai/chat/stream`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || ''}`,
+      void stream(
+        {
+          prompt: text,
+          conversationId,
+          mentionedTrainingIds: activeMentionedIds,
+        },
+        {
+          onStart: (userMsgId, assistantMsgId) => {
+            setMessages((prev) => [
+              ...prev,
+              { id: userMsgId, role: 'user', content: text, timestamp: new Date().toISOString() },
+              { id: assistantMsgId, role: 'assistant', content: '', timestamp: new Date().toISOString(), isStreaming: true },
+            ]);
           },
-          body: JSON.stringify({
-            prompt: text,
-            conversationId,
-            mentionedTrainingIds: activeMentionedIds.length > 0 ? activeMentionedIds : undefined,
-          }),
-          signal: ctrl.signal,
-        });
-
-        if (!response.ok) throw new Error('Falha na ligação ao assistente');
-
-        const reader = response.body?.getReader();
-        if (!reader) throw new Error('Não foi possível ler o stream');
-
-        const decoder = new TextDecoder();
-        let accumulatedText = '';
-        let sources: any[] = [];
-        let sseBuffer = '';
-        let nextConversationId = conversationId || undefined;
-
-        const appendAssistantText = (textChunk: string, convId?: string) => {
-          if (!textChunk) return;
-          accumulatedText += textChunk;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, content: accumulatedText, conversationId: convId || nextConversationId }
-                : m,
-            ),
-          );
-        };
-
-        const applySources = (nextSources: unknown) => {
-          if (!Array.isArray(nextSources)) return;
-          sources = nextSources;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === assistantMsgId ? { ...m, sources } : m)),
-          );
-        };
-
-        const handlePayload = (rawPayload: string) => {
-          if (!rawPayload) return false;
-          if (rawPayload === '[DONE]') return true;
-
-          try {
-            const data = JSON.parse(rawPayload);
-
-            const chunkConversationId =
-              typeof data?.conversationId === 'string' ? data.conversationId : undefined;
-            if (chunkConversationId) {
-              nextConversationId = chunkConversationId;
+          onChunk: (assistantMsgId, accumulatedText, convId) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMsgId
+                  ? { ...m, content: accumulatedText, conversationId: convId ?? m.conversationId }
+                  : m,
+              ),
+            );
+          },
+          onSources: (assistantMsgId, sources) => {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === assistantMsgId ? { ...m, sources } : m)),
+            );
+          },
+          onDone: async (assistantMsgId, finalConversationId) => {
+            setIsTyping(false);
+            setMessages((prev) =>
+              prev.map((m) => (m.id === assistantMsgId ? { ...m, isStreaming: false } : m)),
+            );
+            const refreshed = await fetchConversations();
+            if (finalConversationId) {
+              setConversationId(finalConversationId);
+            } else if (refreshed[0]?.id) {
+              setConversationId(refreshed[0].id);
             }
-
-            const textChunk =
-              typeof data?.text === 'string'
-                ? data.text
-                : typeof data?.answer === 'string'
-                  ? data.answer
-                  : typeof data?.chunk === 'string'
-                    ? data.chunk
-                    : '';
-
-            if (textChunk) {
-              appendAssistantText(textChunk, chunkConversationId);
-            }
-
-            applySources(data?.sources);
-          } catch {
-            // Backend SSE currently streams plain text chunks.
-            appendAssistantText(rawPayload);
-          }
-
-          return false;
-        };
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          sseBuffer += decoder.decode(value, { stream: true });
-          const frames = sseBuffer.split('\n\n');
-          sseBuffer = frames.pop() || '';
-
-          let shouldStop = false;
-          for (const frame of frames) {
-            const payload = frame
-              .split('\n')
-              .filter((line) => line.startsWith('data:'))
-              .map((line) => {
-                const dataPart = line.slice(5);
-                return dataPart.startsWith(' ') ? dataPart.slice(1) : dataPart;
-              })
-              .join('\n');
-
-            if (handlePayload(payload)) {
-              shouldStop = true;
-              break;
-            }
-          }
-
-          if (shouldStop) break;
-        }
-
-        if (sseBuffer.trim()) {
-          const tailPayload = sseBuffer
-            .split('\n')
-            .filter((line) => line.startsWith('data:'))
-            .map((line) => {
-              const dataPart = line.slice(5);
-              return dataPart.startsWith(' ') ? dataPart.slice(1) : dataPart;
-            })
-            .join('\n');
-
-          handlePayload(tailPayload);
-        }
-
-        const refreshed = await fetchConversations();
-        if (nextConversationId) {
-          setConversationId(nextConversationId);
-        } else if (refreshed[0]?.id) {
-          setConversationId(refreshed[0].id);
-        }
-      } catch (err: any) {
-        if (err.name === 'AbortError') {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, content: (m.content || '') + '\n\n**[Geração interrompida]**', isStreaming: false }
-                : m
-            )
-          );
-          return;
-        }
-        toast.error(t('ai.errorSend'));
-        setMessages((prev) => prev.filter((m) => m.id !== assistantMsgId));
-      } finally {
-        setIsTyping(false);
-        abortControllerRef.current = null;
-        setMessages((prev) =>
-          prev.map((m) => m.id === assistantMsgId ? { ...m, isStreaming: false } : m)
-        );
-      }
+          },
+          onAbort: (assistantMsgId, partialText) => {
+            setIsTyping(false);
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMsgId
+                  ? { ...m, content: (partialText || m.content) + '\n\n*[Geração interrompida pelo utilizador]*', isStreaming: false }
+                  : m,
+              ),
+            );
+          },
+          onError: (assistantMsgId) => {
+            setIsTyping(false);
+            toast.error(t('ai.errorSend'));
+            setMessages((prev) => prev.filter((m) => m.id !== assistantMsgId));
+          },
+        },
+      );
     },
-    [user?.id, t, isTyping, conversationId, mentionedIds, fetchConversations],
+    [isTyping, isStreaming, stream, conversationId, mentionedIds, fetchConversations, t],
   );
 
   const handleStartNewChat = useCallback(() => {
@@ -448,19 +331,22 @@ export default function AiAssistantPage() {
           </div>
 
           {/* Input bar */}
-          <div className="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-background/95 px-6 py-4 backdrop-blur-md">
-            <ChatInput
-              value={inputValue}
-              onChange={setInputValue}
-              onSend={handleSend}
-              loading={isTyping}
-              mentionableCourses={mentionableCourses}
-              mentionedIds={mentionedIds}
-              onMentionedIdsChange={setMentionedIds}
-            />
-            <p className="mt-2 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30">
-              {t('ai.disclaimer')}
-            </p>
+          <div className="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-background/95 px-6 pt-4 pb-6 backdrop-blur-xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <div className="mx-auto max-w-4xl">
+              <ChatInput
+                value={inputValue}
+                onChange={setInputValue}
+                onSend={handleSend}
+                onStop={stopStream}
+                loading={isTyping || isStreaming}
+                mentionableCourses={mentionableCourses}
+                mentionedIds={mentionedIds}
+                onMentionedIdsChange={setMentionedIds}
+              />
+              <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30">
+                {t('ai.disclaimer')}
+              </p>
+            </div>
           </div>
         </div>
 
